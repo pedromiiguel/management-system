@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   type CSSProperties,
+  type MouseEvent,
   type ReactNode,
 } from 'react';
 
@@ -20,7 +21,8 @@ export type IconName =
   | 'config'
   | 'sun'
   | 'search'
-  | 'scan';
+  | 'scan'
+  | 'trash';
 
 export function SolIcon({ name, size = 17 }: { name: IconName; size?: number }) {
   const p = {
@@ -52,6 +54,8 @@ export function SolIcon({ name, size = 17 }: { name: IconName; size?: number }) 
       return <svg {...p}><circle cx="9" cy="9" r="5.5" /><path d="M13.2 13.2L17 17" /></svg>;
     case 'scan':
       return <svg {...p}><path d="M2.5 6V3.5H6M14 3.5h3.5V6M17.5 14v2.5H14M6 16.5H2.5V14" /><path d="M5.5 7v6M8 7v6M10.5 7v4M13 7v6" /></svg>;
+    case 'trash':
+      return <svg {...p}><path d="M4 5.5h12M7.5 5.5V4a1 1 0 011-1h3a1 1 0 011 1v1.5M8 9v5.5M12 9v5.5" /><path d="M5.5 5.5l.6 9.7a1.5 1.5 0 001.5 1.4h4.8a1.5 1.5 0 001.5-1.4l.6-9.7" /></svg>;
   }
 }
 
@@ -111,6 +115,30 @@ export function SBtn({
       {icon ? <SolIcon name={icon} size={15} /> : null}
       <span>{children}</span>
       {kbd ? <SKbd light={primary}>{kbd}</SKbd> : null}
+    </button>
+  );
+}
+
+export function SIconBtn({
+  icon,
+  danger,
+  title,
+  onClick,
+}: {
+  icon: IconName;
+  danger?: boolean;
+  title?: string;
+  onClick?: (e: MouseEvent) => void;
+}) {
+  return (
+    <button
+      className={clsx('s-icon-btn', danger && 'is-danger')}
+      title={title}
+      aria-label={title}
+      onClick={onClick}
+      type="button"
+    >
+      <SolIcon name={icon} size={15} />
     </button>
   );
 }
