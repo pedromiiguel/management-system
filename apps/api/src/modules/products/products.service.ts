@@ -10,17 +10,23 @@ export class ProductsService {
   /** Busca por nome, SKU ou EAN (FR-03/FR-11) com paginação. */
   async list(params: { search?: string; activeOnly?: boolean; page?: number; perPage?: number }) {
     const { search, activeOnly = true, page = 1, perPage = 50 } = params;
+
+    // Nome ignora acentos (ex.: "agua" encontra "Água") via extensão unaccent do Postgres;
+    // Prisma não expõe essa função no query builder, por isso resolve os ids via SQL bruto.
+    let matchingIds: string[] | undefined;
+    if (search) {
+      const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+        SELECT id FROM "product"
+        WHERE unaccent(name) ILIKE unaccent(${`%${search}%`})
+           OR sku ILIKE ${`%${search}%`}
+           OR ean = ${search}
+      `;
+      matchingIds = rows.map((r) => r.id);
+    }
+
     const where: Prisma.ProductWhereInput = {
       ...(activeOnly ? { active: true } : {}),
-      ...(search
-        ? {
-            OR: [
-              { name: { contains: search, mode: 'insensitive' } },
-              { sku: { contains: search, mode: 'insensitive' } },
-              { ean: search },
-            ],
-          }
-        : {}),
+      ...(matchingIds ? { id: { in: matchingIds } } : {}),
     };
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
