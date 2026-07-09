@@ -80,6 +80,13 @@ body {
 .s-icon-btn.is-danger { color: var(--danger); }
 .s-icon-btn.is-danger:hover { background: #f9e7e4; }
 
+.s-qty-stepper { display: inline-flex; align-items: center; gap: 4px; }
+.s-qty-stepper button { width: 22px; height: 22px; flex: none; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--ink); cursor: pointer; font-size: 13px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+.s-qty-stepper button:hover:not(:disabled) { background: rgba(2, 47, 64, 0.06); }
+.s-qty-stepper button:disabled { opacity: 0.35; cursor: not-allowed; }
+.s-qty-stepper input { width: 34px; text-align: center; border: 1px solid var(--line); border-radius: 5px; padding: 3px 0; font-size: 13px; font-weight: 700; font-family: inherit; color: var(--ink); }
+.s-qty-stepper input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
 .s-kbd { font-family: ui-monospace, monospace; font-size: 10.5px; font-weight: 600; padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: #f7f9fa; color: var(--dim); }
 .s-kbd.is-light { background: rgba(255, 255, 255, 0.18); border-color: rgba(255, 255, 255, 0.35); color: #fff; }
 

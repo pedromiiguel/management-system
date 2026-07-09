@@ -10,6 +10,7 @@ import {
   SBtn,
   SCard,
   SChip,
+  SIconBtn,
   SKbd,
   SModal,
   SolIcon,
@@ -18,10 +19,11 @@ import {
   SToggle,
   useToast,
 } from '../../components/sol';
+import { Confirm } from '../../components/confirm';
 import { api, apiErrorMessage } from '../../lib/api';
 import { getUser } from '../../lib/auth';
 import { formatBRL, formatDateTime, maskBRL, parseMoney } from '../../lib/format';
-import type { Customer, Product, Sale } from '../../lib/types';
+import type { Customer, Product, Sale, SaleItem } from '../../lib/types';
 
 export const Route = createFileRoute('/_app/pos')({
   component: PosPage,
@@ -30,7 +32,6 @@ export const Route = createFileRoute('/_app/pos')({
 type Modal =
   | { kind: 'none' }
   | { kind: 'search'; initialQuery?: string }
-  | { kind: 'quantity' }
   | { kind: 'discount' }
   | { kind: 'customer' }
   | { kind: 'confirm-cancel' }
@@ -125,6 +126,8 @@ function PosPage() {
     },
   });
 
+  // Alterar quantidade (stepper/input da coluna Qtd) — sem foco automático no
+  // scan: o operador pode estar clicando +/- várias vezes seguidas.
   const updateItem = useMutation({
     mutationFn: async ({ itemId, quantity }: { itemId: string; quantity: number }) =>
       (await api.patch<{ sale: Sale; warning: string | null }>(
@@ -134,10 +137,68 @@ function PosPage() {
     onSuccess: ({ sale: updated, warning }) => {
       setSale(updated);
       if (warning) toast(warning, 'warn');
-      focusScan();
     },
     onError: (error) => toast(apiErrorMessage(error), 'danger'),
   });
+
+  // Estado otimista da quantidade por item: mostra o clique/digitação na hora
+  // e só sincroniza com o servidor depois de um debounce (evita 1 request por
+  // clique quando o operador está zerando uma quantidade grande).
+  const [pendingQty, setPendingQty] = useState<Record<string, number>>({});
+  const qtyPending = useRef<Record<string, { quantity: number; timer: ReturnType<typeof setTimeout> }>>({});
+
+  const commitQuantity = useCallback(
+    (itemId: string, quantity: number) => {
+      delete qtyPending.current[itemId];
+      updateItem.mutate(
+        { itemId, quantity },
+        {
+          onSettled: () =>
+            setPendingQty((prev) => {
+              if (!(itemId in prev)) return prev;
+              const next = { ...prev };
+              delete next[itemId];
+              return next;
+            }),
+        },
+      );
+    },
+    [updateItem],
+  );
+
+  const scheduleQuantity = useCallback(
+    (item: SaleItem, quantity: number) => {
+      if (quantity < 1) return;
+      const existing = qtyPending.current[item.id];
+      if (existing) clearTimeout(existing.timer);
+      const timer = setTimeout(() => commitQuantity(item.id, quantity), 400);
+      qtyPending.current[item.id] = { quantity, timer };
+      setPendingQty((prev) => ({ ...prev, [item.id]: quantity }));
+    },
+    [commitQuantity],
+  );
+
+  // +/- lê o último valor gravado no ref (síncrono) em vez da prop do último
+  // render — cliques disparados antes do React re-renderizar (ex: duplo clique
+  // rápido) não pisam um no outro.
+  const stepQuantity = useCallback(
+    (item: SaleItem, delta: number) => {
+      const current = qtyPending.current[item.id]?.quantity ?? item.quantity;
+      scheduleQuantity(item, current + delta);
+    },
+    [scheduleQuantity],
+  );
+
+  // Dispara na hora qualquer alteração de quantidade ainda no debounce — chamado
+  // antes de finalizar, remover item, cancelar ou aplicar desconto, pra nunca
+  // mudar o estado da venda com uma quantidade que a tela mostrou mas o
+  // servidor ainda não confirmou.
+  const flushPendingQuantity = useCallback(() => {
+    for (const [itemId, { quantity, timer }] of Object.entries(qtyPending.current)) {
+      clearTimeout(timer);
+      commitQuantity(itemId, quantity);
+    }
+  }, [commitQuantity]);
 
   const removeItem = useMutation({
     mutationFn: async (itemId: string) =>
@@ -149,6 +210,25 @@ function PosPage() {
     },
     onError: (error) => toast(apiErrorMessage(error), 'danger'),
   });
+
+  // Remover item (botão da linha ou atalho Del) — sempre pede confirmação.
+  const handleRemove = useCallback(
+    async (item: SaleItem) => {
+      flushPendingQuantity();
+      const confirmed = await Confirm.call({
+        title: 'Remover item?',
+        message: (
+          <>
+            Remover <b>{item.product.name}</b> da venda?
+          </>
+        ),
+        confirmLabel: 'Remover',
+        danger: true,
+      });
+      if (confirmed) removeItem.mutate(item.id);
+    },
+    [removeItem, flushPendingQuantity],
+  );
 
   const setDiscount = useMutation({
     mutationFn: async (discount: DiscountInput | null) =>
@@ -223,6 +303,7 @@ function PosPage() {
   }
 
   function finalize() {
+    flushPendingQuantity();
     if (!sale || items.length === 0) {
       toast('Adicione itens antes de finalizar', 'warn');
       return;
@@ -246,7 +327,6 @@ function PosPage() {
   // campo de scan vive focado (NFR-12: scanner USB emula teclado + Enter)
   const hk = { ignoreInputs: false, enabled: !modalOpen } as const;
   useHotkey('F2', () => setModal({ kind: 'search' }), hk);
-  useHotkey('F3', () => selected && setModal({ kind: 'quantity' }), hk);
   useHotkey('F4', () => setModal({ kind: 'discount' }), hk);
   useHotkey('F5', () => setPayment(PaymentMethod.CASH), hk);
   useHotkey('F6', () => setPayment(PaymentMethod.PIX), hk);
@@ -255,7 +335,7 @@ function PosPage() {
   useHotkey('F10', finalize, hk);
   useHotkey(
     'Delete',
-    () => selected && removeItem.mutate(selected.id),
+    () => selected && void handleRemove(selected),
     { ignoreInputs: false, enabled: !modalOpen && scan === '' },
   );
   useHotkey(
@@ -341,34 +421,55 @@ function PosPage() {
 
           <SCard pad={8} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'auto' }}>
             <STable
-              cols={['#', 'Produto', 'Qtd', 'Unit.', 'Subtotal']}
-              widths="40px 1fr 70px 100px 110px"
-              align={[null, null, 'center', 'right', 'right']}
+              cols={['#', 'Produto', 'Qtd', 'Unit.', 'Subtotal', '']}
+              widths="40px 1fr 108px 100px 110px 44px"
+              align={[null, null, 'center', 'right', 'right', 'center']}
               emptyText="Bipe o primeiro produto para começar a venda"
-              rows={items.map((item, index) => ({
-                key: item.id,
-                highlight: item.id === lastAddedId,
-                onClick: () => setSelectedId(item.id),
-                cells: [
-                  index + 1,
-                  <span key="n" style={{ fontWeight: item.id === selected?.id ? 700 : 400 }}>
-                    {item.product.name}
-                  </span>,
-                  item.quantity,
-                  formatBRL(item.unitPrice),
-                  <b key="s">{formatBRL(item.unitPrice * item.quantity)}</b>,
-                ],
-              }))}
+              rows={items.map((item, index) => {
+                const quantity = pendingQty[item.id] ?? item.quantity;
+                return {
+                  key: item.id,
+                  highlight: item.id === lastAddedId,
+                  onClick: () => setSelectedId(item.id),
+                  cells: [
+                    index + 1,
+                    <span key="n" style={{ fontWeight: item.id === selected?.id ? 700 : 400 }}>
+                      {item.product.name}
+                    </span>,
+                    <QtyStepper
+                      key="q"
+                      quantity={quantity}
+                      onStep={(delta) => stepQuantity(item, delta)}
+                      onTyped={(next) => scheduleQuantity(item, next)}
+                      onDone={() => {
+                        flushPendingQuantity();
+                        focusScan();
+                      }}
+                    />,
+                    formatBRL(item.unitPrice),
+                    <b key="s">{formatBRL(item.unitPrice * quantity)}</b>,
+                    <SIconBtn
+                      key="del"
+                      icon="trash"
+                      danger
+                      title="Remover item"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void handleRemove(item);
+                      }}
+                    />,
+                  ],
+                };
+              })}
             />
             <div style={{ flex: 1 }} />
             <div className="s-dim" style={{ fontSize: 12, padding: '8px 10px' }}>
-              Bipar o mesmo produto soma a quantidade · <b>Del</b> remove o item selecionado
+              Bipar o mesmo produto soma a quantidade · use +/- ou digite pra alterar a quantidade · <b>Del</b> remove o item selecionado
             </div>
           </SCard>
 
           <div className="s-strip">
             <span><SKbd>F2</SKbd> buscar</span>
-            <span><SKbd>F3</SKbd> quantidade</span>
             <span><SKbd>F4</SKbd> desconto</span>
             <span><SKbd>Del</SKbd> remover</span>
             <span><SKbd>F10</SKbd> finalizar</span>
@@ -493,23 +594,12 @@ function PosPage() {
           }}
         />
       )}
-      {modal.kind === 'quantity' && selected && (
-        <QuantityModal
-          item={selected.product.name}
-          initial={selected.quantity}
-          onSubmit={(quantity) => {
-            updateItem.mutate({ itemId: selected.id, quantity });
-            setModal({ kind: 'none' });
-          }}
-          onClose={() => {
-            setModal({ kind: 'none' });
-            focusScan();
-          }}
-        />
-      )}
       {modal.kind === 'discount' && (
         <DiscountModal
-          onSubmit={(discount) => setDiscount.mutate(discount)}
+          onSubmit={(discount) => {
+            flushPendingQuantity();
+            setDiscount.mutate(discount);
+          }}
           onClose={() => {
             setModal({ kind: 'none' });
             focusScan();
@@ -537,7 +627,15 @@ function PosPage() {
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <SBtn ghost onClick={() => setModal({ kind: 'none' })}>Voltar</SBtn>
-            <SBtn danger onClick={() => cancelSale.mutate()}>Cancelar venda</SBtn>
+            <SBtn
+              danger
+              onClick={() => {
+                flushPendingQuantity();
+                cancelSale.mutate();
+              }}
+            >
+              Cancelar venda
+            </SBtn>
           </div>
         </SModal>
       )}
@@ -608,37 +706,57 @@ function SearchModal({
   );
 }
 
-function QuantityModal({
-  item,
-  initial,
-  onSubmit,
-  onClose,
+// Alterar quantidade de um item já na venda (FR-14) — +/- ou digitação direta,
+// sem precisar rebipar o produto. Ver CONTEXT.md ("Alterar quantidade").
+function QtyStepper({
+  quantity,
+  onStep,
+  onTyped,
+  onDone,
 }: {
-  item: string;
-  initial: number;
-  onSubmit: (quantity: number) => void;
-  onClose: () => void;
+  quantity: number;
+  onStep: (delta: number) => void;
+  onTyped: (quantity: number) => void;
+  onDone: () => void;
 }) {
-  const [value, setValue] = useState(String(initial));
-  const quantity = Number(value);
-  const valid = Number.isInteger(quantity) && quantity > 0;
+  const [raw, setRaw] = useState(String(quantity));
+  useEffect(() => setRaw(String(quantity)), [quantity]);
+
+  const commitTyped = () => {
+    const n = Number(raw);
+    if (Number.isInteger(n) && n > 0) onTyped(n);
+    else setRaw(String(quantity));
+  };
+
   return (
-    <SModal title={`Quantidade — ${item}`} onClose={onClose} width={380}>
-      <div className="s-input">
-        <input
-          autoFocus
-          type="number"
-          min={1}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && valid && onSubmit(quantity)}
-        />
-      </div>
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 14 }}>
-        <SBtn ghost onClick={onClose}>Voltar</SBtn>
-        <SBtn primary disabled={!valid} onClick={() => onSubmit(quantity)}>Aplicar</SBtn>
-      </div>
-    </SModal>
+    <div className="s-qty-stepper" onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        disabled={quantity <= 1}
+        onClick={() => onStep(-1)}
+        aria-label="Diminuir quantidade"
+      >
+        −
+      </button>
+      <input
+        value={raw}
+        inputMode="numeric"
+        onChange={(e) => setRaw(e.target.value.replace(/\D/g, ''))}
+        onBlur={() => {
+          commitTyped();
+          onDone();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            (e.target as HTMLInputElement).blur();
+          }
+        }}
+      />
+      <button type="button" onClick={() => onStep(1)} aria-label="Aumentar quantidade">
+        +
+      </button>
+    </div>
   );
 }
 
