@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { productSchema, stockEntrySchema, type ProductInput } from '@beverage/shared';
+import { Permission, productSchema, stockEntrySchema, type ProductInput } from '@beverage/shared';
 import { Screen } from '../_app';
 import { Confirm } from '../../components/confirm';
 import {
@@ -19,6 +19,7 @@ import {
   useToast,
 } from '../../components/sol';
 import { api, apiErrorMessage } from '../../lib/api';
+import { hasPermission } from '../../lib/auth';
 import { formatBRL } from '../../lib/format';
 import type { Paginated, Product, StockAlerts } from '../../lib/types';
 
@@ -222,6 +223,32 @@ function ProductsPage() {
 
 // ---------- Cadastro / edição (FR-01/FR-02) ----------
 
+// Entrada embutida no cadastro/edição (ADR 0001): quantidade opcional — só vira
+// StockMovement se preenchida. Sem campo de custo próprio: usa o purchasePrice
+// já informado no formulário.
+const productFormSchema = productSchema
+  .extend({
+    stockEntry: z
+      .object({
+        quantity: z.number().int().min(1).optional(),
+        batch: z.string().optional(),
+        expiresAt: z.coerce.date().optional(),
+      })
+      .optional(),
+  })
+  .transform(({ stockEntry, ...rest }): ProductInput => ({
+    ...rest,
+    ...(stockEntry?.quantity
+      ? {
+          stockEntry: {
+            quantity: stockEntry.quantity,
+            batch: stockEntry.batch,
+            expiresAt: stockEntry.expiresAt,
+          },
+        }
+      : {}),
+  }));
+
 function ProductModal({
   product,
   onSaved,
@@ -233,12 +260,13 @@ function ProductModal({
 }) {
   const toast = useToast();
   const queryClient = useQueryClient();
+  const canEnterStock = hasPermission(Permission.STOCK_WRITE);
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<z.input<typeof productSchema>, unknown, ProductInput>({
-    resolver: zodResolver(productSchema),
+  } = useForm<z.input<typeof productFormSchema>, unknown, ProductInput>({
+    resolver: zodResolver(productFormSchema),
     defaultValues: product
       ? {
           name: product.name,
@@ -313,6 +341,44 @@ function ProductModal({
             <input type="number" min="0" {...register('minimumStock', { valueAsNumber: true })} />,
           )}
         </div>
+        {canEnterStock && (
+          <div style={{ borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+            <div className="s-label" style={{ marginBottom: 6 }}>
+              Adicionar ao estoque — opcional
+              {product && <span className="s-dim"> (atual: {product.currentStock})</span>}
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              {field(
+                'Quantidade',
+                errors.stockEntry?.quantity?.message,
+                <input
+                  type="number"
+                  min="1"
+                  {...register('stockEntry.quantity', {
+                    setValueAs: (v: string) => (v === '' ? undefined : Number(v)),
+                  })}
+                />,
+              )}
+              {field(
+                'Lote — opcional',
+                undefined,
+                <input
+                  {...register('stockEntry.batch', { setValueAs: (v: string) => v || undefined })}
+                />,
+              )}
+              {field(
+                'Validade — opcional',
+                undefined,
+                <input
+                  type="date"
+                  {...register('stockEntry.expiresAt', {
+                    setValueAs: (v: string) => (v ? new Date(v) : undefined),
+                  })}
+                />,
+              )}
+            </div>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 4 }}>
           {product ? (
             <SBtn ghost danger onClick={() => deactivate.mutate()}>

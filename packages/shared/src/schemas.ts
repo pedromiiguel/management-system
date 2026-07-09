@@ -45,6 +45,14 @@ export const roleSchema = z.object({
 export type RoleInput = z.infer<typeof roleSchema>;
 
 // ---------- Produtos (FR-01) ----------
+/** Entrada de estoque embutida no formulário de produto — ver ADR 0001. */
+export const productStockEntrySchema = z.object({
+  quantity,
+  batch: z.string().optional(),
+  expiresAt: z.coerce.date().optional(),
+});
+export type ProductStockEntryInput = z.infer<typeof productStockEntrySchema>;
+
 export const productSchema = z.object({
   name: z.string().min(1, 'Informe o nome'),
   sku: z.string().min(1, 'Informe o SKU'),
@@ -54,6 +62,8 @@ export const productSchema = z.object({
   salePrice: money,
   minimumStock: z.number().int().min(0).default(0),
   active: z.boolean().default(true),
+  /** Se presente, lança uma Entrada (soma ao saldo) na mesma transação. */
+  stockEntry: productStockEntrySchema.optional(),
 });
 export type ProductInput = z.infer<typeof productSchema>;
 export const updateProductSchema = productSchema.partial();

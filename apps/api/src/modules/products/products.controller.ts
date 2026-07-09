@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import {
   Permission,
   ProductInput,
@@ -6,6 +6,7 @@ import {
   UpdateProductInput,
   updateProductSchema,
 } from '@beverage/shared';
+import { AuthUser, CurrentUser } from '../../common/decorators/current-user.decorator';
 import { RequirePermission } from '../../common/decorators/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { ProductsService } from './products.service';
@@ -44,16 +45,22 @@ export class ProductsController {
 
   @Post()
   @RequirePermission(Permission.PRODUCTS_WRITE)
-  create(@Body(new ZodValidationPipe(productSchema)) body: ProductInput) {
+  create(
+    @CurrentUser() user: AuthUser,
+    @Body(new ZodValidationPipe(productSchema)) body: ProductInput,
+  ) {
+    this.assertStockEntryPermission(user, body.stockEntry);
     return this.productsService.create(body);
   }
 
   @Patch(':id')
   @RequirePermission(Permission.PRODUCTS_WRITE)
   update(
+    @CurrentUser() user: AuthUser,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(updateProductSchema)) body: UpdateProductInput,
   ) {
+    this.assertStockEntryPermission(user, body.stockEntry);
     return this.productsService.update(id, body);
   }
 
@@ -67,5 +74,17 @@ export class ProductsController {
   @RequirePermission(Permission.PRODUCTS_WRITE)
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
+  }
+
+  /**
+   * PRODUCTS_WRITE (via @RequirePermission) só cobre o cadastro em si — uma
+   * Entrada embutida no formulário (ADR 0001) exige STOCK_WRITE também, e o
+   * decorator declarativo não expressa "exigido só quando o campo vier
+   * preenchido".
+   */
+  private assertStockEntryPermission(user: AuthUser, stockEntry: unknown) {
+    if (stockEntry && !user.permissions.includes(Permission.STOCK_WRITE)) {
+      throw new ForbiddenException('Você não tem permissão para lançar entrada de estoque');
+    }
   }
 }

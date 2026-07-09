@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { ProductInput, UpdateProductInput } from '@beverage/shared';
+import { ProductInput, ProductStockEntryInput, UpdateProductInput } from '@beverage/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -58,11 +58,73 @@ export class ProductsService {
   }
 
   create(input: ProductInput) {
-    return this.prisma.product.create({ data: this.normalize(input) });
+    const { stockEntry, ...productInput } = input;
+    return this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.create({ data: this.normalize(productInput) });
+      if (stockEntry) {
+        await this.applyStockEntry(tx, product.id, stockEntry, productInput.purchasePrice);
+      }
+      return tx.product.findUniqueOrThrow({
+        where: { id: product.id },
+        include: { batches: { orderBy: { expiresAt: 'asc' } } },
+      });
+    });
   }
 
   update(id: string, input: UpdateProductInput) {
-    return this.prisma.product.update({ where: { id }, data: this.normalize(input) });
+    const { stockEntry, ...productInput } = input;
+    return this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.update({ where: { id }, data: this.normalize(productInput) });
+      if (stockEntry) {
+        await this.applyStockEntry(tx, product.id, stockEntry, productInput.purchasePrice);
+      }
+      return tx.product.findUniqueOrThrow({
+        where: { id },
+        include: { batches: { orderBy: { expiresAt: 'asc' } } },
+      });
+    });
+  }
+
+  /** Entrada embutida no cadastro/edição de produto — ver ADR 0001. Sempre aditiva. */
+  private async applyStockEntry(
+    tx: Prisma.TransactionClient,
+    productId: string,
+    entry: ProductStockEntryInput,
+    purchasePriceInput?: number,
+  ) {
+    const unitCost =
+      purchasePriceInput ??
+      (
+        await tx.product.findUniqueOrThrow({
+          where: { id: productId },
+          select: { purchasePrice: true },
+        })
+      ).purchasePrice;
+
+    await tx.stockMovement.create({
+      data: {
+        productId,
+        type: 'ENTRY',
+        source: 'PURCHASE',
+        quantity: entry.quantity,
+        unitCost,
+        note: 'Entrada lançada no cadastro do produto',
+      },
+    });
+    if (entry.batch || entry.expiresAt) {
+      await tx.productBatch.create({
+        data: {
+          productId,
+          batch: entry.batch,
+          expiresAt: entry.expiresAt,
+          quantity: entry.quantity,
+        },
+      });
+    }
+    await tx.product.update({
+      where: { id: productId },
+      data: { currentStock: { increment: entry.quantity } },
+    });
   }
 
   /** BR-04: produto com vendas não é excluído — apenas desativado. */
