@@ -18,13 +18,14 @@
     "axios": "^1.17.0",
     "clsx": "^2.1.1",
     "react": "^19.2.0",
+    "react-call": "^2.0.2",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.78.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tanstack/router-plugin": "^1.168.18",
     "@tailwindcss/vite": "^4.3.0",
+    "@tanstack/router-plugin": "^1.168.18",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.0",
