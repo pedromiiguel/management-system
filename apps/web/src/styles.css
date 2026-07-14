@@ -189,9 +189,13 @@ body {
 @keyframes s-blink { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .s-caret { animation: none; } }
 
-/* ---------- comprovante (FR-23) ---------- */
+/* ---------- cupom não-fiscal (FR-23) — bobina térmica de 80mm ---------- */
+.s-cupom { margin: 0; padding: 12px 10px; background: #fafaf7; border: 1px dashed rgba(2, 47, 64, 0.25); border-radius: var(--r-sm); font: 12px/1.4 ui-monospace, 'Cascadia Mono', Consolas, monospace; white-space: pre; overflow-x: auto; color: #111; }
+
 @media print {
   body * { visibility: hidden; }
   .s-receipt, .s-receipt * { visibility: visible; }
-  .s-receipt { position: fixed; inset: 0; background: #fff; padding: 8px; font-size: 12px; font-family: ui-monospace, monospace; }
+  /* 80mm de bobina ≈ 72mm imprimíveis; fonte monoespaçada p/ 40 colunas */
+  .s-receipt { position: fixed; top: 0; left: 0; width: 72mm; background: #fff; border: 0; border-radius: 0; padding: 2mm; font: 11px/1.35 ui-monospace, 'Cascadia Mono', Consolas, monospace; white-space: pre; overflow: visible; }
+  @page { size: 80mm auto; margin: 0; }
 }

@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import axios from 'axios';
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { PaymentMethod, PAYMENT_METHOD_LABELS, type DiscountInput } from '@beverage/shared';
+import { PaymentMethod, SERVICE_FEE_RATE, type DiscountInput } from '@beverage/shared';
 import { Screen } from '../_app';
 import {
   SBtn,
@@ -22,12 +22,17 @@ import {
 import { Confirm } from '../../components/confirm';
 import { api, apiErrorMessage } from '../../lib/api';
 import { getUser } from '../../lib/auth';
-import { formatBRL, formatDateTime, maskBRL, parseMoney } from '../../lib/format';
+import { buildCupom } from '../../lib/cupom';
+import { formatBRL, maskBRL, parseMoney } from '../../lib/format';
 import type { Customer, Product, Sale, SaleItem } from '../../lib/types';
 
 export const Route = createFileRoute('/_app/pos')({
   component: PosPage,
 });
+
+// Dados do estabelecimento impressos no cupom — trocar o CNPJ placeholder
+// pelo CNPJ real antes de usar em produção.
+const STORE = { name: 'COSTAS BAR', cnpj: '67.968.751/0001-77' };
 
 type Modal =
   | { kind: 'none' }
@@ -47,7 +52,8 @@ function PosPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const [payment, setPayment] = useState<PaymentMethod>(PaymentMethod.CASH);
-  const [withInvoice, setWithInvoice] = useState(false);
+  const [withInvoice, setWithInvoice] = useState(true);
+  const [serviceFee, setServiceFee] = useState(true);
   const [received, setReceived] = useState('');
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [modal, setModal] = useState<Modal>({ kind: 'none' });
@@ -76,7 +82,8 @@ function PosPage() {
 
   const resetCheckout = useCallback(() => {
     setPayment(PaymentMethod.CASH);
-    setWithInvoice(false);
+    setWithInvoice(true);
+    setServiceFee(true);
     setReceived('');
     setCustomer(null);
     setSelectedId(null);
@@ -260,6 +267,7 @@ function PosPage() {
       const body = {
         paymentMethod: payment,
         withInvoice,
+        serviceFee,
         ...(payment === PaymentMethod.CASH ? { amountPaid: parseMoney(received) } : {}),
         ...(payment === PaymentMethod.CREDIT ? { customerId: customer?.id } : {}),
       };
@@ -276,10 +284,15 @@ function PosPage() {
   const items = sale?.items ?? [];
   const total = sale?.total ?? 0;
   const itemCount = items.reduce((acc, i) => acc + i.quantity, 0);
+  // Taxa de serviço (10% do subtotal, pré-desconto) exibida localmente; o
+  // backend recalcula com Decimal na conclusão (fonte da verdade).
+  const subtotal = items.reduce((acc, i) => acc + i.unitPrice * i.quantity, 0);
+  const feeValue = serviceFee ? Math.round(subtotal * SERVICE_FEE_RATE * 100) / 100 : 0;
+  const displayTotal = total + feeValue;
   const receivedValue = parseMoney(received);
   const change =
     payment === PaymentMethod.CASH && Number.isFinite(receivedValue)
-      ? receivedValue - total
+      ? receivedValue - displayTotal
       : null;
   const selected = items.find((i) => i.id === selectedId) ?? items.at(-1) ?? null;
   const busy = addItem.isPending || completeSale.isPending;
@@ -309,7 +322,7 @@ function PosPage() {
       return;
     }
     if (payment === PaymentMethod.CASH) {
-      if (!Number.isFinite(receivedValue) || receivedValue < total) {
+      if (!Number.isFinite(receivedValue) || receivedValue < displayTotal) {
         toast('Informe o valor recebido (maior ou igual ao total)', 'warn');
         return;
       }
@@ -481,7 +494,7 @@ function PosPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <SCard pad={18} style={{ textAlign: 'center' }}>
             <div className="s-stat-label">TOTAL DA VENDA</div>
-            <div className="s-total">{formatBRL(total)}</div>
+            <div className="s-total">{formatBRL(displayTotal)}</div>
             <div className="s-dim" style={{ fontSize: 13 }}>
               {itemCount} {itemCount === 1 ? 'item' : 'itens'} · {items.length}{' '}
               {items.length === 1 ? 'produto' : 'produtos'}
@@ -498,6 +511,16 @@ function PosPage() {
                     : formatBRL(sale.discountValue)
                   : '—'}{' '}
                 <SKbd>F4</SKbd>
+              </span>
+            </div>
+            <div className="s-divider" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 13.5 }}>Taxa de serviço (10%)</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {serviceFee && (
+                  <span className="s-dim" style={{ fontSize: 13 }}>{formatBRL(feeValue)}</span>
+                )}
+                <SToggle on={serviceFee} onChange={setServiceFee} />
               </span>
             </div>
             <div className="s-divider" />
@@ -863,67 +886,12 @@ function CustomerModal({
   );
 }
 
+// Cupom não-fiscal (FR-23) — o <pre> exibido é exatamente o texto que vai
+// para a impressora térmica de 80mm (ver lib/cupom.ts e o @media print).
 function ReceiptModal({ sale, onClose }: { sale: Sale; onClose: () => void }) {
   return (
     <SModal title="Venda concluída ✓" onClose={onClose} width={420}>
-      <div className="s-receipt">
-        <div style={{ textAlign: 'center', marginBottom: 10 }}>
-          <b>DISTRIBUIDORA SOL</b>
-          <div className="s-dim" style={{ fontSize: 12 }}>
-            Comprovante de venda — {sale.withInvoice ? 'com NF' : 'sem NF'}
-          </div>
-          <div className="s-dim" style={{ fontSize: 12 }}>
-            #{sale.id.slice(-6).toUpperCase()} · {formatDateTime(sale.completedAt)}
-          </div>
-        </div>
-        <STable
-          cols={['Produto', 'Qtd', 'Total']}
-          widths="1fr 50px 90px"
-          align={[null, 'center', 'right']}
-          dense
-          rows={sale.items.map((i) => ({
-            key: i.id,
-            cells: [i.product.name, i.quantity, formatBRL(i.unitPrice * i.quantity)],
-          }))}
-        />
-        <div className="s-divider" />
-        {sale.discountValue ? (
-          <div className="s-kv">
-            <span>Desconto</span>
-            <b>
-              {sale.discountType === 'PERCENT'
-                ? `${sale.discountValue}%`
-                : formatBRL(sale.discountValue)}
-            </b>
-          </div>
-        ) : null}
-        <div className="s-kv">
-          <span>Total</span>
-          <b style={{ fontSize: 17 }}>{formatBRL(sale.total)}</b>
-        </div>
-        <div className="s-kv">
-          <span>Pagamento</span>
-          <b>{sale.paymentMethod ? PAYMENT_METHOD_LABELS[sale.paymentMethod] : '—'}</b>
-        </div>
-        {sale.change !== null && (
-          <>
-            <div className="s-kv">
-              <span>Recebido</span>
-              <b>{formatBRL(sale.amountPaid)}</b>
-            </div>
-            <div className="s-kv is-troco">
-              <span>Troco</span>
-              <b>{formatBRL(sale.change)}</b>
-            </div>
-          </>
-        )}
-        {sale.customer && (
-          <div className="s-kv">
-            <span>Cliente</span>
-            <b>{sale.customer.name}</b>
-          </div>
-        )}
-      </div>
+      <pre className="s-receipt s-cupom">{buildCupom(sale, STORE)}</pre>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
         <SBtn ghost onClick={() => window.print()}>Imprimir</SBtn>
         <SBtn primary onClick={onClose}>Nova venda (Enter)</SBtn>

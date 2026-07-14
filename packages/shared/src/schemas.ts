@@ -118,12 +118,16 @@ export const discountSchema = z
   });
 export type DiscountInput = z.infer<typeof discountSchema>;
 
+/** Taxa de serviço opcional do cupom (10% sobre o subtotal, pré-desconto). */
+export const SERVICE_FEE_RATE = 0.1;
+
 export const completeSaleSchema = z
   .object({
     paymentMethod: z.enum(PaymentMethod),
     /** Obrigatório para pagamento em dinheiro (FR-18). */
     amountPaid: money.optional(),
     withInvoice: z.boolean().default(false),
+    serviceFee: z.boolean().default(false),
     /** Obrigatório para venda a prazo (BR-08). */
     customerId: z.string().optional(),
     dueDate: z.coerce.date().optional(),

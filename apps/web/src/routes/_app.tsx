@@ -33,9 +33,9 @@ function AppShell() {
             <SolIcon name="sun" size={20} />
           </span>
           <span className="s-logo-text">
-            Distribuidora
+            Costas
             <br />
-            <b>SOL</b>
+            <b>BAR</b>
           </span>
         </div>
         <nav className="s-nav">

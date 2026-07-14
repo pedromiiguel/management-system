@@ -44,6 +44,7 @@ export interface Sale {
   paymentMethod: PaymentMethod | null;
   amountPaid: number | null;
   change: number | null;
+  serviceFee: number | null;
   withInvoice: boolean;
   openedAt: string;
   completedAt: string | null;
