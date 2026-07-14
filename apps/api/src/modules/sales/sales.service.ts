@@ -10,6 +10,7 @@ import {
   CompleteSaleInput,
   DiscountInput,
   PaymentMethod,
+  SERVICE_FEE_RATE,
   StockPolicy,
 } from '@beverage/shared';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -164,7 +165,15 @@ export class SalesService {
         (acc, i) => acc.add(i.unitPrice.mul(i.quantity)),
         new Decimal(0),
       );
-      const total = this.applyDiscount(subtotal, sale.discountType, sale.discountValue);
+      let total = this.applyDiscount(subtotal, sale.discountType, sale.discountValue);
+
+      // Taxa de serviço opcional do cupom: 10% sobre o subtotal (pré-desconto),
+      // somada após o desconto — entra no total cobrado, no troco e no financeiro.
+      let serviceFee: Decimal | null = null;
+      if (input.serviceFee) {
+        serviceFee = subtotal.mul(SERVICE_FEE_RATE).toDecimalPlaces(2);
+        total = total.add(serviceFee);
+      }
 
       // Troco (FR-18) — dinheiro exige valor recebido suficiente
       let amountPaid: Decimal | null = null;
@@ -256,6 +265,7 @@ export class SalesService {
           paymentMethod: input.paymentMethod,
           amountPaid,
           change,
+          serviceFee,
           withInvoice: input.withInvoice,
           customerId: input.customerId,
           cashRegisterId: register?.id,
