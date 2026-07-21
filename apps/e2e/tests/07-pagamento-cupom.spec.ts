@@ -79,7 +79,7 @@ test.describe('pagamento, conclusão e cupom', () => {
     await page.getByRole('button', { name: 'Finalizar venda' }).click();
 
     await expect(customerDialog).toBeVisible();
-    await expect(page.locator('.s-toast')).toHaveCount(0);
+    await expect(page.getByRole('status')).toHaveCount(0);
   });
 
   test('venda em fiado é concluída após escolher o cliente do seed', async ({ page }) => {

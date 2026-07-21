@@ -98,7 +98,7 @@ test.describe('quantidade — estado otimista, debounce e flush', () => {
 
     await expect(page.getByText(/Venda #[A-Z0-9]{6} em andamento/)).toBeVisible();
     await expect(page.locator('[data-testid^="sale-item-"]')).toHaveCount(0);
-    await expect(page.locator('.s-toast')).toHaveCount(0);
+    await expect(page.getByRole('status')).toHaveCount(0);
   });
 
   test('alterar a quantidade e aplicar desconto em seguida calcula o desconto sobre a quantidade nova', async ({
