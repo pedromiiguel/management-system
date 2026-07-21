@@ -1,0 +1,96 @@
+# Glossário
+
+Vocabulário usado nas decisões de arquitetura e testes deste repositório.
+Ver [docs/adr](adr/) para o raciocínio completo por trás de cada termo
+marcado com ADR.
+
+## PDV / POS
+
+O fluxo de venda no balcão. `apps/web/src/routes/_app/pos.tsx` é hoje um
+wrapper fino; a implementação real vive em `apps/web/src/presentation/pos/`,
+por cima de `apps/web/src/domain|data|infra|main/*` — piloto de Clean
+Architecture, ver [ADR 0003](adr/0003-clean-architecture-piloto-pos.md).
+
+## flushPendingQuantity
+
+Função que força o envio imediato ao servidor de qualquer alteração de
+quantidade ainda presa no debounce de 400ms. Precisa ser chamada em todo
+caminho que sai do estado "editando quantidade" (finalizar venda, remover
+item, cancelar venda, aplicar desconto) — senão a mudança fica só no cliente
+e se perde. Centralizada em `presentation/pos/hooks/use-quantity-debounce.ts`
+(ADR 0003), coberta por `apps/e2e/tests/05-quantidade.spec.ts`.
+
+## qtyPending
+
+`useRef` que guarda, por item da venda, a quantidade otimista exibida na tela
+e o timer do debounce de 400ms — deliberadamente fora de `useState` para não
+disparar re-render a cada tecla/clique.
+
+## focusScan
+
+Callback que devolve o foco ao campo de entrada do scanner via
+`requestAnimationFrame`, chamado depois de qualquer mutação que deveria
+manter o operador digitando/escaneando sem precisar clicar de volta no campo.
+Centralizado em `presentation/pos/hooks/use-scan-focus.ts`. **Tem** cobertura
+E2E, ao contrário do que o ADR 0002 registrou — `apps/e2e/tests/support/pos.ts`
+verifica foco após adicionar item (`addKnownItems`) e após cancelar venda
+(`ensureFreshSale`); essa suíte pegou uma regressão real na extração das
+mutations (ver [ADR 0003](adr/0003-clean-architecture-piloto-pos.md)).
+
+## Refatoração puramente estrutural
+
+Mudança que reorganiza código (quebra de arquivo, extração de
+hooks/componentes) sem alterar UI ou comportamento observável. Era a
+definição original da refatoração do front ([ADR 0001](adr/0001-e2e-antes-da-refatoracao-do-front.md));
+a rodada do PDV passou a incluir correções pontuais além da reorganização
+([ADR 0002](adr/0002-escopo-refatoracao-pos.md)).
+
+## Feature folder
+
+Convenção de organizar hooks, componentes e tipos de um fluxo específico sob
+`features/<nome>/`, deixando o arquivo de rota (`routes/_app/<nome>.tsx`)
+como um wrapper fino. Introduzida para o PDV em
+[ADR 0002](adr/0002-escopo-refatoracao-pos.md) — ainda **não** é convenção
+obrigatória para o resto do repositório.
+
+## Clean Architecture em camadas (`arquiteture.md`)
+
+Convenção portátil de arquitetura para o front: `presentation → main → data →
+domain ← @shared`. Uma camada só importa camadas mais internas; `domain` é
+TypeScript puro sem framework. Adotada como piloto no PDV em
+[ADR 0003](adr/0003-clean-architecture-piloto-pos.md) — **não** é convenção
+de repo ainda.
+
+## `IHttpClient`
+
+Interface que é a única fronteira entre `data/` e o cliente HTTP real
+(axios, no caso deste repo). `data/handlers` nunca importa axios diretamente,
+só essa interface. O adaptador concreto mora em `infra/`.
+
+## Usecase / Handler / Factory
+
+Vocabulário do fluxo de uma integração: `domain/usecases` define a interface
+(`ISearchProduct`, `IOpenSale`...); `data/handlers` implementa contra
+`IHttpClient` (`SearchProductHandler`); `main/factories` monta o handler
+injetando o `IHttpClient` (`makeSearchProduct`) e, por cima, envolve em
+`useQuery`/`useMutation`. Verbos custom (fora do CRUD `Search/GetOne/Create/
+Update/Delete`) são permitidos para ações de negócio que não são um CRUD
+genérico — ex. `IOpenSale`, `ICancelSale`, `ICompleteSale` no PDV. Ver mapeamento
+completo em [ADR 0003](adr/0003-clean-architecture-piloto-pos.md).
+
+## Flow (`main/factories/flows`)
+
+Camada de composição que junta as mutations em torno do ciclo de vida de um
+agregado num único objeto entregue à `presentation` via props. No PDV:
+`usePosFlow` (`main/factories/flows/use-pos-flow.ts`), consumido por
+`presentation/pos/PosPage.tsx`.
+
+## Suíte E2E do PDV
+
+`apps/e2e/tests/01-smoke.spec.ts` a `05-quantidade.spec.ts` — Playwright,
+local, sob demanda, sem CI. Cobre abertura de venda, busca por código/nome,
+guarda de autenticação, o padrão de debounce+flush de quantidade **e** o
+retorno de foco do scanner (via helpers `addKnownItems`/`ensureFreshSale` em
+`support/pos.ts` — achado tardio, ver [ADR 0003](adr/0003-clean-architecture-piloto-pos.md)).
+Deliberadamente não cobre regra de negócio (totais, taxa de serviço, fiado).
+Ver [ADR 0001](adr/0001-e2e-antes-da-refatoracao-do-front.md).
