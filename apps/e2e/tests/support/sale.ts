@@ -6,23 +6,23 @@ export function scanInput(page: Page): Locator {
 }
 
 export function totalValue(page: Page): Locator {
-  return page.getByTestId('pos-total');
+  return page.getByTestId('sale-total');
 }
 
 export function changeValue(page: Page): Locator {
-  return page.getByTestId('pos-change');
+  return page.getByTestId('sale-change');
 }
 
 export function discountValue(page: Page): Locator {
-  return page.getByTestId('pos-discount-value');
+  return page.getByTestId('sale-discount-value');
 }
 
 export function serviceFeeValue(page: Page): Locator {
-  return page.getByTestId('pos-service-fee-value');
+  return page.getByTestId('sale-service-fee-value');
 }
 
 export function selectedCustomer(page: Page): Locator {
-  return page.getByTestId('pos-selected-customer');
+  return page.getByTestId('sale-selected-customer');
 }
 
 /** Linha da venda pelo nome do produto — estável independente da ordem de renderização. */
@@ -52,8 +52,8 @@ export function removeItemButton(row: Locator): Locator {
 }
 
 /** Abre a frente de caixa e aguarda a venda em andamento + foco no campo de código. */
-export async function openPos(page: Page): Promise<void> {
-  await page.goto('/pos');
+export async function openSalePage(page: Page): Promise<void> {
+  await page.goto('/sale');
   await expect(page.getByText(/Venda #[A-Z0-9]{6} em andamento/)).toBeVisible();
   await expect(scanInput(page)).toBeFocused();
 }
@@ -65,7 +65,7 @@ export async function openPos(page: Page): Promise<void> {
  * deixada por um teste anterior no mesmo arquivo, sempre pelo navegador.
  */
 export async function ensureFreshSale(page: Page): Promise<void> {
-  await openPos(page);
+  await openSalePage(page);
   const hasItems = (await page.locator('[data-testid^="sale-item-"]').count()) > 0;
   if (!hasItems) return;
 

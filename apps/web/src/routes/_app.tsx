@@ -1,7 +1,9 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router';
-import type { ReactNode } from 'react';
 import { SolIcon, type IconName } from '../components/sol';
 import { clearSession, getUser, isAuthenticated } from '../lib/auth';
+import { Screen } from '../presentation/components/Screen';
+
+export { Screen };
 
 export const Route = createFileRoute('/_app')({
   beforeLoad: ({ location }) => {
@@ -13,7 +15,7 @@ export const Route = createFileRoute('/_app')({
 });
 
 const NAV: { icon: IconName; label: string; to: string }[] = [
-  { icon: 'pdv', label: 'PDV — Caixa', to: '/pos' },
+  { icon: 'pdv', label: 'PDV — Caixa', to: '/sale' },
   { icon: 'produtos', label: 'Produtos', to: '/products' },
   { icon: 'estoque', label: 'Estoque', to: '/stock' },
   { icon: 'financeiro', label: 'Financeiro', to: '/financial' },
@@ -71,26 +73,5 @@ function AppShell() {
         <Outlet />
       </div>
     </div>
-  );
-}
-
-/** Topbar + conteúdo, padrão de todas as telas autenticadas (chrome do design). */
-export function Screen({
-  title,
-  topRight,
-  children,
-}: {
-  title: string;
-  topRight?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <>
-      <div className="s-topbar">
-        <span className="s-title">{title}</span>
-        <span className="s-topbar-right">{topRight}</span>
-      </div>
-      <div className="s-content">{children}</div>
-    </>
   );
 }
