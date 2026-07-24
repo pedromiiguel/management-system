@@ -1,96 +1,35 @@
-import type { CashMovementType, CashRegisterStatus, PaymentMethod } from '@beverage/shared';
+import type { PaymentMethod } from '@beverage/shared';
 
-// Product, Sale, SaleItem e Customer são definidos em @/domain/models/sale —
-// única fonte da verdade (ADR 0003/0004). Reexportados aqui só porque
-// financial.tsx, products.tsx, reports.tsx e stock.tsx ainda importam deste
-// arquivo e estão fora do escopo do piloto de Clean Architecture.
-export type { Product, Sale, SaleItem, Customer } from '@/domain/models/sale';
+// Sale, SaleItem e Customer são definidos em @/domain/models/sale — única
+// fonte da verdade (ADR 0003/0004). Reexportados aqui só porque reports.tsx
+// ainda importa deste arquivo e está fora do escopo das migrações atuais.
+export type { Sale, SaleItem, Customer } from '@/domain/models/sale';
 
-export interface Paginated<T> {
-  items: T[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+// Product é definido em @/domain/models/products (ADR 0007). Reexportado
+// aqui pela mesma razão acima — stock.tsx e reports.tsx ainda importam Product
+// deste arquivo.
+export type { Product } from '@/domain/models/products';
 
-export interface CashMovement {
-  id: string;
-  type: CashMovementType;
-  amount: number;
-  description: string;
-  paymentMethod: PaymentMethod | null;
-  occurredAt: string;
-  category?: { id: string; name: string } | null;
-  sale?: { id: string } | null;
-}
+// CashMovement, CashRegister, Receivable, Payable, FinancialCategory e
+// Dashboard são definidos em @/domain/models/financial — única fonte da
+// verdade (ADR 0006). Reexportados aqui pela mesma razão acima.
+export type {
+  CashMovement,
+  CashRegister,
+  Receivable,
+  Payable,
+  FinancialCategory,
+  Dashboard,
+} from '@/domain/models/financial';
 
-export interface CashRegister {
-  id: string;
-  status: CashRegisterStatus;
-  openingBalance: number;
-  expectedBalance: number | null;
-  countedBalance: number | null;
-  difference: number | null;
-  openedAt: string;
-  closedAt: string | null;
-  note: string | null;
-  operator: { id: string; name: string };
-  movements?: CashMovement[];
-  summary?: {
-    inflowsByMethod: Record<string, number>;
-    pulls: number;
-    floats: number;
-    outflows: number;
-    expectedCash: number;
-  };
-}
+// Paginated é definido em @/domain/models/products (ADR 0007) — genérico o
+// bastante para ter nascido lá por ser o primeiro domínio a precisar dele.
+// Reexportado aqui porque reports.tsx e stock.tsx ainda usam este tipo.
+export type { Paginated } from '@/domain/models/products';
 
-export interface Receivable {
-  id: string;
-  amount: number;
-  dueDate: string | null;
-  status: 'OPEN' | 'RECEIVED';
-  receivedAt: string | null;
-  createdAt: string;
-  customer: { id: string; name: string; contact: string | null };
-  sale: { id: string; completedAt: string | null; total: number } | null;
-}
-
-export interface Payable {
-  id: string;
-  description: string;
-  supplier: string | null;
-  amount: number;
-  dueDate: string;
-  status: 'OPEN' | 'PAID';
-  paidAt: string | null;
-  category: { id: string; name: string } | null;
-}
-
-export interface FinancialCategory {
-  id: string;
-  name: string;
-  kind: 'INCOME' | 'EXPENSE';
-  system: boolean;
-}
-
-export interface Dashboard {
-  revenue: { day: number; month: number; year: number };
-  byMethodMonth: { paymentMethod: PaymentMethod; total: number; count: number }[];
-  result: { revenue: number; cogs: number; expenses: number; profit: number };
-  target: { monthly: number | null; progress: number | null };
-}
-
-export interface StockAlerts {
-  lowStock: { id: string; name: string; sku: string; currentStock: number; minimumStock: number }[];
-  expiring: {
-    id: string;
-    batch: string | null;
-    expiresAt: string | null;
-    quantity: number;
-    product: { id: string; name: string; sku: string };
-  }[];
-}
+// StockAlerts é definido em @/domain/models/stock (ADR 0007). Reexportado
+// aqui porque stock.tsx ainda importa deste arquivo.
+export type { StockAlerts } from '@/domain/models/stock';
 
 export interface AppSettings {
   stockPolicy: 'BLOCK' | 'WARN';
