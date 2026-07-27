@@ -2,17 +2,23 @@
 
 Servidos por Vite na raiz (`/`). O que estiver aqui é copiado tal qual para o build.
 
-## `logo.png` — pendente
+## `logo.png`
 
-O emblema circular da marca (Costas's Espetos) é usado pela tela de login em
-`presentation/flows/login/components/LoginBrandPanel/`, via `/logo.png`.
+Emblema circular completo da marca (Costa's Espetos), 944×1120. Usado pelo
+painel de marca do login (`presentation/flows/login/components/
+LoginBrandPanel/`, via `/logo.png`), a 196px — o único tamanho em que o
+arco de texto da ilustração é legível.
 
-**O arquivo ainda não está no repo.** Ele vive no projeto de design
-(`Sistema Distribuidora Sol - Hi-Fi.html` → `hifi/logo.png`, 944×1120) e não é
-baixável pelo MCP `claude_design`: o `get_file` corta em 256 KiB e o arquivo é
-maior, voltando `truncated: true`. Baixe pelo claude.ai/design e salve aqui como
-`logo.png`. Até lá o login renderiza o `alt` no lugar da imagem.
+Upload manual do usuário — o MCP `claude_design` não baixa arquivos acima
+de 256 KiB (`get_file` retorna `truncated: true` para este arquivo, que
+tem ~2,2 MB).
 
-O emblema é usado só a 196px, no login — na sidebar a marca é lockup
-tipográfico, porque a 92px o arco de texto do emblema fica ilegível.
+## `logo-mark.png`
+
+Recorte de `logo.png` (só a grelha com os espetinhos, 460×270, sem
+chroma-key — a região cortada não toca o fundo preto opaco do canvas
+original). Usado pela sidebar (`AppShell/components/Sidebar/`, via
+`/logo-mark.png`) a 28px, ao lado do lockup tipográfico "Costa's /
+ESPETOS" — o emblema inteiro não é legível nesse tamanho.
+
 Ver Decisão 5 do [ADR 0013](../../../docs/adr/0013-rebrand-costas-espetos.md).
