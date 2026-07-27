@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import type {
   CashMovementInput,
   CloseRegisterInput,
+  FinancialCategoryInput,
   ManualEntryInput,
   OpenRegisterInput,
   PayableInput,
@@ -10,6 +11,7 @@ import type {
 import {
   makeCloseCashRegister,
   makeCreateCashMovement,
+  makeCreateFinancialCategory,
   makeCreateFinancialEntry,
   makeCreatePayable,
   makeOpenCashRegister,
@@ -46,4 +48,10 @@ export function usePayPayableMutation() {
 
 export function useCreateFinancialEntryMutation() {
   return useMutation({ mutationFn: (input: ManualEntryInput) => makeCreateFinancialEntry().create(input) });
+}
+
+export function useCreateFinancialCategoryMutation() {
+  return useMutation({
+    mutationFn: (input: FinancialCategoryInput) => makeCreateFinancialCategory().create(input),
+  });
 }
