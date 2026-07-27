@@ -1,15 +1,16 @@
 import { Link } from '@tanstack/react-router';
-import { NAV } from './Sidebar.constants';
+import { LOGO_MARK_SRC, NAV } from './Sidebar.constants';
 import type { SidebarViewProps } from './Sidebar.types';
 
 export function SidebarView({ userInitial, userName, onLogout }: SidebarViewProps) {
   return (
     <div className="s-sidebar">
       <div className="s-logo">
-        {/* Lockup tipográfico: o emblema circular da marca só é legível a 196px,
-            então fica restrito ao login — ver Decisão 5 do ADR 0013. */}
+        <span className="s-logo-mark">
+          <img src={LOGO_MARK_SRC} alt="" />
+        </span>
         <span className="s-logo-text">
-          Costas&apos;s
+          Costa&apos;s
           <b>ESPETOS</b>
         </span>
       </div>

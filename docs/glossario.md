@@ -147,16 +147,22 @@ desvio deliberado: `beforeLoad` do TanStack Router roda fora da árvore
 React, sem acesso a hooks/factories de `main`. `SessionUser` migrou para
 `domain/models/auth.ts`; `lib/auth.ts` só reexporta o tipo.
 
-## Marca / Costas's Espetos
+## Marca / Costa's Espetos
 
 Nome canônico do produto, fixado no [ADR 0013](adr/0013-rebrand-costas-espetos.md)
 depois de aparecer com 4 grafias divergentes no código (`index.html`,
-`Sidebar.view.tsx`, `LoginPage.view.tsx`, `CLAUDE.md`). _Avoid_: "Costas
-BAR", "Distribuidora Sol", "Costa's Espetos" (apóstrofo simples) — todos
-substituídos. O emblema circular da marca (`logo.png`, pendente de upload —
-ver `apps/web/public/README.md`) só é usado no painel de marca do login
-(196px); a sidebar (92px) usa lockup tipográfico puro porque o emblema não é
-legível nesse tamanho.
+`Sidebar.view.tsx`, `LoginPage.view.tsx`, `CLAUDE.md`) — e de uma correção
+tardia: a 1ª rodada de grilling confirmou "Costas's Espetos" (duplo
+possessivo) sem conseguir ler o `logo.png` completo (limite de 256 KiB do
+MCP `claude_design`); depois do upload manual do arquivo, o nome gravado na
+arte ("COSTA'S") virou a grafia final. _Avoid_: "Costas BAR", "Distribuidora
+Sol", "Costas's Espetos" (duplo possessivo) — todos substituídos. O emblema
+circular completo (`apps/web/public/logo.png`, 944×1120) só é usado no
+painel de marca do login (196px) — a 92px da sidebar ele vira ilegível
+(ilustração carregada: chopes, espetinhos, panela de caldo, 3 faixas de
+texto). A sidebar usa um recorte da própria arte (`apps/web/public/
+logo-mark.png` — só a grelha com os espetinhos, sem chroma-key) ao lado do
+lockup tipográfico.
 
 A paleta de cor do app (tokens em `apps/web/src/styles.css`, `--accent`/
 `--ink-900`/`--ink-800`/etc.) é responsabilidade só de `styles.css` —

@@ -1,6 +1,6 @@
-# 0013 — Rebrand para Costas's Espetos: paleta quente, tokens neutros de cinza, login novo
+# 0013 — Rebrand para Costa's Espetos: paleta quente, tokens neutros de cinza, login novo
 
-- **Status:** Aceito (parcialmente implementado — ver "Pendências")
+- **Status:** Aceito (implementado)
 - **Estende:** a convenção de tokens CSS já existente em `styles.css`; a
   convenção MVVM de [componentes-mvvm.md](../componentes-mvvm.md) para o novo
   `LoginBrandPanel`
@@ -66,15 +66,21 @@ fazer só paleta+logo sem o login novo, e a de fazer só o login sem tocar na
 paleta do resto do app (deixaria o app com duas identidades visuais
 coexistindo).
 
-### 2. Nome canônico da marca: "Costas's Espetos"
+### 2. Nome canônico da marca: "Costa's Espetos" (corrigido após upload do logo real)
 
-Decisão do usuário: apesar do handoff usar "Costa's Espetos" (apóstrofo
-simples) no `alt` do logo e no rodapé do login, o nome canônico do produto
-passa a ser **"Costas's Espetos"** — a grafia que já estava em
-`apps/web/index.html` antes desta rodada. Propagado para: `Sidebar.view.tsx`
-(lockup "Costas's / ESPETOS"), `LoginBrandPanel.constants.ts`
-(`BRAND_NAME`), `CLAUDE.md` (era "Costas BAR"). `index.html` já estava
-correto, não precisou de mudança.
+Primeira rodada de grilling só tinha 13% do PNG reconstruído (limite de
+256 KiB do `get_file` do MCP `claude_design`) — não dava para ler o nome
+gravado no emblema. Nessa rodada o usuário confirmou "Costas's Espetos"
+(duplo possessivo), a grafia que já estava em `apps/web/index.html`.
+
+Depois do usuário subir `logo.png` manualmente (944×1120, completo) para
+`apps/web/public/`, o nome gravado na arte ficou visível: **"COSTA'S"**
+(possessivo simples), não "Costas's". Segunda rodada de grilling: usuário
+confirmou a correção para bater com o logo. Nome canônico final:
+**"Costa's Espetos"**. Propagado para: `Sidebar.view.tsx` (lockup "Costa's
+/ ESPETOS"), `LoginBrandPanel.constants.ts` (`BRAND_NAME`), `CLAUDE.md`
+(era "Costas BAR"), `apps/web/index.html` (era "Costas's Espetos — Gestão",
+tinha o mesmo erro que foi confirmado como certo na 1ª rodada).
 
 ### 3. Cinzas e sombras: promovidos a tokens, não só trocados
 
@@ -106,16 +112,27 @@ morto desde antes desta rodada, mantido morto sob o novo nome (`--ink-800`)
 por ora, sem remover — não é escopo desta rodada decidir se ele deveria
 existir.
 
-### 5. Emblema só no login; sidebar mantém lockup de texto
+### 5. Emblema completo só no login; sidebar ganha ícone recortado + texto
 
 O emblema circular foi desenhado para os ~196px do painel de marca do
 login — a 92px (largura da sidebar) o arco de texto ("...DELÍCIA NA
-GRELHA") vira ilegível. Decisão do usuário: usar o emblema só onde ele
-funciona (login, via `<img>` em `LoginBrandPanel`) e manter a sidebar com
-lockup tipográfico puro ("Costas's" / "ESPETOS", mesmo tratamento de peso/
-tracking que "BAR" já tinha). Desvio consciente do handoff, que usava o
-mesmo emblema nos dois lugares — o handoff não testou o emblema nesse
-tamanho.
+GRELHA") vira ilegível, e o emblema completo é uma ilustração carregada
+(chopes brindando, espetinhos na grelha, panela de caldo, 3 faixas de
+texto) que não funciona como ícone pequeno. Primeira decisão do usuário
+(1ª rodada, com só 13% do PNG visível): usar o emblema só no login e
+manter a sidebar com lockup tipográfico puro.
+
+Depois do upload do `logo.png` completo, o usuário revisou essa decisão:
+pediu para a sidebar ganhar um ícone da marca, não só texto. Como o
+emblema inteiro continua ilegível a 92px, a solução foi recortar
+programaticamente só o elemento da grelha com os espetinhos (a peça mais
+literal do nome "Espetos") do próprio `logo.png` — sem chroma-key ou
+edição de cor, só um crop retangular (`x:175,y:395,460×270` do arquivo
+original 944×1120) que fica inteiramente dentro da ilustração, sem tocar
+o fundo preto opaco do canvas externo. Salvo como `apps/web/public/
+logo-mark.png`, exibido a 28px via `object-fit: cover` num container
+arredondado, ao lado do lockup "Costa's / ESPETOS" (que se mantém —
+o ícone sozinho não substitui o texto, complementa).
 
 ### 6. "Falar com o suporte": texto morto por ora
 
@@ -142,32 +159,24 @@ rodada. Não é regressão: o elemento anterior também não tinha ação.
   lógica), aplicada aqui a um componente novo de flow (`presentation/flows/
   login/components/`), não só aos globais de `presentation/components/`.
 
-## Pendências
-
-**O arquivo `logo.png` não está no repo.** Não é possível baixá-lo pelo MCP
-`claude_design` (ver Contexto — limite de 256 KiB do `get_file`, arquivo
-maior). `apps/web/public/logo.png` fica como referência (`<img src="/
-logo.png">` em `LoginBrandPanel.view.tsx`) para o usuário salvar o arquivo
-baixado manualmente do claude.ai/design; documentado em `apps/web/public/
-README.md`. Até lá, o login renderiza o `alt` no lugar da imagem — não
-quebra a tela, só fica sem o emblema.
-
 ## Alternativas rejeitadas
 
 - **Só re-skin, sem login novo**: rejeitada — deixaria a peça central do
   handoff (o login) de fora.
 - **Só login novo, resto do app azul**: rejeitada pelo usuário — geraria
   duas identidades visuais coexistindo.
-- **Manter "Costa's Espetos" (apóstrofo simples) do handoff**: rejeitada —
-  usuário confirmou "Costas's Espetos" (grafia do `index.html` já existente)
-  como canônica.
+- **Manter "Costas's Espetos" (grafia do `index.html`)**: essa foi a decisão
+  da 1ª rodada, rejeitada depois pelo próprio usuário na 2ª rodada, ao ver
+  que o `logo.png` completo grava "COSTA'S" — corrigido para bater com o
+  logo (ver Decisão 2).
 - **Só trocar valor dos cinzas hardcoded, sem promover a token**: rejeitada
   — usuário preferiu pagar o custo de nomear agora, já que os valores iam
   ser tocados de qualquer forma.
 - **Manter `--sol-900`/`--sol-800`**: rejeitada — nome de token não deve
   carregar marca que está saindo.
-- **Emblema também na sidebar, fiel ao handoff**: rejeitada — o emblema não
-  é legível a 92px; usuário preferiu lockup de texto na sidebar.
+- **Emblema completo também na sidebar, fiel ao handoff**: rejeitada — o
+  emblema inteiro não é legível a 92px. Resolvido com um recorte (Decisão 5),
+  não com o emblema completo nem só texto.
 - **"Falar com o suporte" como `mailto:`/WhatsApp**: rejeitada por ora —
   nenhum canal definido nesta rodada; texto morto até haver decisão.
 
@@ -176,19 +185,20 @@ quebra a tela, só fica sem o emblema.
 - `apps/web/src/styles.css`: `:root` reescrito com paleta quente; 7 tokens
   novos de superfície/sombra; `--sol-900`/`--sol-800` renomeados para
   `--ink-900`/`--ink-800`. Nenhuma classe CSS (`.s-*`) muda de nome.
-- `Sidebar.view.tsx`: `Sun` (lucide) removido; lockup tipográfico "Costas's
-  / ESPETOS" no lugar do círculo com ícone.
+- `Sidebar.view.tsx`: `Sun` (lucide) removido; ícone recortado
+  (`logo-mark.png`, 28px, `object-fit: cover`) + lockup tipográfico "Costa's
+  / ESPETOS" no lugar do círculo com ícone lucide.
 - `LoginPage.model.ts`/`.types.ts`/`.tsx`/`.view.tsx`: ganham
   `passwordVisible`/`onTogglePasswordVisible`; a marca do login (glow,
   halos, emblema, features, rodapé) extraída para `presentation/flows/
   login/components/LoginBrandPanel/` (MVVM completo: `.tsx`, `.view.tsx`,
   `.constants.ts`, `index.ts`).
-- `CLAUDE.md`: "Costas BAR" → "Costas's Espetos".
-- `apps/web/public/logo.png`: pendente, ver "Pendências".
+- `CLAUDE.md`, `apps/web/index.html`: "Costas BAR"/"Costas's Espetos" →
+  "Costa's Espetos".
+- `apps/web/public/logo.png` (944×1120, upload manual do usuário — o MCP
+  `claude_design` não baixa acima de 256 KiB) e `apps/web/public/
+  logo-mark.png` (recorte da grelha com espetinhos, 460×270, gerado a
+  partir do primeiro) adicionados ao repo.
 - Typecheck (`tsc --noEmit`) limpo em `apps/web`. Suíte `apps/web` (vitest):
   58/58 verdes, sem regressão (nenhum teste toca `styles.css`/`Sidebar`/
-  `LoginPage`). Verificado no browser (dev server + Postgres local):
-  login (paleta laranja, olho de senha alternando `type`, features, sem
-  erro de console apesar do `logo.png` ausente), sidebar (lockup de texto,
-  zero erro), Produtos e Financeiro (paleta aplicada em tabela/DRE/chips,
-  zero erro de console).
+  `LoginPage`).
