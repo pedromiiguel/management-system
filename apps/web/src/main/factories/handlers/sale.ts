@@ -6,8 +6,10 @@ import { DeleteSaleItemHandler } from '@/data/handlers/sale/delete-sale-item-han
 import { OpenSaleHandler } from '@/data/handlers/sale/open-sale-handler';
 import { SearchCustomerHandler } from '@/data/handlers/sale/search-customer-handler';
 import { SearchProductHandler } from '@/data/handlers/sale/search-product-handler';
+import { SearchSaleHistoryHandler } from '@/data/handlers/sale/search-sale-history-handler';
 import { SetSaleDiscountHandler } from '@/data/handlers/sale/set-sale-discount-handler';
 import { UpdateSaleItemQuantityHandler } from '@/data/handlers/sale/update-sale-item-quantity-handler';
+import { VoidSaleHandler } from '@/data/handlers/sale/void-sale-handler';
 import { httpClient } from '@/main/factories/http/make-http-client';
 
 export const makeSearchProduct = () => new SearchProductHandler(httpClient);
@@ -20,3 +22,5 @@ export const makeCancelSale = () => new CancelSaleHandler(httpClient);
 export const makeCompleteSale = () => new CompleteSaleHandler(httpClient);
 export const makeSearchCustomer = () => new SearchCustomerHandler(httpClient);
 export const makeCreateCustomer = () => new CreateCustomerHandler(httpClient);
+export const makeVoidSale = () => new VoidSaleHandler(httpClient);
+export const makeSearchSaleHistory = () => new SearchSaleHistoryHandler(httpClient);

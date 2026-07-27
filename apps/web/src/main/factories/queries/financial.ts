@@ -3,7 +3,6 @@ import {
   makeGetCashFlow,
   makeGetCurrentCashRegister,
   makeGetFinancialDashboard,
-  makeGetSalesTotal,
   makeSearchCashRegisterHistory,
   makeSearchFinancialCategory,
   makeSearchPayable,
@@ -14,14 +13,6 @@ export function useFinancialDashboardQuery() {
   return useQuery({
     queryKey: ['financial', 'dashboard'],
     queryFn: () => makeGetFinancialDashboard().get(),
-  });
-}
-
-export function useSalesTotalQuery(from: string, to: string) {
-  return useQuery({
-    queryKey: ['reports', 'sales', from, to],
-    queryFn: () => makeGetSalesTotal().get(from, to),
-    staleTime: 60_000,
   });
 }
 

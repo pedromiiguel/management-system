@@ -7,4 +7,6 @@ export const saleEndpoints = {
   saleDiscount: (saleId: string) => `/sales/${saleId}/discount`,
   saleCancel: (saleId: string) => `/sales/${saleId}/cancel`,
   saleComplete: (saleId: string) => `/sales/${saleId}/complete`,
+  saleVoid: (saleId: string) => `/sales/${saleId}/void`,
+  salesHistory: () => '/sales/history',
 };

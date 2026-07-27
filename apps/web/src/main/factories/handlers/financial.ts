@@ -5,7 +5,6 @@ import { CreatePayableHandler } from '@/data/handlers/financial/create-payable-h
 import { GetCashFlowHandler } from '@/data/handlers/financial/get-cash-flow-handler';
 import { GetCurrentCashRegisterHandler } from '@/data/handlers/financial/get-current-cash-register-handler';
 import { GetFinancialDashboardHandler } from '@/data/handlers/financial/get-financial-dashboard-handler';
-import { GetSalesTotalHandler } from '@/data/handlers/financial/get-sales-total-handler';
 import { OpenCashRegisterHandler } from '@/data/handlers/financial/open-cash-register-handler';
 import { PayPayableHandler } from '@/data/handlers/financial/pay-payable-handler';
 import { SearchCashRegisterHistoryHandler } from '@/data/handlers/financial/search-cash-register-history-handler';
@@ -16,7 +15,6 @@ import { SettleReceivableHandler } from '@/data/handlers/financial/settle-receiv
 import { httpClient } from '@/main/factories/http/make-http-client';
 
 export const makeGetFinancialDashboard = () => new GetFinancialDashboardHandler(httpClient);
-export const makeGetSalesTotal = () => new GetSalesTotalHandler(httpClient);
 export const makeGetCurrentCashRegister = () => new GetCurrentCashRegisterHandler(httpClient);
 export const makeSearchCashRegisterHistory = () => new SearchCashRegisterHistoryHandler(httpClient);
 export const makeOpenCashRegister = () => new OpenCashRegisterHandler(httpClient);

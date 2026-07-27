@@ -64,6 +64,30 @@ acompanharam, saindo de `domain/usecases/products` para
 migração. `AdjustModal` (novo, sem equivalente em `products`) reusa
 `ISearchProductCatalog` de `products` para a busca de produto.
 
+## Relatórios / reports (flow)
+
+Tela com 4 abas (Vendas por período, Mais vendidos, Margem por produto,
+Posição de estoque), navegadas por `SSeg` na mesma rota —
+`apps/web/src/routes/_app/reports.tsx` é um wrapper fino; a implementação
+vive em `apps/web/src/presentation/flows/reports/`, por cima de
+`apps/web/src/domain|data|infra|main/*` — 5º módulo em Clean Architecture,
+ver [ADR 0009](adr/0009-clean-architecture-reports.md). Diferente dos
+outros módulos, tem uma ação de negócio real (estornar venda concluída,
+BR-05) e um modal de detalhe/reimpressão de cupom — não é só leitura
+agregada.
+
+`IVoidSale` e `ISearchSaleHistory` nascem em `domain/usecases/sale`, não em
+`reports` — os dois operam sobre o agregado `Sale` e usam permissões
+`sales.*` (`SALES_VOID`, `SALES_HISTORY`), distintas de `REPORTS_READ`.
+`IGetSalesTotal` migra de `domain/usecases/financial` para
+`domain/usecases/reports`, cumprindo o desvio deliberado registrado na
+[ADR 0006](adr/0006-clean-architecture-financial-promove-convencao.md). A
+renderização de cupom sai de `ReceiptModal` (sale) para um componente
+compartilhado, `presentation/components/CupomReceipt/`, reaproveitado pelo
+novo `SaleDetailModal` de `reports`. `IHttpClient` ganha suporte a
+`responseType: 'blob'` para a exportação CSV — antes um `fetch()` cru fora
+da abstração.
+
 ## flushPendingQuantity
 
 Função que força o envio imediato ao servidor de qualquer alteração de
@@ -117,7 +141,8 @@ e ao `products` em [ADR 0007](adr/0007-clean-architecture-products.md) —
 com módulos independentes validando o mesmo padrão, **é a convenção
 esperada** para as próximas migrações, não mais uma decisão caso a caso.
 `stock` é o 4º módulo, ver [ADR 0008](adr/0008-clean-architecture-stock.md);
-`reports` e `settings` continuam como próximos candidatos.
+`reports` é o 5º, ver [ADR 0009](adr/0009-clean-architecture-reports.md).
+`settings` continua como próximo candidato.
 
 ## `IHttpClient`
 

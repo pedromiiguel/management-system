@@ -102,3 +102,24 @@ export async function addKnownItems(
     await expect(input).toBeFocused();
   }
 }
+
+/**
+ * Monta e conclui uma venda de verdade pela UI (pagamento PIX, sem troco
+ * nem fiado — não exige caixa aberto). Usada pela suíte de `reports` (ADR
+ * 0009) para ter uma venda concluída real para os relatórios/histórico,
+ * sem criar dado em código (mesma convenção de `seed-data.ts`). Fecha o
+ * modal de recibo ao final, deixando uma venda nova em andamento.
+ */
+export async function completeKnownSale(
+  page: Page,
+  items: { code: string; quantity?: number }[],
+): Promise<void> {
+  await ensureFreshSale(page);
+  await addKnownItems(page, items);
+  await page.getByRole('button', { name: 'Pagamento PIX' }).click();
+  await page.getByRole('button', { name: 'Finalizar venda' }).click();
+  const receipt = page.getByRole('dialog', { name: 'Venda concluída ✓' });
+  await expect(receipt).toBeVisible();
+  await receipt.getByRole('button', { name: 'Nova venda (Enter)' }).click();
+  await expect(receipt).toBeHidden();
+}

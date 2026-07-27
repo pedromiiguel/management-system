@@ -1,0 +1,1 @@
+export { ProductsTab } from './ProductsTab';

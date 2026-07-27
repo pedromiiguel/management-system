@@ -98,9 +98,13 @@ export class ReportsController {
 
   private parsePeriod(from?: string, to?: string) {
     if (!from || !to) throw new BadRequestException('Informe o período (from/to)');
+    // `from`/`to` chegam como "YYYY-MM-DD" (sem hora). `new Date(from)` já
+    // parseia como meia-noite UTC; construir o fim do dia como string local
+    // ("...T23:59:59.999", sem "Z") — não com `Date#setHours` sobre um Date
+    // já em UTC — evita cortar o dia várias horas antes do fim real em fusos
+    // atrás de UTC (achado desta migração, ver ADR 0009).
     const start = new Date(from);
-    const end = new Date(to);
-    end.setHours(23, 59, 59, 999);
+    const end = new Date(`${to}T23:59:59.999`);
     return { from: start, to: end };
   }
 
