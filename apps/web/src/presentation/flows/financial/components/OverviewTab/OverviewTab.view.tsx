@@ -73,7 +73,7 @@ export function OverviewTabView({
             {dashboard?.target?.monthly ? (
               <>
                 <div className="flex justify-between items-baseline mb-2">
-                  <span className="text-[22px] font-bold text-[color:var(--sol-900)]">{targetPct}%</span>
+                  <span className="text-[22px] font-bold text-[color:var(--ink-900)]">{targetPct}%</span>
                   <span className="s-dim text-xs">
                     {formatBRL(dashboard?.revenue.month)} / {formatBRL(dashboard.target.monthly)}
                   </span>

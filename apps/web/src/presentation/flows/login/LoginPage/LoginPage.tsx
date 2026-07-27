@@ -2,7 +2,15 @@ import { useLoginPageModel } from './LoginPage.model';
 import { LoginPageView } from './LoginPage.view';
 
 export function LoginPage() {
-  const { register, errors, onSubmit, submitting, loginError } = useLoginPageModel();
+  const {
+    register,
+    errors,
+    onSubmit,
+    submitting,
+    loginError,
+    passwordVisible,
+    onTogglePasswordVisible,
+  } = useLoginPageModel();
 
   return (
     <LoginPageView
@@ -11,6 +19,8 @@ export function LoginPage() {
       onSubmit={onSubmit}
       submitting={submitting}
       loginError={loginError}
+      passwordVisible={passwordVisible}
+      onTogglePasswordVisible={onTogglePasswordVisible}
     />
   );
 }

@@ -131,7 +131,10 @@ comum (`auth`):
   `apps/web/src/presentation/flows/login/LoginPage/`, consumindo
   `domain/usecases/auth/login.ts` (`ILogin`) por cima de
   `domain|data|infra|main/*`. Única tela legada que já usava
-  `react-hook-form`+`zod` antes de qualquer migração.
+  `react-hook-form`+`zod` antes de qualquer migração. O painel de marca
+  (glow, halos, emblema, features, rodapé) é um componente MVVM próprio,
+  `presentation/flows/login/components/LoginBrandPanel/` — ver
+  [ADR 0013](adr/0013-rebrand-costas-espetos.md).
 - `apps/web/src/routes/_app.tsx` (o shell de navegação/sidebar) é um
   wrapper fino; a implementação vive em
   `apps/web/src/presentation/layout/AppShell/` (View pura, sem `domain/
@@ -143,6 +146,25 @@ comum (`auth`):
 desvio deliberado: `beforeLoad` do TanStack Router roda fora da árvore
 React, sem acesso a hooks/factories de `main`. `SessionUser` migrou para
 `domain/models/auth.ts`; `lib/auth.ts` só reexporta o tipo.
+
+## Marca / Costas's Espetos
+
+Nome canônico do produto, fixado no [ADR 0013](adr/0013-rebrand-costas-espetos.md)
+depois de aparecer com 4 grafias divergentes no código (`index.html`,
+`Sidebar.view.tsx`, `LoginPage.view.tsx`, `CLAUDE.md`). _Avoid_: "Costas
+BAR", "Distribuidora Sol", "Costa's Espetos" (apóstrofo simples) — todos
+substituídos. O emblema circular da marca (`logo.png`, pendente de upload —
+ver `apps/web/public/README.md`) só é usado no painel de marca do login
+(196px); a sidebar (92px) usa lockup tipográfico puro porque o emblema não é
+legível nesse tamanho.
+
+A paleta de cor do app (tokens em `apps/web/src/styles.css`, `--accent`/
+`--ink-900`/`--ink-800`/etc.) é responsabilidade só de `styles.css` —
+nenhum `.ts`/`.tsx` do repo contém hex literal, e os cinzas/sombras
+intermediários (`--surface-soft`, `--surface-mute`, `--surface-sunk`,
+`--line-soft`, `--track`, `--track-strong`, `--shadow-rgb`) também são
+tokens, não literais, desde o ADR 0013. Trocar a identidade visual do app é,
+por convenção, editar só o bloco `:root`.
 
 ## `src/components/` (pasta legada) → `presentation/components/`
 

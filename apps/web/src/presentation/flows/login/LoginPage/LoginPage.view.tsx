@@ -1,44 +1,52 @@
-import { Sun } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/presentation/components/Button';
+import { LoginBrandPanel } from '../components/LoginBrandPanel';
 import type { LoginPageViewProps } from './LoginPage.types';
 
-export function LoginPageView({ register, errors, onSubmit, submitting, loginError }: LoginPageViewProps) {
+export function LoginPageView({
+  register,
+  errors,
+  onSubmit,
+  submitting,
+  loginError,
+  passwordVisible,
+  onTogglePasswordVisible,
+}: LoginPageViewProps) {
   return (
     <div className="s-login">
-      <div className="s-login-brand">
-        <div className="s-login-halo" />
-        <div className="s-login-halo is-2" />
-        <div className="relative">
-          <span className="s-logo-mark w-14 h-14">
-            <Sun size={30} />
-          </span>
-          <div className="text-[30px] leading-[1.2] mt-5 font-normal">
-            Distribuidora
-            <br />
-            <b className="tracking-[4px] font-extrabold">SOL</b>
-          </div>
-          <div className="text-sm opacity-60 mt-3.5 max-w-[240px] leading-normal">
-            Vendas, estoque e financeiro num lugar só.
-          </div>
-        </div>
-        <div className="relative text-xs opacity-45">v1.0 · MVP</div>
-      </div>
+      <LoginBrandPanel />
       <div className="s-login-side">
         <form className="s-login-form" onSubmit={onSubmit}>
-          <div className="text-2xl font-extrabold text-[color:var(--sol-900)]">Bem-vindo de volta</div>
-          <div className="s-dim text-[13.5px] mt-1 mb-[26px]">Entre com sua conta para abrir o caixa.</div>
-          <div className="flex flex-col gap-4">
+          <div className="text-[25px] font-extrabold text-[color:var(--ink-900)] tracking-[-0.01em]">
+            Bem-vindo de volta
+          </div>
+          <div className="s-dim text-[13.5px] mt-[5px] mb-6">Entre com sua conta para abrir o caixa.</div>
+          <div className="flex flex-col gap-3.5">
             <div>
               <div className="s-label">Usuário</div>
-              <div className="s-input">
+              <div className="s-input is-big">
                 <input placeholder="seu login" aria-label="Usuário" autoFocus {...register('login')} />
               </div>
               {errors.login ? <div className="s-error">{errors.login.message}</div> : null}
             </div>
             <div>
               <div className="s-label">Senha</div>
-              <div className="s-input">
-                <input type="password" placeholder="••••••••" aria-label="Senha" {...register('password')} />
+              <div className="s-input is-big">
+                <input
+                  type={passwordVisible ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  aria-label="Senha"
+                  {...register('password')}
+                />
+                <button
+                  type="button"
+                  className="s-eye"
+                  onClick={onTogglePasswordVisible}
+                  aria-label={passwordVisible ? 'Ocultar senha' : 'Mostrar senha'}
+                  aria-pressed={passwordVisible}
+                >
+                  {passwordVisible ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
               </div>
               {errors.password ? <div className="s-error">{errors.password.message}</div> : null}
             </div>
@@ -47,11 +55,12 @@ export function LoginPageView({ register, errors, onSubmit, submitting, loginErr
             <Button primary big type="submit" disabled={submitting} style={{ marginTop: 8 }}>
               {submitting ? 'Entrando…' : 'Entrar'}
             </Button>
-            <span className="text-[13px] text-center text-[color:var(--accent-deep)] font-semibold">
-              Esqueci minha senha
-            </span>
           </div>
         </form>
+        {/* Sem destino por ora — canal de suporte ainda não definido (Decisão 6 do ADR 0013) */}
+        <div className="s-login-help">
+          Problemas para entrar? <b>Falar com o suporte</b>
+        </div>
       </div>
     </div>
   );

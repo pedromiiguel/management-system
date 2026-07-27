@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Management system for a beverage distributor / bar (Costas BAR): product catalog, stock, point-of-sale (PDV), customers, cash register, and financials. Domain language and UI copy are **Portuguese (pt-BR)** — keep it that way. The user-facing spec references FR-/NFR- requirement codes that appear in code comments.
+Management system for a beverage distributor / bar (Costas's Espetos): product catalog, stock, point-of-sale (PDV), customers, cash register, and financials. Domain language and UI copy are **Portuguese (pt-BR)** — keep it that way. The user-facing spec references FR-/NFR- requirement codes that appear in code comments.
 
 **Read [CONTEXT.md](CONTEXT.md) before touching sales/stock/financial code.** It's the authoritative glossary defining precise domain verbs whose distinctions are load-bearing: `Bipar` vs `Alterar quantidade`, `Remover` (item, reversible) vs `Excluir` (product) vs `Estornar` (completed sale), `Entrada` (additive stock) vs `Ajustar` (audited correction, requires reason). Using the wrong term in code or UI is a real bug.
 
