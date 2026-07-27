@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { loginSchema } from '@beverage/shared';
 import type { LoginInput } from '@/domain/models/auth';
@@ -23,6 +24,9 @@ export function useLoginPageModel() {
     formState: { errors },
   } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const togglePasswordVisible = useCallback(() => setPasswordVisible((visible) => !visible), []);
+
   const login = useLoginMutation();
 
   const submit = handleSubmit((input) => {
@@ -40,5 +44,7 @@ export function useLoginPageModel() {
     onSubmit: submit,
     submitting: login.isPending,
     loginError: login.isError ? apiErrorMessage(login.error) : null,
+    passwordVisible,
+    onTogglePasswordVisible: togglePasswordVisible,
   };
 }

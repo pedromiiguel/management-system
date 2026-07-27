@@ -1,5 +1,4 @@
 import { Link } from '@tanstack/react-router';
-import { Sun } from 'lucide-react';
 import { NAV } from './Sidebar.constants';
 import type { SidebarViewProps } from './Sidebar.types';
 
@@ -7,13 +6,11 @@ export function SidebarView({ userInitial, userName, onLogout }: SidebarViewProp
   return (
     <div className="s-sidebar">
       <div className="s-logo">
-        <span className="s-logo-mark">
-          <Sun size={20} />
-        </span>
+        {/* Lockup tipográfico: o emblema circular da marca só é legível a 196px,
+            então fica restrito ao login — ver Decisão 5 do ADR 0013. */}
         <span className="s-logo-text">
-          Costas
-          <br />
-          <b>BAR</b>
+          Costas&apos;s
+          <b>ESPETOS</b>
         </span>
       </div>
       <nav className="s-nav">

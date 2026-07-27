@@ -7,4 +7,6 @@ export type LoginPageViewProps = {
   onSubmit: () => void;
   submitting: boolean;
   loginError: string | null;
+  passwordVisible: boolean;
+  onTogglePasswordVisible: () => void;
 };
