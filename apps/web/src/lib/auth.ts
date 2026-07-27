@@ -1,13 +1,11 @@
 import type { Permission } from '@beverage/shared';
+// SessionUser é definido em @/domain/models/auth (ADR 0011) — única fonte
+// da verdade. Reexportado aqui porque este arquivo fica fora da Clean
+// Architecture (ver Decisão 3 da ADR 0011: beforeLoad do TanStack Router
+// roda fora da árvore React, sem acesso a hooks/factories de `main`).
+import type { SessionUser } from '@/domain/models/auth';
 
-export interface SessionUser {
-  id: string;
-  name: string;
-  login: string;
-  roleId: string;
-  roleName: string;
-  permissions: string[];
-}
+export type { SessionUser };
 
 const TOKEN_KEY = 'sol.token';
 const USER_KEY = 'sol.user';

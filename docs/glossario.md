@@ -119,6 +119,31 @@ Depois desta rodada, os 6 módulos legados
 (`sale`/`financial`/`products`/`stock`/`reports`/`settings`) estão todos em
 Clean Architecture — não há mais candidato conhecido pendente de migração.
 
+## Login / auth (flow) e shell de navegação (layout)
+
+7º módulo, fora da lista original de 6 — ver
+[ADR 0011](adr/0011-clean-architecture-auth.md). Duas unidades de
+apresentação distintas (não compartilham rota nem tela), um domínio
+comum (`auth`):
+
+- `apps/web/src/routes/login.tsx` é um wrapper fino (mantém
+  `validateSearch`/`beforeLoad`, configuração de rota); a tela vive em
+  `apps/web/src/presentation/flows/login/LoginPage/`, consumindo
+  `domain/usecases/auth/login.ts` (`ILogin`) por cima de
+  `domain|data|infra|main/*`. Única tela legada que já usava
+  `react-hook-form`+`zod` antes de qualquer migração.
+- `apps/web/src/routes/_app.tsx` (o shell de navegação/sidebar) é um
+  wrapper fino; a implementação vive em
+  `apps/web/src/presentation/layout/AppShell/` (View pura, sem `domain/
+  data/main` próprios — não há chamada de API por trás, só `clearSession()`
+  local) + `AppShell/components/Sidebar/` (MVVM completo).
+
+`lib/auth.ts` (`getToken`/`setSession`/`clearSession`/`isAuthenticated`/
+`hasPermission`, sobre `localStorage`) **fica fora da Clean Architecture** —
+desvio deliberado: `beforeLoad` do TanStack Router roda fora da árvore
+React, sem acesso a hooks/factories de `main`. `SessionUser` migrou para
+`domain/models/auth.ts`; `lib/auth.ts` só reexporta o tipo.
+
 ## flushPendingQuantity
 
 Função que força o envio imediato ao servidor de qualquer alteração de
@@ -175,7 +200,9 @@ esperada** para as próximas migrações, não mais uma decisão caso a caso.
 `reports` é o 5º, ver [ADR 0009](adr/0009-clean-architecture-reports.md).
 `settings` é o 6º e último módulo da lista original de módulos legados, ver
 [ADR 0010](adr/0010-clean-architecture-settings.md). Depois dela, não há
-mais módulo legado conhecido pendente de migração.
+mais módulo legado conhecido pendente de migração — mas o usuário optou por
+estender o escopo: `login.tsx`/`_app.tsx` (nunca fizeram parte da lista
+original) viraram o 7º módulo, ver [ADR 0011](adr/0011-clean-architecture-auth.md).
 
 ## `IHttpClient`
 
