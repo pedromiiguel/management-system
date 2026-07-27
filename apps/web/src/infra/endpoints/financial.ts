@@ -1,8 +1,5 @@
 export const financialEndpoints = {
   dashboard: () => '/financial/dashboard',
-  // Pertence conceitualmente ao domínio de reports (fora de escopo — ver
-  // "desvio deliberado" no ADR 0006), não ao de financial.
-  salesTotal: () => '/reports/sales',
   cashRegisterCurrent: () => '/cash-register/current',
   cashRegisterHistory: () => '/cash-register/history',
   cashRegisterOpen: () => '/cash-register/open',

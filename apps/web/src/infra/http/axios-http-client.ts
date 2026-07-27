@@ -11,6 +11,7 @@ export class AxiosHttpClient implements IHttpClient {
       params: data.queryParams,
       data: data.body,
       headers: data.headers,
+      responseType: data.responseType === 'blob' ? 'blob' : 'json',
     });
     return { statusCode: response.status, body: response.data };
   }

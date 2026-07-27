@@ -9,6 +9,7 @@ import {
   makeOpenSale,
   makeSetSaleDiscount,
   makeUpdateSaleItemQuantity,
+  makeVoidSale,
 } from '@/main/factories/handlers/sale';
 
 export function useOpenSaleMutation() {
@@ -56,4 +57,8 @@ export function useCompleteSaleMutation() {
 
 export function useCreateCustomerMutation() {
   return useMutation({ mutationFn: (name: string) => makeCreateCustomer().create(name) });
+}
+
+export function useVoidSaleMutation() {
+  return useMutation({ mutationFn: (saleId: string) => makeVoidSale().void(saleId) });
 }

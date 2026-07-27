@@ -1,7 +1,7 @@
 import { useQueries } from '@tanstack/react-query';
 import { toDateInput } from '@/lib/format';
-import { makeGetSalesTotal } from '@/main/factories/handlers/financial';
 import { useFinancialDashboardQuery } from '@/main/factories/queries/financial';
+import { makeGetSalesTotal } from '@/main/factories/handlers/reports';
 
 const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 

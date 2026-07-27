@@ -6,7 +6,7 @@ export type ReceiptModalProps = {
 };
 
 export type ReceiptModalViewProps = {
-  receipt: string;
+  sale: Sale;
   onPrint: () => void;
   onClose: () => void;
 };
