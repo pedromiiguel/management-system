@@ -1,5 +1,7 @@
 import { Screen } from '@/presentation/components/Screen';
-import { SBtn, SChip, SSeg } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Chip } from '@/presentation/components/Chip';
+import { SegmentedControl } from '@/presentation/components/SegmentedControl';
 import { ProductsTab } from '../components/ProductsTab';
 import { SalesTab } from '../components/SalesTab';
 import { StockTab } from '../components/StockTab';
@@ -33,7 +35,7 @@ export function ReportsPageView({
   return (
     <Screen title="Relatórios">
       <div className="flex flex-col gap-3 h-full">
-        <SSeg<ReportsTab> items={TABS} active={tab} onChange={onChangeTab} />
+        <SegmentedControl<ReportsTab> items={TABS} active={tab} onChange={onChangeTab} />
         {tab !== 'stock' && (
           <div className="flex gap-2.5 items-end">
             <div>
@@ -49,24 +51,24 @@ export function ReportsPageView({
               </div>
             </div>
             {CHIPS.map((c) => (
-              <SChip key={c.id} active={chip === c.id} onClick={() => onApplyChip(c.id)}>
+              <Chip key={c.id} active={chip === c.id} onClick={() => onApplyChip(c.id)}>
                 {c.label}
-              </SChip>
+              </Chip>
             ))}
             <span className="flex-1" />
-            <SBtn ghost disabled={isExportingCsv} onClick={onExportCsv}>
+            <Button ghost disabled={isExportingCsv} onClick={onExportCsv}>
               Exportar CSV
-            </SBtn>
-            <SBtn ghost onClick={() => window.print()}>
+            </Button>
+            <Button ghost onClick={() => window.print()}>
               Exportar PDF
-            </SBtn>
+            </Button>
           </div>
         )}
         {tab === 'stock' && (
           <div className="flex justify-end">
-            <SBtn ghost disabled={isExportingCsv} onClick={onExportCsv}>
+            <Button ghost disabled={isExportingCsv} onClick={onExportCsv}>
               Exportar CSV
-            </SBtn>
+            </Button>
           </div>
         )}
 

@@ -1,5 +1,9 @@
 import { PAYMENT_METHOD_LABELS } from '@beverage/shared';
-import { SBars, SCard, SDre, SProgress, SStat } from '@/components/sol';
+import { BarChart } from '@/presentation/components/BarChart';
+import { Card } from '@/presentation/components/Card';
+import { DreLine } from '@/presentation/components/DreLine';
+import { ProgressBar } from '@/presentation/components/ProgressBar';
+import { StatCard } from '@/presentation/components/StatCard';
 import { formatBRL } from '@/lib/format';
 import type { OverviewTabViewProps } from './OverviewTab.types';
 
@@ -13,13 +17,13 @@ export function OverviewTabView({
   return (
     <>
       <div className="flex gap-3">
-        <SStat
+        <StatCard
           label="Faturamento (mês)"
           value={formatBRL(dashboard?.revenue.month)}
           sub={`acumulado no ano: ${formatBRL(dashboard?.revenue.year)}`}
         />
-        <SStat label="Vendas (hoje)" value={formatBRL(dashboard?.revenue.day)} sub="receita bruta do dia" />
-        <SStat
+        <StatCard label="Vendas (hoje)" value={formatBRL(dashboard?.revenue.day)} sub="receita bruta do dia" />
+        <StatCard
           label="Resultado (mês)"
           value={formatBRL(dashboard?.result.profit)}
           sub="receita − CMV − despesas"
@@ -27,26 +31,26 @@ export function OverviewTabView({
         />
       </div>
       <div className="grid grid-cols-[1fr_350px] gap-3 flex-1 min-h-0">
-        <SCard className="flex flex-col overflow-auto">
+        <Card className="flex flex-col overflow-auto">
           <div className="s-card-title">
             Faturamento mês a mês <span className="s-dim font-normal">(R$)</span>
           </div>
-          <SBars values={monthTotals} labels={monthLabels} height={150} hl={5} />
+          <BarChart values={monthTotals} labels={monthLabels} height={150} hl={5} />
           <div className="s-divider my-3.5" />
           <div className="s-card-title mb-1.5">Resultado do período</div>
-          <SDre op="" label="Receita bruta de vendas" value={formatBRL(dashboard?.result.revenue)} />
-          <SDre op="−" label="Custo das mercadorias vendidas (CMV)" value={formatBRL(dashboard?.result.cogs)} />
-          <SDre
+          <DreLine op="" label="Receita bruta de vendas" value={formatBRL(dashboard?.result.revenue)} />
+          <DreLine op="−" label="Custo das mercadorias vendidas (CMV)" value={formatBRL(dashboard?.result.cogs)} />
+          <DreLine
             op="="
             label="Margem bruta"
             value={formatBRL(Number(dashboard?.result.revenue ?? 0) - Number(dashboard?.result.cogs ?? 0))}
             strong
           />
-          <SDre op="−" label="Despesas operacionais" value={formatBRL(dashboard?.result.expenses)} />
-          <SDre op="=" label="Resultado líquido" value={formatBRL(dashboard?.result.profit)} strong accent />
-        </SCard>
+          <DreLine op="−" label="Despesas operacionais" value={formatBRL(dashboard?.result.expenses)} />
+          <DreLine op="=" label="Resultado líquido" value={formatBRL(dashboard?.result.profit)} strong accent />
+        </Card>
         <div className="flex flex-col gap-3 min-h-0 overflow-auto">
-          <SCard>
+          <Card>
             <div className="s-card-title">Recebimentos por forma de pagamento</div>
             {(dashboard?.byMethodMonth ?? []).map((m) => {
               const pct = totalByMethod > 0 ? (Number(m.total) / totalByMethod) * 100 : 0;
@@ -56,15 +60,15 @@ export function OverviewTabView({
                     <span>{PAYMENT_METHOD_LABELS[m.paymentMethod]}</span>
                     <b>{formatBRL(m.total)}</b>
                   </div>
-                  <SProgress pct={pct} height={8} />
+                  <ProgressBar pct={pct} height={8} />
                 </div>
               );
             })}
             {(dashboard?.byMethodMonth ?? []).length === 0 ? (
               <div className="s-dim text-xs">Sem vendas no mês ainda.</div>
             ) : null}
-          </SCard>
-          <SCard className="flex-1">
+          </Card>
+          <Card className="flex-1">
             <div className="s-card-title">Meta de faturamento</div>
             {dashboard?.target?.monthly ? (
               <>
@@ -74,7 +78,7 @@ export function OverviewTabView({
                     {formatBRL(dashboard?.revenue.month)} / {formatBRL(dashboard.target.monthly)}
                   </span>
                 </div>
-                <SProgress pct={targetPct ?? 0} height={12} />
+                <ProgressBar pct={targetPct ?? 0} height={12} />
                 <div className="s-dim text-xs mt-2.5">
                   {Number(dashboard?.revenue.month ?? 0) >= Number(dashboard.target.monthly)
                     ? 'Meta do mês atingida 🎉'
@@ -86,7 +90,7 @@ export function OverviewTabView({
                 Meta não configurada — defina em Configurações (opcional, FR-36).
               </div>
             )}
-          </SCard>
+          </Card>
         </div>
       </div>
     </>

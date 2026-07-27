@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/components/sol';
+import { useToast } from '@/presentation/components/Toast';
 import { apiErrorMessage } from '@/lib/api';
 import { useOpenCashRegisterMutation } from '@/main/factories/mutations/financial';
 import { useCashRegisterHistoryQuery, useCurrentCashRegisterQuery } from '@/main/factories/queries/financial';

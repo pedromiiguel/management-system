@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/components/sol';
+import { useToast } from '@/presentation/components/Toast';
 import type { Role } from '@/domain/models/users';
 import { apiErrorMessage } from '@/lib/api';
 import { useUpdateRoleMutation } from '@/main/factories/mutations/users';

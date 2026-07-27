@@ -1,4 +1,6 @@
-import { SBtn, SChip, SModal } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Chip } from '@/presentation/components/Chip';
+import { Modal } from '@/presentation/components/Modal';
 import type { DiscountModalViewProps } from './DiscountModal.types';
 
 export function DiscountModalView({
@@ -12,33 +14,33 @@ export function DiscountModalView({
   onClose,
 }: DiscountModalViewProps) {
   return (
-    <SModal title="Desconto na venda (F4)" onClose={onClose} width={380}>
+    <Modal title="Desconto na venda (F4)" onClose={onClose} width={380}>
       <form onSubmit={onSubmit}>
         <div className="flex gap-2 mb-2.5">
-          <SChip active={selectedType === 'AMOUNT'} onClick={() => onSelectType('AMOUNT')}>
+          <Chip active={selectedType === 'AMOUNT'} onClick={() => onSelectType('AMOUNT')}>
             Valor (R$)
-          </SChip>
-          <SChip active={selectedType === 'PERCENT'} onClick={() => onSelectType('PERCENT')}>
+          </Chip>
+          <Chip active={selectedType === 'PERCENT'} onClick={() => onSelectType('PERCENT')}>
             Percentual (%)
-          </SChip>
+          </Chip>
         </div>
         <div className="s-input">
           <input autoFocus placeholder={placeholder} {...register('raw')} />
         </div>
         <div className="flex gap-2 justify-between mt-3.5">
-          <SBtn ghost onClick={onRemove}>
+          <Button ghost onClick={onRemove}>
             Remover desconto
-          </SBtn>
+          </Button>
           <div className="flex gap-2">
-            <SBtn ghost onClick={onClose}>
+            <Button ghost onClick={onClose}>
               Voltar
-            </SBtn>
-            <SBtn primary type="submit" disabled={!canApply}>
+            </Button>
+            <Button primary type="submit" disabled={!canApply}>
               Aplicar
-            </SBtn>
+            </Button>
           </div>
         </div>
       </form>
-    </SModal>
+    </Modal>
   );
 }

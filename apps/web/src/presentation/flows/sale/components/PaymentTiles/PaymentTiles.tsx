@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { SKbd } from '@/components/sol';
+import { Kbd } from '@/presentation/components/Kbd';
 import { PAYMENT_TILES } from './PaymentTiles.constants';
 import type { PaymentTilesProps } from './PaymentTiles.types';
 
@@ -16,7 +16,7 @@ export function PaymentTiles({ payment, onSelectPayment }: PaymentTilesProps) {
           aria-pressed={payment === method}
         >
           <b>{label}</b>
-          <SKbd>{key}</SKbd>
+          <Kbd>{key}</Kbd>
         </button>
       ))}
     </div>

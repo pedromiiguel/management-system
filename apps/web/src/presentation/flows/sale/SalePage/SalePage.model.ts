@@ -11,8 +11,8 @@ import type {
 } from '@/domain/models/sale';
 import { useSaleFlow } from '@/main/factories/flows/use-sale-flow';
 import { useSearchProductsQuery } from '@/main/factories/queries/sale';
-import { useToast } from '@/components/sol';
-import { Confirm } from '@/components/confirm';
+import { useToast } from '@/presentation/components/Toast';
+import { Confirm } from '@/presentation/components/Confirm';
 import { apiErrorMessage } from '@/lib/api';
 import { formatBRL, maskBRL, parseMoney } from '@/lib/format';
 import { useQuantityDebounce } from '../hooks/use-quantity-debounce';

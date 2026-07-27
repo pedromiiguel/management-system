@@ -1,5 +1,7 @@
 import { CASH_MOVEMENT_LABELS, CashMovementType } from '@beverage/shared';
-import { SBtn, SChip, SModal } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Chip } from '@/presentation/components/Chip';
+import { Modal } from '@/presentation/components/Modal';
 import type { CashMoveModalViewProps } from './CashMoveModal.types';
 
 const MOVEMENT_TYPES = [CashMovementType.PULL, CashMovementType.FLOAT, CashMovementType.OUTFLOW] as const;
@@ -18,12 +20,12 @@ export function CashMoveModalView({
   onClose,
 }: CashMoveModalViewProps) {
   return (
-    <SModal title="Movimento de caixa" onClose={onClose} width={420}>
+    <Modal title="Movimento de caixa" onClose={onClose} width={420}>
       <div className="flex gap-2 mb-3">
         {MOVEMENT_TYPES.map((t) => (
-          <SChip key={t} active={type === t} onClick={() => onChangeType(t)}>
+          <Chip key={t} active={type === t} onClick={() => onChangeType(t)}>
             {CASH_MOVEMENT_LABELS[t]}
-          </SChip>
+          </Chip>
         ))}
       </div>
       <div className="s-label">Valor (R$)</div>
@@ -46,9 +48,9 @@ export function CashMoveModalView({
         />
       </div>
       <div className="flex gap-2 justify-end mt-3.5">
-        <SBtn ghost onClick={onClose}>Voltar</SBtn>
-        <SBtn primary disabled={!valid || saving} onClick={onSubmit}>Registrar</SBtn>
+        <Button ghost onClick={onClose}>Voltar</Button>
+        <Button primary disabled={!valid || saving} onClick={onSubmit}>Registrar</Button>
       </div>
-    </SModal>
+    </Modal>
   );
 }

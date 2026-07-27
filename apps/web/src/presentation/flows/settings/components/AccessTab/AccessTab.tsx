@@ -1,5 +1,6 @@
 import { ALL_PERMISSIONS, PERMISSION_LABELS, type Permission } from '@beverage/shared';
-import { SCheck, STag } from '@/components/sol';
+import { Checkbox } from '@/presentation/components/Checkbox';
+import { Tag } from '@/presentation/components/Tag';
 import { useAccessTabModel } from './AccessTab.model';
 import { AccessTabView } from './AccessTab.view';
 import type { PermissionRow, UserRowView } from './AccessTab.types';
@@ -21,10 +22,10 @@ export function AccessTab() {
     key: u.id,
     cells: [
       `${u.name} (${u.login})`,
-      <STag key="r" tone="accent">
+      <Tag key="r" tone="accent">
         {u.role.name}
-      </STag>,
-      <SCheck key="a" on={u.active} />,
+      </Tag>,
+      <Checkbox key="a" on={u.active} />,
     ],
   }));
 

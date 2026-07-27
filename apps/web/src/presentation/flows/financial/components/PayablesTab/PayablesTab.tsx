@@ -1,4 +1,5 @@
-import { SBtn, STag } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Tag } from '@/presentation/components/Tag';
 import { formatBRL, formatDate } from '@/lib/format';
 import { usePayablesTabModel } from './PayablesTab.model';
 import { PayablesTabView } from './PayablesTab.view';
@@ -15,9 +16,9 @@ export function PayablesTab() {
         p.description,
         p.supplier ?? '—',
         p.category?.name ?? '—',
-        overdue ? <STag key="d" tone="danger">{formatDate(p.dueDate)}</STag> : formatDate(p.dueDate),
+        overdue ? <Tag key="d" tone="danger">{formatDate(p.dueDate)}</Tag> : formatDate(p.dueDate),
         <b key="v">{formatBRL(p.amount)}</b>,
-        <SBtn key="b" ghost onClick={() => pay(p.id)}>Pagar</SBtn>,
+        <Button key="b" ghost onClick={() => pay(p.id)}>Pagar</Button>,
       ],
     };
   });

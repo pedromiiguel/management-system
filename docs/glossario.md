@@ -144,6 +144,32 @@ desvio deliberado: `beforeLoad` do TanStack Router roda fora da árvore
 React, sem acesso a hooks/factories de `main`. `SessionUser` migrou para
 `domain/models/auth.ts`; `lib/auth.ts` só reexporta o tipo.
 
+## `src/components/` (pasta legada) → `presentation/components/`
+
+`apps/web/src/components/` (`sol.tsx` — 16 primitivas de design system +
+`SolIcon`/`IconName`; `confirm.tsx`) ficava fora da Clean Architecture, sem
+convenção de pasta MVVM. Migrada por completo em
+[ADR 0012](adr/0012-migracao-sol-lucide.md): as 16 primitivas viram pastas
+MVVM próprias em `presentation/components/` com nomes renomeados (`SBtn`→
+`Button`, `SCard`→`Card`, `SModal`→`Modal`, `STable`→`Table`, `SIconBtn`→
+`IconButton`, `STag`→`Tag`, `SChip`→`Chip`, `SStat`→`StatCard`, `SKbd`→
+`Kbd`, `SCheck`→`Checkbox`, `SSeg`→`SegmentedControl`, `SToggle`→`Toggle`,
+`SBars`→`BarChart`, `SDre`→`DreLine`, `SProgress`→`ProgressBar`;
+`ToastProvider`/`useToast` mantêm o nome); `confirm.tsx` vira
+`presentation/components/Confirm/`. `SolIcon`/`IconName` são removidos por
+completo (inclusive dos ícones de marca da sidebar/login, que o
+[ADR 0011](adr/0011-clean-architecture-auth.md) havia deliberadamente
+poupado) — todo ícone do app passa a vir de `lucide-react`. `src/components/`
+deixa de existir. Esta rodada também move `CupomReceipt`/`Screen` (já em
+`presentation/components/`, mas soltos) para pastas MVVM próprias.
+
+Convenção local desta rodada, diferente do padrão geral de
+`componentes-mvvm.md`: todo componente ganha ViewModel (`.tsx`) + View
+(`.view.tsx`) **separados**, mesmo sem lógica nenhuma — não usa o colapso em
+arquivo único que a doc permite para componente puramente apresentacional.
+Só `Toast/` (antigo `ToastProvider`/`useToast`) tem `.model.ts` de fato, por
+ser o único com estado real.
+
 ## flushPendingQuantity
 
 Função que força o envio imediato ao servidor de qualquer alteração de
@@ -203,6 +229,9 @@ esperada** para as próximas migrações, não mais uma decisão caso a caso.
 mais módulo legado conhecido pendente de migração — mas o usuário optou por
 estender o escopo: `login.tsx`/`_app.tsx` (nunca fizeram parte da lista
 original) viraram o 7º módulo, ver [ADR 0011](adr/0011-clean-architecture-auth.md).
+`src/components/` (pasta legada com o design system e o diálogo de
+confirmação) migrou por completo para `presentation/components/` em
+[ADR 0012](adr/0012-migracao-sol-lucide.md).
 
 ## `IHttpClient`
 

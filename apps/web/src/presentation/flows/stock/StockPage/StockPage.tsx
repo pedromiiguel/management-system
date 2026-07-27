@@ -1,4 +1,4 @@
-import { STag } from '@/components/sol';
+import { Tag } from '@/presentation/components/Tag';
 import { formatDate, formatDateTime } from '@/lib/format';
 import { SOURCE_LABELS } from './StockPage.constants';
 import { useStockPageModel } from './StockPage.model';
@@ -17,9 +17,9 @@ export function StockPage() {
         {m.note ? <span className="s-dim"> — {m.note}</span> : null}
       </span>,
       m.type === 'ENTRY' ? (
-        <STag key="t" tone="ok">entrada</STag>
+        <Tag key="t" tone="ok">entrada</Tag>
       ) : (
-        <STag key="t" tone="dim">saída</STag>
+        <Tag key="t" tone="dim">saída</Tag>
       ),
       SOURCE_LABELS[m.source],
       <b key="q">{m.type === 'ENTRY' ? '+' : '−'}{m.quantity}</b>,
@@ -36,7 +36,7 @@ export function StockPage() {
     cells: [
       b.product.name,
       b.batch ?? '—',
-      <STag key="v" tone="warn">{formatDate(b.expiresAt)}</STag>,
+      <Tag key="v" tone="warn">{formatDate(b.expiresAt)}</Tag>,
       b.quantity,
     ],
   }));

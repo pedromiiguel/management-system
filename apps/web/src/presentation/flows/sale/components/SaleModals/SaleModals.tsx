@@ -1,4 +1,5 @@
-import { SBtn, SModal } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Modal } from '@/presentation/components/Modal';
 import { CustomerModal } from '../CustomerModal';
 import { DiscountModal } from '../DiscountModal';
 import { ReceiptModal } from '../ReceiptModal';
@@ -26,19 +27,19 @@ export function SaleModals({
   }
   if (modal.kind === 'confirm-cancel') {
     return (
-      <SModal title="Cancelar venda em andamento?" onClose={onConfirmCancelClose}>
+      <Modal title="Cancelar venda em andamento?" onClose={onConfirmCancelClose}>
         <div className="s-dim text-[13.5px] mb-4">
           Os itens bipados serão descartados. Nenhum estoque ou valor foi movimentado (FR-21).
         </div>
         <div className="flex gap-2 justify-end">
-          <SBtn ghost onClick={onConfirmCancelClose}>
+          <Button ghost onClick={onConfirmCancelClose}>
             Voltar
-          </SBtn>
-          <SBtn danger onClick={onCancelSale}>
+          </Button>
+          <Button danger onClick={onCancelSale}>
             Cancelar venda
-          </SBtn>
+          </Button>
         </div>
-      </SModal>
+      </Modal>
     );
   }
   if (modal.kind === 'receipt') {

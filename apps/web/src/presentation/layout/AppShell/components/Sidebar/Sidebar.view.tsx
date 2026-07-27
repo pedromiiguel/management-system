@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { SolIcon } from '@/components/sol';
+import { Sun } from 'lucide-react';
 import { NAV } from './Sidebar.constants';
 import type { SidebarViewProps } from './Sidebar.types';
 
@@ -8,7 +8,7 @@ export function SidebarView({ userInitial, userName, onLogout }: SidebarViewProp
     <div className="s-sidebar">
       <div className="s-logo">
         <span className="s-logo-mark">
-          <SolIcon name="sun" size={20} />
+          <Sun size={20} />
         </span>
         <span className="s-logo-text">
           Costas
@@ -24,7 +24,7 @@ export function SidebarView({ userInitial, userName, onLogout }: SidebarViewProp
             className="s-nav-item"
             activeProps={{ className: 's-nav-item is-active' }}
           >
-            <SolIcon name={item.icon} />
+            <item.icon size={17} />
             <span>{item.label}</span>
           </Link>
         ))}

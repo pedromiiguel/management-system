@@ -1,5 +1,8 @@
 import { clsx } from 'clsx';
-import { SCard, SIconBtn, STable } from '@/components/sol';
+import { Trash2 } from 'lucide-react';
+import { Card } from '@/presentation/components/Card';
+import { IconButton } from '@/presentation/components/IconButton';
+import { Table } from '@/presentation/components/Table';
 import { formatBRL } from '@/lib/format';
 import { QtyStepper } from '../QtyStepper';
 import type { SaleItemsCardProps } from './SaleItemsCard.types';
@@ -16,8 +19,8 @@ export function SaleItemsCard({
   onRemoveItem,
 }: SaleItemsCardProps) {
   return (
-    <SCard pad={8} className="flex flex-col flex-1 min-h-0 overflow-auto">
-      <STable
+    <Card pad={8} className="flex flex-col flex-1 min-h-0 overflow-auto">
+      <Table
         cols={['#', 'Produto', 'Qtd', 'Unit.', 'Subtotal', '']}
         widths="40px 1fr 108px 100px 110px 44px"
         align={[null, null, 'center', 'right', 'right', 'center']}
@@ -48,9 +51,9 @@ export function SaleItemsCard({
               <b key="s" data-testid={`sale-item-${item.id}-subtotal`}>
                 {formatBRL(item.unitPrice * quantity)}
               </b>,
-              <SIconBtn
+              <IconButton
                 key="del"
-                icon="trash"
+                icon={Trash2}
                 danger
                 title="Remover item"
                 onClick={(event) => {
@@ -67,6 +70,6 @@ export function SaleItemsCard({
         Bipar o mesmo produto soma a quantidade · use +/- ou digite pra alterar a quantidade ·{' '}
         <b>Del</b> remove o item selecionado
       </div>
-    </SCard>
+    </Card>
   );
 }

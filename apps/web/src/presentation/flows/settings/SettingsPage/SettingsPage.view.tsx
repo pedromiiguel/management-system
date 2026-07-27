@@ -1,5 +1,5 @@
 import { Screen } from '@/presentation/components/Screen';
-import { SSeg } from '@/components/sol';
+import { SegmentedControl } from '@/presentation/components/SegmentedControl';
 import { AccessTab } from '../components/AccessTab';
 import { CategoriesTab } from '../components/CategoriesTab';
 import { GeneralTab } from '../components/GeneralTab';
@@ -15,7 +15,7 @@ export function SettingsPageView({ tab, onChangeTab, title }: SettingsPageViewPr
   return (
     <Screen title={title}>
       <div className="flex flex-col gap-3 h-full">
-        <SSeg<SettingsTab> items={TABS} active={tab} onChange={onChangeTab} />
+        <SegmentedControl<SettingsTab> items={TABS} active={tab} onChange={onChangeTab} />
         {tab === 'general' ? <GeneralTab /> : null}
         {tab === 'access' ? <AccessTab /> : null}
         {tab === 'categories' ? <CategoriesTab /> : null}

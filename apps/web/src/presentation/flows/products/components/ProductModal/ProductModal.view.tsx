@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { SBtn, SModal } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Modal } from '@/presentation/components/Modal';
 import type { ProductModalViewProps } from './ProductModal.types';
 
 function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
@@ -23,7 +24,7 @@ export function ProductModalView({
   onClose,
 }: ProductModalViewProps) {
   return (
-    <SModal title={product ? `Editar — ${product.name}` : 'Novo produto'} onClose={onClose} width={520}>
+    <Modal title={product ? `Editar — ${product.name}` : 'Novo produto'} onClose={onClose} width={520}>
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <Field label="Nome" error={errors.name?.message}>
           <input autoFocus data-testid="product-name" {...register('name')} />
@@ -97,20 +98,20 @@ export function ProductModalView({
         )}
         <div className="flex gap-2 justify-between mt-1">
           {product ? (
-            <SBtn ghost danger onClick={onDeactivate}>
+            <Button ghost danger onClick={onDeactivate}>
               {product.active ? 'Desativar' : 'Produto inativo'}
-            </SBtn>
+            </Button>
           ) : (
             <span />
           )}
           <div className="flex gap-2">
-            <SBtn ghost onClick={onClose}>Voltar</SBtn>
-            <SBtn primary type="submit" disabled={saving}>
+            <Button ghost onClick={onClose}>Voltar</Button>
+            <Button primary type="submit" disabled={saving}>
               {saving ? 'Salvando…' : 'Salvar'}
-            </SBtn>
+            </Button>
           </div>
         </div>
       </form>
-    </SModal>
+    </Modal>
   );
 }

@@ -1,6 +1,9 @@
 import { Search } from 'lucide-react';
 import { Screen } from '@/presentation/components/Screen';
-import { SBtn, SCard, SChip, STable } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Card } from '@/presentation/components/Card';
+import { Chip } from '@/presentation/components/Chip';
+import { Table } from '@/presentation/components/Table';
 import { ProductModal } from '../components/ProductModal';
 import { StockEntryModal } from '@/presentation/flows/stock/components/StockEntryModal';
 import type { ProductsPageViewProps } from './ProductsPage.types';
@@ -29,8 +32,8 @@ export function ProductsPageView({
       title="Produtos & Estoque"
       topRight={
         <>
-          <SBtn ghost onClick={onOpenNewEntry}>Entrada de estoque</SBtn>
-          <SBtn primary onClick={onOpenNewProduct}>+ Novo produto</SBtn>
+          <Button ghost onClick={onOpenNewEntry}>Entrada de estoque</Button>
+          <Button primary onClick={onOpenNewProduct}>+ Novo produto</Button>
         </>
       }
     >
@@ -44,36 +47,36 @@ export function ProductsPageView({
               placeholder="Buscar por nome, SKU ou código de barras…"
             />
           </div>
-          <SChip active={filter === 'all'} onClick={() => onChangeFilter('all')}>
+          <Chip active={filter === 'all'} onClick={() => onChangeFilter('all')}>
             Todos · {total}
-          </SChip>
-          <SChip active={filter === 'active'} onClick={() => onChangeFilter('active')}>Ativos</SChip>
-          <SChip active={filter === 'low'} onClick={() => onChangeFilter('low')}>
+          </Chip>
+          <Chip active={filter === 'active'} onClick={() => onChangeFilter('active')}>Ativos</Chip>
+          <Chip active={filter === 'low'} onClick={() => onChangeFilter('low')}>
             Estoque baixo · {lowCount}
-          </SChip>
-          <SChip active={filter === 'expiring'} onClick={() => onChangeFilter('expiring')}>
+          </Chip>
+          <Chip active={filter === 'expiring'} onClick={() => onChangeFilter('expiring')}>
             Vencimento próximo · {expiringCount}
-          </SChip>
+          </Chip>
         </div>
 
-        <SCard pad={8} className="flex-1 min-h-0 overflow-auto">
-          <STable
+        <Card pad={8} className="flex-1 min-h-0 overflow-auto">
+          <Table
             cols={['SKU', 'Código de barras', 'Produto', 'Preço venda', 'Estoque', 'Mín.', 'Situação', 'Ações']}
             widths="80px 140px 1fr 110px 80px 60px 150px 60px"
             align={[null, null, null, 'right', 'center', 'center', null, 'center']}
             dense
             rows={rows}
           />
-        </SCard>
+        </Card>
 
         <div className="flex justify-between items-center">
           <span className="s-dim text-[12.5px]">
             Produtos com venda registrada não são excluídos — apenas desativados.
           </span>
           <span className="flex gap-1.5 items-center">
-            <SBtn ghost disabled={page <= 1} onClick={onPrevPage}>‹</SBtn>
+            <Button ghost disabled={page <= 1} onClick={onPrevPage}>‹</Button>
             <span className="s-dim text-[13px]">página {page}</span>
-            <SBtn ghost disabled={!hasNextPage} onClick={onNextPage}>›</SBtn>
+            <Button ghost disabled={!hasNextPage} onClick={onNextPage}>›</Button>
           </span>
         </div>
       </div>

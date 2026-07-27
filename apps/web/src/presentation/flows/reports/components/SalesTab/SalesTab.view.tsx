@@ -1,4 +1,9 @@
-import { SBars, SBtn, SCard, SModal, SStat, STable } from '@/components/sol';
+import { BarChart } from '@/presentation/components/BarChart';
+import { Button } from '@/presentation/components/Button';
+import { Card } from '@/presentation/components/Card';
+import { Modal } from '@/presentation/components/Modal';
+import { StatCard } from '@/presentation/components/StatCard';
+import { Table } from '@/presentation/components/Table';
 import { SaleDetailModal } from './components/SaleDetailModal';
 import type { SalesTabViewProps } from './SalesTab.types';
 
@@ -21,21 +26,21 @@ export function SalesTabView({
   return (
     <>
       <div className="flex gap-3">
-        <SStat label="Receita no período" value={revenue} sub="produtos, líquida de taxa de serviço" />
-        <SStat label="Taxa de serviço" value={serviceFeeTotal} sub="10% — fica com a casa" />
-        <SStat label="Nº de vendas" value={count} />
-        <SStat label="Ticket médio" value={ticket} />
-        <SStat label="Canceladas" value={cancelled} sub="estoque estornado automaticamente" />
+        <StatCard label="Receita no período" value={revenue} sub="produtos, líquida de taxa de serviço" />
+        <StatCard label="Taxa de serviço" value={serviceFeeTotal} sub="10% — fica com a casa" />
+        <StatCard label="Nº de vendas" value={count} />
+        <StatCard label="Ticket médio" value={ticket} />
+        <StatCard label="Canceladas" value={cancelled} sub="estoque estornado automaticamente" />
       </div>
-      <SCard>
+      <Card>
         <div className="s-card-title">
           Receita por dia <span className="s-dim font-normal">(R$)</span>
         </div>
-        <SBars values={dayValues} labels={dayLabels} height={110} hl={dayValues.length - 1} />
+        <BarChart values={dayValues} labels={dayLabels} height={110} hl={dayValues.length - 1} />
         {dayValues.length === 0 && <div className="s-dim text-[12.5px]">Sem vendas no período.</div>}
-      </SCard>
-      <SCard pad={8} className="flex-1 min-h-0 overflow-auto">
-        <STable
+      </Card>
+      <Card pad={8} className="flex-1 min-h-0 overflow-auto">
+        <Table
           cols={['Data/hora', 'Venda', 'Itens', 'Pagamento', 'NF', 'Total', '']}
           widths="130px 90px 60px 1fr 60px 110px 100px"
           align={[null, null, 'center', null, 'center', 'right', 'right']}
@@ -43,21 +48,21 @@ export function SalesTabView({
           emptyText="Nenhuma venda no período"
           rows={rows}
         />
-      </SCard>
+      </Card>
       {detail && <SaleDetailModal sale={detail} onClose={onCloseDetail} />}
       {voiding && (
-        <SModal title={`Estornar venda #${voiding.id.slice(-6).toUpperCase()}?`} onClose={onCancelVoid}>
+        <Modal title={`Estornar venda #${voiding.id.slice(-6).toUpperCase()}?`} onClose={onCancelVoid}>
           <div className="s-dim text-[13.5px] mb-4">
             Os itens voltam ao estoque e o valor é deduzido da receita (BR-05). O histórico é
             preservado para auditoria.
           </div>
           <div className="flex gap-2 justify-end">
-            <SBtn ghost onClick={onCancelVoid}>Voltar</SBtn>
-            <SBtn danger disabled={isVoiding} onClick={onConfirmVoid}>
+            <Button ghost onClick={onCancelVoid}>Voltar</Button>
+            <Button danger disabled={isVoiding} onClick={onConfirmVoid}>
               Estornar venda
-            </SBtn>
+            </Button>
           </div>
-        </SModal>
+        </Modal>
       )}
     </>
   );

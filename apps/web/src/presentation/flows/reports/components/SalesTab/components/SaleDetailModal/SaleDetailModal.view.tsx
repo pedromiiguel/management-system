@@ -1,4 +1,7 @@
-import { SBtn, SModal, STable, STag } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Modal } from '@/presentation/components/Modal';
+import { Table } from '@/presentation/components/Table';
+import { Tag } from '@/presentation/components/Tag';
 import { formatBRL, formatDateTime } from '@/lib/format';
 import { CupomReceipt } from '@/presentation/components/CupomReceipt';
 import type { SaleDetailModalViewProps } from './SaleDetailModal.types';
@@ -12,14 +15,14 @@ export function SaleDetailModalView({
   onClose,
 }: SaleDetailModalViewProps) {
   return (
-    <SModal title={`Venda #${sale.id.slice(-6).toUpperCase()}`} onClose={onClose} width={480}>
+    <Modal title={`Venda #${sale.id.slice(-6).toUpperCase()}`} onClose={onClose} width={480}>
       <div className="flex gap-2 items-center mb-2.5">
-        {cancelled ? <STag tone="danger">estornada</STag> : <STag tone="accent">concluída</STag>}
+        {cancelled ? <Tag tone="danger">estornada</Tag> : <Tag tone="accent">concluída</Tag>}
         <span className="s-dim text-[12.5px]">
           {formatDateTime(sale.completedAt ?? sale.cancelledAt)} · Operador: {sale.operator.name}
         </span>
       </div>
-      <STable
+      <Table
         cols={['Produto', 'Qtd', 'Unit.', 'Total']}
         widths="1fr 50px 90px 90px"
         align={[null, 'center', 'right', 'right']}
@@ -56,9 +59,9 @@ export function SaleDetailModalView({
       )}
       {!cancelled && <CupomReceipt sale={sale} printOnly />}
       <div className="flex gap-2 justify-end mt-4">
-        {!cancelled && <SBtn ghost onClick={onPrint}>Imprimir cupom</SBtn>}
-        <SBtn primary onClick={onClose}>Fechar</SBtn>
+        {!cancelled && <Button ghost onClick={onPrint}>Imprimir cupom</Button>}
+        <Button primary onClick={onClose}>Fechar</Button>
       </div>
-    </SModal>
+    </Modal>
   );
 }

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import type { Customer } from '@/domain/models/sale';
 import { useCreateCustomerMutation } from '@/main/factories/mutations/sale';
 import { useSearchCustomersQuery } from '@/main/factories/queries/sale';
-import { useToast } from '@/components/sol';
+import { useToast } from '@/presentation/components/Toast';
 import { useDebounce } from '@/presentation/hooks';
 import { apiErrorMessage } from '@/lib/api';
 import { customerFormSchema, type CustomerFormInput } from './CustomerModal.schema';

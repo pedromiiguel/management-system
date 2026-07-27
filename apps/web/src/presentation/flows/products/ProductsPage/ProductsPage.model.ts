@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Confirm } from '@/components/confirm';
-import { useToast } from '@/components/sol';
+import { Confirm } from '@/presentation/components/Confirm';
+import { useToast } from '@/presentation/components/Toast';
 import { apiErrorMessage } from '@/lib/api';
 import type { Product } from '@/domain/models/products';
 import { useDeleteProductMutation } from '@/main/factories/mutations/products';

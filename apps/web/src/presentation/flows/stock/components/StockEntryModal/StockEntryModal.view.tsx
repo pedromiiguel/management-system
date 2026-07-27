@@ -1,5 +1,7 @@
 import { Search } from 'lucide-react';
-import { SBtn, SModal, STable } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Modal } from '@/presentation/components/Modal';
+import { Table } from '@/presentation/components/Table';
 import type { StockEntryModalViewProps } from './StockEntryModal.types';
 
 export function StockEntryModalView({
@@ -15,7 +17,7 @@ export function StockEntryModalView({
   onClose,
 }: StockEntryModalViewProps) {
   return (
-    <SModal title="Entrada de estoque" onClose={onClose} width={480}>
+    <Modal title="Entrada de estoque" onClose={onClose} width={480}>
       {!picked ? (
         <>
           <div className="s-input mb-2.5">
@@ -26,7 +28,7 @@ export function StockEntryModalView({
               {...registerFilter('search')}
             />
           </div>
-          <STable
+          <Table
             cols={['Produto', 'Estoque']}
             widths="1fr 80px"
             align={[null, 'center']}
@@ -90,13 +92,13 @@ export function StockEntryModalView({
             </div>
           </div>
           <div className="flex gap-2 justify-end">
-            <SBtn ghost onClick={onUnpick}>Trocar produto</SBtn>
-            <SBtn primary type="submit" disabled={saving}>
+            <Button ghost onClick={onUnpick}>Trocar produto</Button>
+            <Button primary type="submit" disabled={saving}>
               {saving ? 'Salvando…' : 'Registrar entrada'}
-            </SBtn>
+            </Button>
           </div>
         </form>
       )}
-    </SModal>
+    </Modal>
   );
 }

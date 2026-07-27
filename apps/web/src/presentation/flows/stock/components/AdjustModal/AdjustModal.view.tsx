@@ -1,5 +1,7 @@
 import { Search } from 'lucide-react';
-import { SBtn, SModal, STable } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Modal } from '@/presentation/components/Modal';
+import { Table } from '@/presentation/components/Table';
 import type { AdjustModalViewProps } from './AdjustModal.types';
 
 export function AdjustModalView({
@@ -16,14 +18,14 @@ export function AdjustModalView({
   onClose,
 }: AdjustModalViewProps) {
   return (
-    <SModal title="Ajuste manual de estoque" onClose={onClose} width={460}>
+    <Modal title="Ajuste manual de estoque" onClose={onClose} width={460}>
       {!picked ? (
         <>
           <div className="s-input mb-2.5">
             <Search size={15} />
             <input autoFocus placeholder="Buscar produto…" {...registerFilter('search')} />
           </div>
-          <STable
+          <Table
             cols={['Produto', 'Estoque']}
             widths="1fr 80px"
             align={[null, 'center']}
@@ -61,13 +63,13 @@ export function AdjustModalView({
             {errors.reason && <div className="s-error">{errors.reason.message}</div>}
           </div>
           <div className="flex gap-2 justify-end">
-            <SBtn ghost onClick={onUnpick}>Trocar produto</SBtn>
-            <SBtn primary type="submit" disabled={!canSubmit || saving}>
+            <Button ghost onClick={onUnpick}>Trocar produto</Button>
+            <Button primary type="submit" disabled={!canSubmit || saving}>
               {saving ? 'Salvando…' : 'Registrar ajuste'}
-            </SBtn>
+            </Button>
           </div>
         </form>
       )}
-    </SModal>
+    </Modal>
   );
 }

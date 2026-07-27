@@ -1,4 +1,6 @@
-import { SBtn, SChip, SModal } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Chip } from '@/presentation/components/Chip';
+import { Modal } from '@/presentation/components/Modal';
 import type { ManualEntryModalViewProps } from './ManualEntryModal.types';
 
 export function ManualEntryModalView({
@@ -17,10 +19,10 @@ export function ManualEntryModalView({
   onClose,
 }: ManualEntryModalViewProps) {
   return (
-    <SModal title="Lançamento avulso (FR-35)" onClose={onClose} width={420}>
+    <Modal title="Lançamento avulso (FR-35)" onClose={onClose} width={420}>
       <div className="flex gap-2 mb-3">
-        <SChip active={kind === 'EXPENSE'} onClick={() => onChangeKind('EXPENSE')}>Despesa</SChip>
-        <SChip active={kind === 'INCOME'} onClick={() => onChangeKind('INCOME')}>Receita</SChip>
+        <Chip active={kind === 'EXPENSE'} onClick={() => onChangeKind('EXPENSE')}>Despesa</Chip>
+        <Chip active={kind === 'INCOME'} onClick={() => onChangeKind('INCOME')}>Receita</Chip>
       </div>
       <div className="s-label">Valor (R$)</div>
       <div className="s-input mb-2.5">
@@ -50,9 +52,9 @@ export function ManualEntryModalView({
         </select>
       </div>
       <div className="flex gap-2 justify-end mt-3.5">
-        <SBtn ghost onClick={onClose}>Voltar</SBtn>
-        <SBtn primary disabled={!valid || saving} onClick={onSubmit}>Registrar</SBtn>
+        <Button ghost onClick={onClose}>Voltar</Button>
+        <Button primary disabled={!valid || saving} onClick={onSubmit}>Registrar</Button>
       </div>
-    </SModal>
+    </Modal>
   );
 }

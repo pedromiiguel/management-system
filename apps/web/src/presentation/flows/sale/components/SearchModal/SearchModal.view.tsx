@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
-import { SModal, STable } from '@/components/sol';
+import { Modal } from '@/presentation/components/Modal';
+import { Table } from '@/presentation/components/Table';
 import type { SearchModalViewProps } from './SearchModal.types';
 
 export function SearchModalView({
@@ -10,14 +11,14 @@ export function SearchModalView({
   onClose,
 }: SearchModalViewProps) {
   return (
-    <SModal title="Buscar produto (F2)" onClose={onClose} width={480}>
+    <Modal title="Buscar produto (F2)" onClose={onClose} width={480}>
       <form onSubmit={onSubmit}>
         <div className="s-input mb-2.5">
           <Search size={15} />
           <input autoFocus placeholder="Nome, SKU ou código de barras…" {...register('search')} />
         </div>
       </form>
-      <STable
+      <Table
         cols={['Produto', 'Estoque', 'Preço']}
         widths="1fr 70px 90px"
         align={[null, 'center', 'right']}
@@ -25,6 +26,6 @@ export function SearchModalView({
         emptyText={emptyText}
         rows={rows}
       />
-    </SModal>
+    </Modal>
   );
 }

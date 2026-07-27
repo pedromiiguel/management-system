@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { Permission } from '@beverage/shared';
-import { useToast } from '@/components/sol';
+import { useToast } from '@/presentation/components/Toast';
 import { apiErrorMessage } from '@/lib/api';
 import { hasPermission } from '@/lib/auth';
 import type { Product, ProductInput } from '@/domain/models/products';
