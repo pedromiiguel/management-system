@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
-import { loginSchema, type LoginInput } from '@beverage/shared';
+import { loginSchema } from '@beverage/shared';
+import type { LoginInput } from '@/domain/models/auth';
 import { apiErrorMessage } from '@/lib/api';
 import { setSession } from '@/lib/auth';
 import { useLoginMutation } from '@/main/factories/mutations/auth';
