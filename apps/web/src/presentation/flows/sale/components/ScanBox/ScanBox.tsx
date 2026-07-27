@@ -1,6 +1,6 @@
 import { ScanBarcode } from 'lucide-react';
 import { clsx } from 'clsx';
-import { SKbd } from '@/components/sol';
+import { Kbd } from '@/presentation/components/Kbd';
 import { formatBRL } from '@/lib/format';
 import type { ScanBoxProps } from './ScanBox.types';
 
@@ -27,7 +27,7 @@ export function ScanBox({
           onKeyDown={onScanKeyDown}
           placeholder="Passe o código de barras ou digite o nome / SKU…"
         />
-        <SKbd>F2</SKbd>
+        <Kbd>F2</Kbd>
       </div>
       {suggestOpen ? (
         <div className="s-suggest" role="listbox" aria-label="Sugestões de produto">

@@ -1,4 +1,6 @@
-import { SCard, SKbd, SToggle } from '@/components/sol';
+import { Card } from '@/presentation/components/Card';
+import { Kbd } from '@/presentation/components/Kbd';
+import { Toggle } from '@/presentation/components/Toggle';
 import { formatBRL } from '@/lib/format';
 import type { SaleChargesCardProps } from './SaleChargesCard.types';
 
@@ -11,11 +13,11 @@ export function SaleChargesCard({
   onToggleInvoice,
 }: SaleChargesCardProps) {
   return (
-    <SCard pad={12}>
+    <Card pad={12}>
       <div className="flex justify-between items-center">
         <span className="text-[13.5px]">Desconto</span>
         <span className="s-dim text-[13px]">
-          <span data-testid="sale-discount-value">{discountLabel}</span> <SKbd>F4</SKbd>
+          <span data-testid="sale-discount-value">{discountLabel}</span> <Kbd>F4</Kbd>
         </span>
       </div>
       <div className="s-divider" />
@@ -27,14 +29,14 @@ export function SaleChargesCard({
               {formatBRL(feeValue)}
             </span>
           ) : null}
-          <SToggle on={serviceFee} onChange={onToggleServiceFee} ariaLabel="Taxa de serviço" />
+          <Toggle on={serviceFee} onChange={onToggleServiceFee} ariaLabel="Taxa de serviço" />
         </span>
       </div>
       <div className="s-divider" />
       <div className="flex justify-between items-center">
         <span className="text-[13.5px]">Emitir nota fiscal</span>
-        <SToggle on={withInvoice} onChange={onToggleInvoice} ariaLabel="Emitir nota fiscal" />
+        <Toggle on={withInvoice} onChange={onToggleInvoice} ariaLabel="Emitir nota fiscal" />
       </div>
-    </SCard>
+    </Card>
   );
 }

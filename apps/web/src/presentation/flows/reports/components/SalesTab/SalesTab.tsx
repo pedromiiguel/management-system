@@ -1,5 +1,6 @@
 import { PAYMENT_METHOD_LABELS } from '@beverage/shared';
-import { SBtn, STag } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Tag } from '@/presentation/components/Tag';
 import { formatBRL, formatDateTime } from '@/lib/format';
 import { useSalesTabModel } from './SalesTab.model';
 import { SalesTabView } from './SalesTab.view';
@@ -33,11 +34,11 @@ export function SalesTab({ from, to }: SalesTabProps) {
       s.withInvoice ? 'sim' : 'não',
       <b key="t">{formatBRL(s.total)}</b>,
       s.status === 'CANCELLED' ? (
-        <STag key="a" tone="danger">cancelada</STag>
+        <Tag key="a" tone="danger">cancelada</Tag>
       ) : (
         // span impede que o clique no Estornar também abra o detalhe
         <span key="a" onClick={(e) => e.stopPropagation()}>
-          <SBtn ghost danger onClick={() => onRequestVoid(s)}>Estornar</SBtn>
+          <Button ghost danger onClick={() => onRequestVoid(s)}>Estornar</Button>
         </span>
       ),
     ],

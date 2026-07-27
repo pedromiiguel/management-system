@@ -1,15 +1,7 @@
-import type { ReactNode } from 'react';
+import type { ScreenProps } from './Screen.types';
 
 /** Topbar + conteúdo, padrão de todas as telas autenticadas (chrome do design). */
-export function Screen({
-  title,
-  topRight,
-  children,
-}: {
-  title: string;
-  topRight?: ReactNode;
-  children: ReactNode;
-}) {
+export function ScreenView({ title, topRight, children }: ScreenProps) {
   return (
     <>
       <div className="s-topbar">

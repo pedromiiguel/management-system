@@ -1,4 +1,5 @@
-import { SBtn, SModal } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Modal } from '@/presentation/components/Modal';
 import type { UserModalViewProps } from './UserModal.types';
 
 export function UserModalView({
@@ -17,7 +18,7 @@ export function UserModalView({
   onClose,
 }: UserModalViewProps) {
   return (
-    <SModal title="Novo usuário" onClose={onClose} width={420}>
+    <Modal title="Novo usuário" onClose={onClose} width={420}>
       <div className="flex flex-col gap-2.5">
         <div>
           <div className="s-label">Nome</div>
@@ -57,14 +58,14 @@ export function UserModalView({
           </div>
         </div>
         <div className="flex gap-2 justify-end">
-          <SBtn ghost onClick={onClose}>
+          <Button ghost onClick={onClose}>
             Voltar
-          </SBtn>
-          <SBtn primary disabled={!valid || saving} onClick={onSubmit}>
+          </Button>
+          <Button primary disabled={!valid || saving} onClick={onSubmit}>
             Criar
-          </SBtn>
+          </Button>
         </div>
       </div>
-    </SModal>
+    </Modal>
   );
 }

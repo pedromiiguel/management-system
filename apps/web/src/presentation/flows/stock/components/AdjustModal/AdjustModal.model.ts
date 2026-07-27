@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/components/sol';
+import { useToast } from '@/presentation/components/Toast';
 import { apiErrorMessage } from '@/lib/api';
 import type { Product } from '@/domain/models/products';
 import { useCreateStockAdjustmentMutation } from '@/main/factories/mutations/stock';

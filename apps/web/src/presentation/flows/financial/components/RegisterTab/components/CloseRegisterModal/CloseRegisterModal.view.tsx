@@ -1,4 +1,5 @@
-import { SBtn, SModal } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Modal } from '@/presentation/components/Modal';
 import { formatBRL } from '@/lib/format';
 import type { CloseRegisterModalViewProps } from './CloseRegisterModal.types';
 
@@ -13,7 +14,7 @@ export function CloseRegisterModalView({
   onClose,
 }: CloseRegisterModalViewProps) {
   return (
-    <SModal title="Fechar caixa (conferência — BR-06)" onClose={onClose} width={400}>
+    <Modal title="Fechar caixa (conferência — BR-06)" onClose={onClose} width={400}>
       <div className="s-kv">
         <span>Dinheiro esperado na gaveta</span>
         <b>{formatBRL(expected)}</b>
@@ -37,11 +38,11 @@ export function CloseRegisterModalView({
         </div>
       ) : null}
       <div className="flex gap-2 justify-end mt-3.5">
-        <SBtn ghost onClick={onClose}>Voltar</SBtn>
-        <SBtn primary disabled={!valid || saving} onClick={onSubmit}>
+        <Button ghost onClick={onClose}>Voltar</Button>
+        <Button primary disabled={!valid || saving} onClick={onSubmit}>
           Fechar caixa
-        </SBtn>
+        </Button>
       </div>
-    </SModal>
+    </Modal>
   );
 }

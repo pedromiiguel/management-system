@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/components/sol';
+import { useToast } from '@/presentation/components/Toast';
 import type { Sale } from '@/domain/models/sale';
 import { apiErrorMessage } from '@/lib/api';
 import { useVoidSaleMutation } from '@/main/factories/mutations/sale';

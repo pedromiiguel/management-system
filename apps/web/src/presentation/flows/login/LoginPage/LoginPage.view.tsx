@@ -1,4 +1,5 @@
-import { SBtn, SolIcon } from '@/components/sol';
+import { Sun } from 'lucide-react';
+import { Button } from '@/presentation/components/Button';
 import type { LoginPageViewProps } from './LoginPage.types';
 
 export function LoginPageView({ register, errors, onSubmit, submitting, loginError }: LoginPageViewProps) {
@@ -9,7 +10,7 @@ export function LoginPageView({ register, errors, onSubmit, submitting, loginErr
         <div className="s-login-halo is-2" />
         <div className="relative">
           <span className="s-logo-mark w-14 h-14">
-            <SolIcon name="sun" size={30} />
+            <Sun size={30} />
           </span>
           <div className="text-[30px] leading-[1.2] mt-5 font-normal">
             Distribuidora
@@ -43,9 +44,9 @@ export function LoginPageView({ register, errors, onSubmit, submitting, loginErr
             </div>
             {loginError ? <div className="s-error">{loginError}</div> : null}
             {/* .s-btn não aceita className; margin fica no style prop do DS (mesmo padrão do CreditPanel) */}
-            <SBtn primary big type="submit" disabled={submitting} style={{ marginTop: 8 }}>
+            <Button primary big type="submit" disabled={submitting} style={{ marginTop: 8 }}>
               {submitting ? 'Entrando…' : 'Entrar'}
-            </SBtn>
+            </Button>
             <span className="text-[13px] text-center text-[color:var(--accent-deep)] font-semibold">
               Esqueci minha senha
             </span>

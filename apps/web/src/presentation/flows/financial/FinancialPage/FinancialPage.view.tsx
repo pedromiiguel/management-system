@@ -1,5 +1,6 @@
 import { Screen } from '@/presentation/components/Screen';
-import { SChip, SSeg } from '@/components/sol';
+import { Chip } from '@/presentation/components/Chip';
+import { SegmentedControl } from '@/presentation/components/SegmentedControl';
 import { EntriesTab } from '../components/EntriesTab';
 import { OverviewTab } from '../components/OverviewTab';
 import { PayablesTab } from '../components/PayablesTab';
@@ -17,9 +18,9 @@ const TABS: { id: FinancialTab; label: string }[] = [
 
 export function FinancialPageView({ tab, onChangeTab, monthLabel }: FinancialPageViewProps) {
   return (
-    <Screen title="Financeiro" topRight={<SChip active>{monthLabel}</SChip>}>
+    <Screen title="Financeiro" topRight={<Chip active>{monthLabel}</Chip>}>
       <div className="flex flex-col gap-3 h-full">
-        <SSeg<FinancialTab> items={TABS} active={tab} onChange={onChangeTab} />
+        <SegmentedControl<FinancialTab> items={TABS} active={tab} onChange={onChangeTab} />
         {tab === 'overview' ? <OverviewTab /> : null}
         {tab === 'register' ? <RegisterTab /> : null}
         {tab === 'receivables' ? <ReceivablesTab /> : null}

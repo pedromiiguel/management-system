@@ -1,4 +1,5 @@
-import { SBtn, SModal } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Modal } from '@/presentation/components/Modal';
 import type { MoneyPromptModalViewProps } from './MoneyPromptModal.types';
 
 export function MoneyPromptModalView({
@@ -12,7 +13,7 @@ export function MoneyPromptModalView({
   onClose,
 }: MoneyPromptModalViewProps) {
   return (
-    <SModal title={title} onClose={onClose} width={380}>
+    <Modal title={title} onClose={onClose} width={380}>
       <div className="s-label">{label}</div>
       <div className="s-input">
         <input
@@ -24,9 +25,9 @@ export function MoneyPromptModalView({
         />
       </div>
       <div className="flex gap-2 justify-end mt-3.5">
-        <SBtn ghost onClick={onClose}>Voltar</SBtn>
-        <SBtn primary disabled={!valid} onClick={onSubmit}>{submitLabel}</SBtn>
+        <Button ghost onClick={onClose}>Voltar</Button>
+        <Button primary disabled={!valid} onClick={onSubmit}>{submitLabel}</Button>
       </div>
-    </SModal>
+    </Modal>
   );
 }

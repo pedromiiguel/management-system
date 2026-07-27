@@ -291,7 +291,7 @@ inline nem manter ícones próprios em componentes.**
 
 ```tsx
 // ❌ nunca — SVG à mão ou componente de ícone caseiro
-<SolIcon name="search" size={15} />
+<MeuIconeCaseiro name="search" size={15} />
 <svg viewBox="0 0 20 20">…</svg>
 
 // ✅ sempre — ícone nomeado do lucide, na View
@@ -302,8 +302,8 @@ import { Search } from 'lucide-react';
 - Importe o ícone **pelo nome** (`import { Search, Trash2 } from 'lucide-react'`).
   Herdam `currentColor`, então a cor vem do CSS/Tailwind do container.
 - Ícone é UI → mora na **View**. O ViewModel/Model nunca importam `lucide-react`.
-- Ícones legados (`SolIcon` e o `<svg>` do design system) estão em migração para
-  o lucide; código novo já nasce com lucide.
+- `SolIcon`/`IconName` (o `<svg>` caseiro do design system) foi removido por
+  completo — todo ícone do app é lucide, ver [ADR 0012](adr/0012-migracao-sol-lucide.md).
 
 ## Formulários (React Hook Form)
 

@@ -1,4 +1,5 @@
-import { SBtn, SModal } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Modal } from '@/presentation/components/Modal';
 import type { PayableModalViewProps } from './PayableModal.types';
 
 export function PayableModalView({
@@ -19,7 +20,7 @@ export function PayableModalView({
   onClose,
 }: PayableModalViewProps) {
   return (
-    <SModal title="Nova conta a pagar" onClose={onClose} width={460}>
+    <Modal title="Nova conta a pagar" onClose={onClose} width={460}>
       <div className="flex flex-col gap-2.5">
         <div>
           <div className="s-label">Descrição</div>
@@ -69,10 +70,10 @@ export function PayableModalView({
           </div>
         </div>
         <div className="flex gap-2 justify-end">
-          <SBtn ghost onClick={onClose}>Voltar</SBtn>
-          <SBtn primary disabled={!valid || saving} onClick={onSubmit}>Salvar</SBtn>
+          <Button ghost onClick={onClose}>Voltar</Button>
+          <Button primary disabled={!valid || saving} onClick={onSubmit}>Salvar</Button>
         </div>
       </div>
-    </SModal>
+    </Modal>
   );
 }

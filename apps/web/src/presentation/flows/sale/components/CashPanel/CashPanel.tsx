@@ -1,10 +1,10 @@
-import { SCard } from '@/components/sol';
+import { Card } from '@/presentation/components/Card';
 import { formatBRL } from '@/lib/format';
 import type { CashPanelProps } from './CashPanel.types';
 
 export function CashPanel({ received, onReceivedChange, onReceivedEnter, change }: CashPanelProps) {
   return (
-    <SCard pad={12}>
+    <Card pad={12}>
       <div className="s-kv">
         <span>Recebido</span>
         {/* inline: sobrescreve o padding do .s-input (classe DS unlayered vence o Tailwind) */}
@@ -24,6 +24,6 @@ export function CashPanel({ received, onReceivedChange, onReceivedEnter, change 
         <span>Troco</span>
         <b data-testid="sale-change">{change !== null && change >= 0 ? formatBRL(change) : '—'}</b>
       </div>
-    </SCard>
+    </Card>
   );
 }

@@ -1,4 +1,7 @@
-import { SBtn, SCard, SStat, STable } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Card } from '@/presentation/components/Card';
+import { StatCard } from '@/presentation/components/StatCard';
+import { Table } from '@/presentation/components/Table';
 import { formatBRL } from '@/lib/format';
 import { ManualEntryModal } from './components/ManualEntryModal';
 import type { EntriesTabViewProps } from './EntriesTab.types';
@@ -29,15 +32,15 @@ export function EntriesTabView({
           <div className="s-input"><input type="date" value={to} onChange={(e) => onChangeTo(e.target.value)} /></div>
         </div>
         <span className="flex-1" />
-        <SBtn primary onClick={onOpenCreate}>+ Lançamento avulso</SBtn>
+        <Button primary onClick={onOpenCreate}>+ Lançamento avulso</Button>
       </div>
       <div className="flex gap-3">
-        <SStat label="Entradas" value={formatBRL(inflows)} />
-        <SStat label="Saídas" value={formatBRL(outflows)} />
-        <SStat label="Saldo do período" value={formatBRL(balance)} accent />
+        <StatCard label="Entradas" value={formatBRL(inflows)} />
+        <StatCard label="Saídas" value={formatBRL(outflows)} />
+        <StatCard label="Saldo do período" value={formatBRL(balance)} accent />
       </div>
-      <SCard pad={8} className="flex-1 min-h-0 overflow-auto">
-        <STable
+      <Card pad={8} className="flex-1 min-h-0 overflow-auto">
+        <Table
           cols={['Data', 'Descrição', 'Categoria', 'Forma', 'Valor']}
           widths="110px 1fr 150px 90px 110px"
           align={[null, null, null, null, 'right']}
@@ -45,7 +48,7 @@ export function EntriesTabView({
           emptyText="Nenhum movimento no período"
           rows={rows}
         />
-      </SCard>
+      </Card>
       {creating ? <ManualEntryModal onDone={onCreated} onClose={onCloseCreate} /> : null}
     </>
   );

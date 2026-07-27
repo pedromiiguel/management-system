@@ -1,22 +1,22 @@
-import { SKbd } from '@/components/sol';
+import { Kbd } from '@/presentation/components/Kbd';
 
 export function SaleHotkeyStrip() {
   return (
     <div className="s-strip">
       <span>
-        <SKbd>F2</SKbd> buscar
+        <Kbd>F2</Kbd> buscar
       </span>
       <span>
-        <SKbd>F4</SKbd> desconto
+        <Kbd>F4</Kbd> desconto
       </span>
       <span>
-        <SKbd>Del</SKbd> remover
+        <Kbd>Del</Kbd> remover
       </span>
       <span>
-        <SKbd>F10</SKbd> finalizar
+        <Kbd>F10</Kbd> finalizar
       </span>
       <span>
-        <SKbd>Esc</SKbd> cancelar
+        <Kbd>Esc</Kbd> cancelar
       </span>
     </div>
   );

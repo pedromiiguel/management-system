@@ -1,6 +1,6 @@
-import { clsx } from 'clsx';
-import type { Sale } from '@/domain/models/sale';
 import { buildCupom, STORE } from '@/lib/cupom';
+import { CupomReceiptView } from './CupomReceipt.view';
+import type { CupomReceiptProps } from './CupomReceipt.types';
 
 /**
  * Cupom não-fiscal (FR-23) — o mesmo texto que vai para a impressora térmica
@@ -8,6 +8,6 @@ import { buildCupom, STORE } from '@/lib/cupom';
  * de `ReceiptModal` (sale) para ser reaproveitado por `SaleDetailModal`
  * (reports) — ADR 0009.
  */
-export function CupomReceipt({ sale, printOnly }: { sale: Sale; printOnly?: boolean }) {
-  return <pre className={clsx('s-receipt s-cupom', printOnly && 's-print-only')}>{buildCupom(sale, STORE)}</pre>;
+export function CupomReceipt({ sale, printOnly }: CupomReceiptProps) {
+  return <CupomReceiptView text={buildCupom(sale, STORE)} printOnly={printOnly} />;
 }

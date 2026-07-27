@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CashMovementType } from '@beverage/shared';
-import { useToast } from '@/components/sol';
+import { useToast } from '@/presentation/components/Toast';
 import { apiErrorMessage } from '@/lib/api';
 import { parseMoney } from '@/lib/format';
 import { useCreateCashMovementMutation } from '@/main/factories/mutations/financial';

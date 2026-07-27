@@ -161,7 +161,7 @@ De dentro para fora — sempre nesta ordem:
   [componentes-mvvm.md](./componentes-mvvm.md#estilização-tailwind).
 - **Ícones via `lucide-react`.** Proibido `<svg>` inline ou componente de ícone
   próprio. Importar pelo nome (`import { Search } from 'lucide-react'`) e usar na
-  View. Ícones legados (`SolIcon`) estão em migração.
+  View.
 - **Formulários via `react-hook-form` + `zod`**, nunca `useState` por campo.
   Preferência _uncontrolled_ (`register`); _controlled_ (`Controller`) só como
   fallback quando o campo não pode ser uncontrolled. Schema em `{nome}.schema.ts`,

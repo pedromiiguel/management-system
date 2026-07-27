@@ -1,5 +1,6 @@
 import { PaymentMethod } from '@beverage/shared';
-import { SBtn, STag } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
+import { Tag } from '@/presentation/components/Tag';
 import { Screen } from '@/presentation/components/Screen';
 import { CashPanel } from '../components/CashPanel';
 import { CreditPanel } from '../components/CreditPanel';
@@ -18,8 +19,8 @@ export function SalePageView(vm: SalePageViewModel) {
       title="Frente de Caixa"
       topRight={
         <>
-          {vm.saleTag ? <STag tone="accent">{vm.saleTag}</STag> : null}
-          <STag tone="dim">Operador: {vm.operatorName ?? '—'}</STag>
+          {vm.saleTag ? <Tag tone="accent">{vm.saleTag}</Tag> : null}
+          <Tag tone="dim">Operador: {vm.operatorName ?? '—'}</Tag>
         </>
       }
     >
@@ -39,12 +40,12 @@ export function SalePageView(vm: SalePageViewModel) {
           {vm.payment === PaymentMethod.CASH ? <CashPanel {...vm} /> : null}
           {vm.payment === PaymentMethod.CREDIT ? <CreditPanel {...vm} /> : null}
           <div className="flex-1" />
-          <SBtn primary big kbd="F10" onClick={vm.onFinalize} disabled={vm.isCompletingSale}>
+          <Button primary big kbd="F10" onClick={vm.onFinalize} disabled={vm.isCompletingSale}>
             {vm.isCompletingSale ? 'Finalizando…' : 'Finalizar venda'}
-          </SBtn>
-          <SBtn ghost danger kbd="Esc" onClick={vm.onRequestCancel}>
+          </Button>
+          <Button ghost danger kbd="Esc" onClick={vm.onRequestCancel}>
             Cancelar venda
-          </SBtn>
+          </Button>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useToast } from '@/components/sol';
+import { useToast } from '@/presentation/components/Toast';
 import { apiErrorMessage } from '@/lib/api';
 import { parseMoney } from '@/lib/format';
 import { useCreateFinancialEntryMutation } from '@/main/factories/mutations/financial';

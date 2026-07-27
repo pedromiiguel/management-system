@@ -1,4 +1,4 @@
-import { SBtn } from '@/components/sol';
+import { Button } from '@/presentation/components/Button';
 import { formatBRL, formatDate } from '@/lib/format';
 import { useReceivablesTabModel } from './ReceivablesTab.model';
 import { ReceivablesTabView } from './ReceivablesTab.view';
@@ -17,7 +17,7 @@ export function ReceivablesTab() {
       formatDate(r.createdAt),
       r.dueDate ? formatDate(r.dueDate) : '—',
       <b key="v">{formatBRL(r.amount)}</b>,
-      <SBtn key="b" ghost onClick={() => setSettling(r)}>Receber</SBtn>,
+      <Button key="b" ghost onClick={() => setSettling(r)}>Receber</Button>,
     ],
   }));
 

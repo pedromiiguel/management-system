@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useToast } from '@/components/sol';
+import { useToast } from '@/presentation/components/Toast';
 import type { Role } from '@/domain/models/users';
 import { apiErrorMessage } from '@/lib/api';
 import { useCreateUserMutation } from '@/main/factories/mutations/users';

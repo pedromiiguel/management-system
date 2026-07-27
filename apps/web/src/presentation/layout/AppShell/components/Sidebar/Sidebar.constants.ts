@@ -1,10 +1,18 @@
-import type { IconName } from '@/components/sol';
+import {
+  Barcode,
+  Boxes,
+  ChartColumn,
+  CircleDollarSign,
+  Package,
+  SlidersHorizontal,
+  type LucideIcon,
+} from 'lucide-react';
 
-export const NAV: { icon: IconName; label: string; to: string }[] = [
-  { icon: 'pdv', label: 'PDV — Caixa', to: '/sale' },
-  { icon: 'produtos', label: 'Produtos', to: '/products' },
-  { icon: 'estoque', label: 'Estoque', to: '/stock' },
-  { icon: 'financeiro', label: 'Financeiro', to: '/financial' },
-  { icon: 'relatorios', label: 'Relatórios', to: '/reports' },
-  { icon: 'config', label: 'Configurações', to: '/settings' },
+export const NAV: { icon: LucideIcon; label: string; to: string }[] = [
+  { icon: Barcode, label: 'PDV — Caixa', to: '/sale' },
+  { icon: Package, label: 'Produtos', to: '/products' },
+  { icon: Boxes, label: 'Estoque', to: '/stock' },
+  { icon: CircleDollarSign, label: 'Financeiro', to: '/financial' },
+  { icon: ChartColumn, label: 'Relatórios', to: '/reports' },
+  { icon: SlidersHorizontal, label: 'Configurações', to: '/settings' },
 ];

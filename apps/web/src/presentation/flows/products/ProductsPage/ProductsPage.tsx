@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
-import { SIconBtn, STag } from '@/components/sol';
+import { Trash2 } from 'lucide-react';
+import { IconButton } from '@/presentation/components/IconButton';
+import { Tag } from '@/presentation/components/Tag';
 import { formatBRL } from '@/lib/format';
 import { useProductsPageModel } from './ProductsPage.model';
 import { ProductsPageView } from './ProductsPage.view';
@@ -61,17 +63,17 @@ export function ProductsPage() {
         low ? <b key="s" className="s-low">{p.currentStock}</b> : p.currentStock,
         p.minimumStock,
         !p.active ? (
-          <STag key="t" tone="dim">inativo</STag>
+          <Tag key="t" tone="dim">inativo</Tag>
         ) : expiry ? (
-          <STag key="t" tone="warn">{expiry}</STag>
+          <Tag key="t" tone="warn">{expiry}</Tag>
         ) : low ? (
-          <STag key="t" tone="warn">estoque baixo</STag>
+          <Tag key="t" tone="warn">estoque baixo</Tag>
         ) : (
-          <STag key="t" tone="ok">ativo</STag>
+          <Tag key="t" tone="ok">ativo</Tag>
         ),
-        <SIconBtn
+        <IconButton
           key="del"
-          icon="trash"
+          icon={Trash2}
           danger
           title="Excluir produto"
           onClick={(e) => {

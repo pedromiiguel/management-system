@@ -1,4 +1,4 @@
-import { STag } from '@/components/sol';
+import { Tag } from '@/presentation/components/Tag';
 import { useCategoriesTabModel } from './CategoriesTab.model';
 import { CategoriesTabView } from './CategoriesTab.view';
 import type { CategoryRowView } from './CategoriesTab.types';
@@ -11,18 +11,18 @@ export function CategoriesTab() {
     cells: [
       c.name,
       c.kind === 'INCOME' ? (
-        <STag key="k" tone="ok">
+        <Tag key="k" tone="ok">
           receita
-        </STag>
+        </Tag>
       ) : (
-        <STag key="k" tone="warn">
+        <Tag key="k" tone="warn">
           despesa
-        </STag>
+        </Tag>
       ),
       c.system ? (
-        <STag key="s" tone="dim">
+        <Tag key="s" tone="dim">
           sistema
-        </STag>
+        </Tag>
       ) : (
         '—'
       ),
