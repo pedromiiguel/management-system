@@ -1,5 +1,6 @@
 import { CloseCashRegisterHandler } from '@/data/handlers/financial/close-cash-register-handler';
 import { CreateCashMovementHandler } from '@/data/handlers/financial/create-cash-movement-handler';
+import { CreateFinancialCategoryHandler } from '@/data/handlers/financial/create-financial-category-handler';
 import { CreateFinancialEntryHandler } from '@/data/handlers/financial/create-financial-entry-handler';
 import { CreatePayableHandler } from '@/data/handlers/financial/create-payable-handler';
 import { GetCashFlowHandler } from '@/data/handlers/financial/get-cash-flow-handler';
@@ -28,3 +29,4 @@ export const makePayPayable = () => new PayPayableHandler(httpClient);
 export const makeGetCashFlow = () => new GetCashFlowHandler(httpClient);
 export const makeCreateFinancialEntry = () => new CreateFinancialEntryHandler(httpClient);
 export const makeSearchFinancialCategory = () => new SearchFinancialCategoryHandler(httpClient);
+export const makeCreateFinancialCategory = () => new CreateFinancialCategoryHandler(httpClient);

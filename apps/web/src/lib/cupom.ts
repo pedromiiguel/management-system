@@ -1,5 +1,5 @@
 import { PAYMENT_METHOD_LABELS } from '@beverage/shared';
-import type { Sale } from './types';
+import type { Sale } from '@/domain/models/sale';
 
 /**
  * Cupom não-fiscal para impressora térmica de 80mm (FR-23).

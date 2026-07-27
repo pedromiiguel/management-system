@@ -88,6 +88,37 @@ novo `SaleDetailModal` de `reports`. `IHttpClient` ganha suporte a
 `responseType: 'blob'` para a exportação CSV — antes um `fetch()` cru fora
 da abstração.
 
+## Configurações / settings (flow)
+
+Tela com 3 abas (Geral, Usuários & Perfis, Categorias financeiras),
+navegadas por `SSeg` na mesma rota — `apps/web/src/routes/_app/settings.tsx`
+é um wrapper fino; a implementação vive em
+`apps/web/src/presentation/flows/settings/`, por cima de
+`apps/web/src/domain|data|infra|main/*` — 6º e último módulo da lista
+original de módulos legados em Clean Architecture, ver
+[ADR 0010](adr/0010-clean-architecture-settings.md). Diferente dos outros
+módulos, as 3 abas tocam 3 domínios de permissão genuinamente diferentes
+(nenhuma permissão própria em `GET /settings`, `users.manage` em
+Usuários & Perfis, `financial.read`+`settings.write` em Categorias).
+
+`domain/usecases/users` nasce como domínio próprio (não fica dentro de
+`settings`) — `User`/`Role` têm módulo e permissão (`users.manage`)
+próprios, mesmo critério que deu a `Product` seu domínio na ADR 0007.
+`ICreateFinancialCategory` nasce em `domain/usecases/financial`, ao lado do
+`ISearchFinancialCategory` já existente desde a ADR 0006 — segue o dono do
+agregado (`FinancialCategory`), não a permissão do endpoint
+(`settings.write`), mesmo critério "agregado > permissão" das ADRs
+0007/0009. `AppSettings` migrou para `domain/models/settings.ts`;
+`Role`/`UserRow` migraram para `domain/models/users.ts` — isso esgotou o
+último consumidor do shim `lib/types.ts` (`reports.tsx` já importava direto
+de `domain/models` desde a ADR 0009), então **o arquivo foi removido por
+completo** (não só reduzido); `lib/cupom.ts` passou a importar `Sale`
+direto de `domain/models/sale`.
+
+Depois desta rodada, os 6 módulos legados
+(`sale`/`financial`/`products`/`stock`/`reports`/`settings`) estão todos em
+Clean Architecture — não há mais candidato conhecido pendente de migração.
+
 ## flushPendingQuantity
 
 Função que força o envio imediato ao servidor de qualquer alteração de
@@ -142,7 +173,9 @@ com módulos independentes validando o mesmo padrão, **é a convenção
 esperada** para as próximas migrações, não mais uma decisão caso a caso.
 `stock` é o 4º módulo, ver [ADR 0008](adr/0008-clean-architecture-stock.md);
 `reports` é o 5º, ver [ADR 0009](adr/0009-clean-architecture-reports.md).
-`settings` continua como próximo candidato.
+`settings` é o 6º e último módulo da lista original de módulos legados, ver
+[ADR 0010](adr/0010-clean-architecture-settings.md). Depois dela, não há
+mais módulo legado conhecido pendente de migração.
 
 ## `IHttpClient`
 
