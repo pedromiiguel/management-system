@@ -15,7 +15,9 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { StockModule } from './modules/stock/stock.module';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { createObserveModule } from '@nestjs/observe';
 
+export const { ObserveModule, ObserveInstrument } = createObserveModule();
 @Module({
   imports: [
     PrismaModule,
@@ -31,6 +33,11 @@ import { PrismaModule } from './prisma/prisma.module';
     ReceivablesModule,
     PayablesModule,
     ReportsModule,
+    ObserveModule.forRoot({
+      appKey: process.env.OBSERVE_APP_KEY!,
+      appSecret: process.env.OBSERVE_APP_SECRET!,
+      serviceId: 'management-system-app',
+    }),
   ],
   providers: [
     // Autenticação e autorização globais (NFR-05)

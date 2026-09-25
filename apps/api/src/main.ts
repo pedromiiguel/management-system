@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
-import { AppModule } from './app.module';
+import { AppModule, ObserveInstrument } from './app.module';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
 // Decimal trafega como number no JSON (cálculo continua em Decimal no servidor).
@@ -12,7 +12,9 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
 };
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    instrument: ObserveInstrument,
+  });
   app.setGlobalPrefix('api');
   // Sem CORS_ORIGIN definido, reflete qualquer origem (conveniente em dev).
   const corsOrigin = process.env.CORS_ORIGIN?.split(',').map((o) => o.trim());
