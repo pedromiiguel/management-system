@@ -8,7 +8,11 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["node", "@playwright/test"]
+    "types": ["node", "@playwright/test"],
+    "baseUrl": ".",
+    "paths": {
+      "@beverage/shared": ["../../packages/shared/src"]
+    }
   },
   "include": ["playwright.config.ts", "tests/**/*.ts"]
 }

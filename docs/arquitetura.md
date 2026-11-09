@@ -33,8 +33,10 @@ apps/e2e          Playwright contra web + api
     (Entrada, Ajustar, baixa da venda em FEFO, devolução do estorno).
   - `cash-register/cash-ledger.ts` — único escritor de movimentos de caixa e dono
     do "caixa aberto".
-  - `receivables` — fiado; `sales/sales-query.ts` — venda concluída no período e
-    Receita.
+  - `receivables` — fiado (`createForSale` / `cancelForSale`).
+- `sales/sales-query.ts` — só leitura, fora de transação: a única definição de
+  "venda concluída no período", de Receita e da Taxa de serviço à parte, usada
+  pelo painel e pelos relatórios.
 - `modules/auth` — tudo de autenticação/autorização junto: guards globais
   (`jwt-auth.guard`, `permissions.guard`), decorators (`@Public`,
   `@RequirePermission`, `@CurrentUser`/`AuthUser`) e `SessionService` (usuário e
@@ -58,3 +60,19 @@ apps/e2e          Playwright contra web + api
 
 Uma funcionalidade nova costuma ser: schema no shared → módulo na API com
 permissão → `features/<f>/api.ts` + página → rota.
+
+## Testes
+
+- `packages/shared` e `apps/web`: vitest da lógica pura (precificação, dia da
+  loja, cupom, fila do PDV).
+- `apps/api/test`: e2e com supertest num Postgres real — cobrem as regras de
+  negócio e suas ramificações (BR-xx, permissões, erros). Um `migrate reset`
+  por execução; cada bloco volta a "seed base + fixtures" com `t.reset()`.
+- `apps/e2e`: Playwright contra web + api — verifica a integração UI ↔ API no
+  caminho feliz, pelos nomes acessíveis em pt-BR. O banco é resetado uma vez
+  por arquivo (`npm run db:reset` da raiz, que compila o shared antes do seed),
+  então testes de um mesmo arquivo compartilham estado e cada arquivo parte do
+  zero. Dados esperados vêm do seed da API (`support/seed-data.ts`) e os
+  formatos de dinheiro do próprio web (`support/format.ts`).
+- Só um Postgres local pode ser apagado: `apps/api/test/support/local-database.ts`
+  confere o host e dá o consentimento do Prisma, nas duas suítes.

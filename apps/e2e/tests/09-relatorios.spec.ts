@@ -7,11 +7,9 @@ import { PRODUCTS } from './support/seed-data';
 // formatBRL usa espaço fino (U+00A0) entre "R$" e o valor — ver support/format.ts#brl.
 const brl = (value: string) => `R$ ${value}`;
 
-// Suíte E2E de relatórios — trava o comportamento observável das 4 abas
-// ANTES da refatoração estrutural (ADR 0001/0009), mesmo espírito das
-// suítes de financeiro/produtos/estoque. BR-05 (estorno) já está coberta
-// por apps/api/test/sales.e2e-spec.ts (supertest) — aqui só se verifica
-// a integração UI ↔ API do caminho feliz.
+// Suíte E2E de relatórios — o comportamento observável das 4 abas. BR-05
+// (estorno) está coberta por apps/api/test/sales.e2e-spec.ts — aqui só a
+// integração UI ↔ API do caminho feliz (ver "Testes" em docs/arquitetura.md).
 
 test.describe('Relatórios — navegação e filtro de período', () => {
   test.beforeAll(() => resetDatabase());

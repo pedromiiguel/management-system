@@ -4,7 +4,7 @@ import {
   saleCode,
   SERVICE_FEE_PERCENT,
 } from '@beverage/shared';
-import { formatDecimal } from '@/lib/format';
+import { formatBRLText as brl, formatDecimal } from '@/lib/format';
 import type { Sale } from './api';
 import { salePricing } from './sale';
 
@@ -17,11 +17,6 @@ const WIDTH = 40;
 
 // Larguras das colunas de itens (somadas aos 5 espaços separadores = 40).
 const COL = { num: 2, code: 5, desc: 10, qty: 3, unit: 7, total: 8 } as const;
-
-// Espaço comum depois do "R$" (o Intl usa NBSP, que a impressora não alinha).
-function brl(value: number): string {
-  return `R$ ${formatDecimal(value)}`;
-}
 
 function center(text: string, width = WIDTH): string {
   if (text.length >= width) return text;

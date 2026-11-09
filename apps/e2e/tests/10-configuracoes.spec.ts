@@ -2,12 +2,10 @@ import { expect, test } from '@playwright/test';
 import { resetDatabase } from './support/db';
 import { openSettingsTab } from './support/settings';
 
-// Suíte E2E de configurações — trava o comportamento observável das 3 abas
-// ANTES da refatoração estrutural (ADR 0001/0010), mesmo espírito das suítes
-// de financeiro/produtos/estoque/relatórios. A única regra de negócio com
-// ramificação real (guarda de lockout do papel Administrador) já está coberta
-// por apps/api/test/users.e2e-spec.ts (supertest) — aqui só se verifica o
-// caminho feliz da UI das 3 abas.
+// Suíte E2E de configurações — o comportamento observável das 3 abas. A única
+// regra com ramificação real (guarda de lockout do papel Administrador) está
+// coberta por apps/api/test/users.e2e-spec.ts — aqui só o caminho feliz da UI
+// (ver "Testes" em docs/arquitetura.md).
 
 test.describe('Configurações — Geral', () => {
   test.beforeAll(() => resetDatabase());

@@ -60,8 +60,8 @@ export async function openSalePage(page: Page): Promise<void> {
 
 /**
  * Só existe uma venda em andamento por operador — o backend a retoma a cada
- * `POST /sales`. Como o reset de banco é por arquivo (não por teste, ver ADR
- * 0001), cada teste que precisa de um carrinho vazio cancela qualquer venda
+ * `POST /sales`. Como o reset de banco é por arquivo (não por teste, ver
+ * "Testes" em docs/arquitetura.md), cada teste que precisa de um carrinho vazio cancela qualquer venda
  * deixada por um teste anterior no mesmo arquivo, sempre pelo navegador.
  */
 export async function ensureFreshSale(page: Page): Promise<void> {
@@ -105,8 +105,8 @@ export async function addKnownItems(
 
 /**
  * Monta e conclui uma venda de verdade pela UI (pagamento PIX, sem troco
- * nem fiado — não exige caixa aberto). Usada pela suíte de `reports` (ADR
- * 0009) para ter uma venda concluída real para os relatórios/histórico,
+ * nem fiado — não exige caixa aberto). Usada pela suíte de relatórios
+ * para ter uma venda concluída real para os relatórios/histórico,
  * sem criar dado em código (mesma convenção de `seed-data.ts`). Fecha o
  * modal de recibo ao final, deixando uma venda nova em andamento.
  */

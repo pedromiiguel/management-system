@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { seedBase } from '../../prisma/seed/base';
 import { seedFixtures } from '../../prisma/seed/fixtures';
-import { assertLocalDatabase } from './migrate';
+import { assertLocalDatabase } from './local-database';
 
 /**
  * Volta o banco ao estado "migrações + seed base + fixtures" sem refazer

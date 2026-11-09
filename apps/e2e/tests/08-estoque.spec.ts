@@ -3,14 +3,10 @@ import { resetDatabase } from './support/db';
 import { openStockPage } from './support/stock';
 import { PRODUCTS } from './support/seed-data';
 
-// Suíte E2E de stock — trava a integração UI ↔ API de stock.tsx ANTES da
-// refatoração estrutural (ADR 0008), mesmo espírito das suítes de products/
-// financial. A guarda de estoque negativo (regra com ramificação) já está
-// coberta por apps/api/test/stock.e2e-spec.ts (supertest) — aqui só se
-// verifica o caminho feliz da UI (ver Decisão 4 da ADR 0008). Diferente de
-// `07-produtos.spec.ts` (que só exercita o StockEntryModal pela rota
-// /products), esta suíte é a primeira a exercitar a própria rota /stock —
-// hoje sem cobertura alguma.
+// Suíte E2E da tela de Estoque (/stock). A guarda de estoque negativo (regra
+// com ramificação) está coberta por apps/api/test/stock.e2e-spec.ts — aqui só
+// o caminho feliz da UI (ver "Testes" em docs/arquitetura.md). A Entrada embutida no
+// formulário de Produto é exercitada por `07-produtos.spec.ts`.
 
 test.describe('Estoque — Movimentações e alertas', () => {
   test.beforeAll(() => resetDatabase());

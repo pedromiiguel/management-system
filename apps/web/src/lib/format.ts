@@ -10,6 +10,14 @@ export function formatBRL(value: number | null | undefined): string {
   return brl.format(value ?? 0);
 }
 
+/**
+ * "R$ 1.234,56" com espaço comum depois do "R$", para texto puro (cupom): o
+ * `formatBRL` usa NBSP, que a impressora não alinha.
+ */
+export function formatBRLText(value: number): string {
+  return `R$ ${decimal2.format(value)}`;
+}
+
 /** "1.234,56" — sem símbolo de moeda. */
 export function formatDecimal(value: number): string {
   return decimal2.format(value);

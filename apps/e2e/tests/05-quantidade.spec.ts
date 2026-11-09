@@ -61,7 +61,7 @@ test.describe('quantidade — estado otimista, debounce e flush', () => {
 
     const receipt = page.getByRole('dialog', { name: 'Venda concluída ✓' });
     await expect(receipt).toBeVisible();
-    await expect(receipt.locator('pre')).toContainText(cupomBrl(PRODUCTS.skol.price * 4));
+    await expect(receipt.locator('pre')).toContainText(cupomBrl(PRODUCTS.skol.salePrice * 4));
   });
 
   test('alterar a quantidade e remover outro item em seguida preserva a alteração', async ({
@@ -118,7 +118,7 @@ test.describe('quantidade — estado otimista, debounce e flush', () => {
     await dialog.getByRole('button', { name: 'Aplicar' }).click();
 
     // subtotal = 3 × preço unitário; desconto de 10% sobre a quantidade nova (3), não a antiga (1).
-    await expect(totalValue(page)).toHaveText(brl(PRODUCTS.skol.price * 3 * 0.9));
+    await expect(totalValue(page)).toHaveText(brl(PRODUCTS.skol.salePrice * 3 * 0.9));
   });
 
   test('diminuir a quantidade funciona', async ({ page }) => {
@@ -150,11 +150,11 @@ test.describe('quantidade — estado otimista, debounce e flush', () => {
   test('o total exibido acompanha a quantidade alterada', async ({ page }) => {
     await addKnownItems(page, [{ code: PRODUCTS.skol.ean }]);
     const row = saleItemRow(page, PRODUCTS.skol.name);
-    await expect(totalValue(page)).toHaveText(brl(PRODUCTS.skol.price));
+    await expect(totalValue(page)).toHaveText(brl(PRODUCTS.skol.salePrice));
 
     await increaseQtyButton(row).click();
     await increaseQtyButton(row).click();
 
-    await expect(totalValue(page)).toHaveText(brl(PRODUCTS.skol.price * 3));
+    await expect(totalValue(page)).toHaveText(brl(PRODUCTS.skol.salePrice * 3));
   });
 });

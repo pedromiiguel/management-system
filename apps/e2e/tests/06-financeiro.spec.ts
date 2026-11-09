@@ -8,11 +8,10 @@ import { CUSTOMER_NAME } from './support/seed-data';
 // invisível copiado no meio da string.
 const brl = (value: string) => `R$ ${value}`;
 
-// Suíte E2E do financeiro — trava o comportamento observável das 5 abas
-// ANTES da refatoração estrutural (ADR 0001/0006), mesmo espírito da suíte
-// do PDV. Regra de negócio (diferença de caixa, liquidação de fiado) já está
-// coberta por apps/api/test/financial.e2e-spec.ts (supertest) — aqui só se
-// verifica a integração UI ↔ API.
+// Suíte E2E do financeiro — o comportamento observável das 5 abas. Regra de
+// negócio (diferença de caixa, liquidação de fiado) está coberta por
+// apps/api/test/financial.e2e-spec.ts — aqui só a integração UI ↔ API
+// (ver "Testes" em docs/arquitetura.md).
 
 test.describe('Financeiro — Caixa (BR-06)', () => {
   test.beforeAll(() => resetDatabase());
