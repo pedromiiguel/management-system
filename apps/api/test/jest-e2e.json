@@ -6,7 +6,9 @@
   "transform": {
     "^.+\\.ts$": "ts-jest"
   },
+  "globalSetup": "<rootDir>/support/global-setup.ts",
   "moduleNameMapper": {
+    "^@beverage/shared$": "<rootDir>/../../../packages/shared/src",
     "^@nestjs/observe$": "<rootDir>/mocks/nestjs-observe.ts"
   }
 }
