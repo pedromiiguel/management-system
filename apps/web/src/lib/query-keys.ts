@@ -18,6 +18,8 @@ export const rootKeys = {
   settings: ['settings'],
   users: ['users'],
   roles: ['roles'],
+  /** Usuário logado e permissões vivas (`/auth/me`). */
+  session: ['session'],
 } as const;
 
 export type Resource = keyof typeof rootKeys;

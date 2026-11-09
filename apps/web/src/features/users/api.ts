@@ -47,9 +47,9 @@ export function useCreateRole() {
   });
 }
 
-/** O nome do papel aparece na lista de usuários. */
+/** O nome do papel aparece na lista de usuários; o papel pode ser o do próprio usuário logado. */
 export function useUpdateRole() {
-  const onSuccess = useInvalidate('roles', 'users');
+  const onSuccess = useInvalidate('roles', 'users', 'session');
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateRoleInput }) =>
       http.patch<Role>(`/users/roles/${id}`, input),

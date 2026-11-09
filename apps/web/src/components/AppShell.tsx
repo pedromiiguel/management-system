@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { Link, Outlet, type LinkProps } from '@tanstack/react-router';
 import {
   Barcode,
@@ -9,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { logout, useSession } from '@/lib/session';
+import { sessionQuery } from '@/lib/session-query';
 
 const NAV: { icon: LucideIcon; label: string; to: LinkProps['to'] }[] = [
   { icon: Barcode, label: 'PDV — Caixa', to: '/sale' },
@@ -20,6 +22,8 @@ const NAV: { icon: LucideIcon; label: string; to: LinkProps['to'] }[] = [
 ];
 
 export function AppShell() {
+  // Mantém a sessão em dia: refaz `/auth/me` quando invalidada (ex.: papel alterado).
+  useQuery(sessionQuery());
   return (
     <div className="s-screen">
       <Sidebar />

@@ -73,6 +73,11 @@ export function startSession(token: string, user: SessionUser) {
   set({ token, user });
 }
 
+/** Troca o usuário guardado pelo que a API diz agora (nome, papel, permissões). */
+export function refreshSessionUser(user: SessionUser) {
+  if (current) set({ token: current.token, user });
+}
+
 /** Único caminho de saída: botão "sair" e qualquer 401 da API. */
 export function logout() {
   set(null);
