@@ -4,6 +4,8 @@ import {
   PaymentMethod,
   Permission,
   SaleStatus,
+  StockMovementSource,
+  StockMovementType,
   storeDateKey,
 } from '@beverage/shared';
 import { createTestApp, TestApp } from './support/app';
@@ -169,6 +171,10 @@ describe('Sales', () => {
       expect(voided.body.voidedAt).toBeTruthy();
       expect(voided.body.cancelledAt).toBeNull();
       expect(await currentStock(product.id)).toBe(10);
+      const returned = await t.prisma.stockMovement.findFirstOrThrow({
+        where: { saleId: sale.id, type: StockMovementType.ENTRY },
+      });
+      expect(returned.source).toBe(StockMovementSource.VOID);
 
       const today = storeDateKey(new Date());
       const cashFlow = await admin()

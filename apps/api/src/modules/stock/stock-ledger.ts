@@ -156,7 +156,7 @@ export class StockLedger {
         data: {
           productId: exit.productId,
           type: StockMovementType.ENTRY,
-          source: StockMovementSource.CANCELLATION,
+          source: StockMovementSource.VOID,
           quantity: exit.quantity,
           saleId,
         },

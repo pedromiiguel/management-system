@@ -1,6 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { StockMovementSource, StockMovementType } from '@beverage/shared';
+import {
+  STOCK_MOVEMENT_SOURCE_LABELS,
+  STOCK_MOVEMENT_TYPE_LABELS,
+  StockMovementType,
+} from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
@@ -10,13 +14,6 @@ import { formatDate, formatDateTime } from '@/lib/format';
 import { AdjustModal } from './AdjustModal';
 import { stockAlertsQuery, stockMovementsQuery } from './api';
 import { StockEntryModal } from './StockEntryModal';
-
-const SOURCE_LABELS: Record<StockMovementSource, string> = {
-  [StockMovementSource.PURCHASE]: 'Compra/reposição',
-  [StockMovementSource.SALE]: 'Venda (PDV)',
-  [StockMovementSource.ADJUSTMENT]: 'Ajuste manual',
-  [StockMovementSource.CANCELLATION]: 'Estorno de venda',
-};
 
 export function StockPage() {
   const [modal, setModal] = useState<'none' | 'entry' | 'adjust'>('none');
@@ -57,9 +54,9 @@ export function StockPage() {
                     {m.note ? <span className="s-dim"> — {m.note}</span> : null}
                   </span>,
                   <Tag key="t" tone={entry ? 'ok' : 'dim'}>
-                    {entry ? 'entrada' : 'saída'}
+                    {STOCK_MOVEMENT_TYPE_LABELS[m.type].toLowerCase()}
                   </Tag>,
-                  SOURCE_LABELS[m.source],
+                  STOCK_MOVEMENT_SOURCE_LABELS[m.source],
                   <b key="q">
                     {entry ? '+' : '−'}
                     {m.quantity}

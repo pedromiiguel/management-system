@@ -50,13 +50,30 @@ export const StockMovementType = {
 } as const;
 export type StockMovementType = (typeof StockMovementType)[keyof typeof StockMovementType];
 
+/** Sentido do movimento: soma (entrada) ou subtrai (saída) do saldo. */
+export const STOCK_MOVEMENT_TYPE_LABELS: Record<StockMovementType, string> = {
+  ENTRY: 'Entrada',
+  EXIT: 'Saída',
+};
+
+/**
+ * Origem do movimento de estoque. PURCHASE = Entrada; ADJUSTMENT = Ajustar;
+ * SALE = baixa na conclusão da Venda; VOID = devolução ao Estornar a Venda.
+ */
 export const StockMovementSource = {
   PURCHASE: 'PURCHASE',
   SALE: 'SALE',
   ADJUSTMENT: 'ADJUSTMENT',
-  CANCELLATION: 'CANCELLATION',
+  VOID: 'VOID',
 } as const;
 export type StockMovementSource = (typeof StockMovementSource)[keyof typeof StockMovementSource];
+
+export const STOCK_MOVEMENT_SOURCE_LABELS: Record<StockMovementSource, string> = {
+  PURCHASE: 'Compra/reposição',
+  SALE: 'Venda (PDV)',
+  ADJUSTMENT: 'Ajuste manual',
+  VOID: 'Estorno de venda',
+};
 
 export const CashRegisterStatus = {
   OPEN: 'OPEN',

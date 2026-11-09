@@ -100,7 +100,7 @@ enum StockMovementSource {
   PURCHASE
   SALE
   ADJUSTMENT
-  CANCELLATION
+  VOID // Estornar: itens da venda concluída voltam ao estoque
 }
 
 model StockMovement {
