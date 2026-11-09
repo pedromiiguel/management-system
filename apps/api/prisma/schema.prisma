@@ -185,6 +185,7 @@ model Sale {
   receivable     AccountReceivable?
 
   @@index([status, completedAt])
+  // Índice parcial (só em SQL, migração 20261109130100): uma Venda IN_PROGRESS por operador.
   @@map("sale")
 }
 
@@ -225,6 +226,7 @@ model CashRegister {
   movements       CashMovement[]
   sales           Sale[]
 
+  // Índice parcial (só em SQL, migração 20261109130100): um único caixa OPEN.
   @@map("cash_register")
 }
 

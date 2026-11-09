@@ -8,6 +8,7 @@ import {
   OpenRegisterInput,
   PaymentMethod,
 } from '@beverage/shared';
+import { isUniqueViolation } from '../../prisma/errors';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CashLedger } from './cash-ledger';
 
@@ -38,16 +39,19 @@ export class CashRegisterService {
     return { ...register, summary: summarize(register) };
   }
 
-  open(operatorId: string, input: OpenRegisterInput) {
-    return this.prisma.$transaction(async (tx) => {
-      if (await this.ledger.openRegister(tx)) {
-        throw new ConflictException('Já existe um caixa aberto — feche-o primeiro');
-      }
-      return tx.cashRegister.create({
+  /** Um único caixa aberto — o índice único parcial barra até aberturas simultâneas. */
+  async open(operatorId: string, input: OpenRegisterInput) {
+    const alreadyOpen = new ConflictException('Já existe um caixa aberto — feche-o primeiro');
+    if (await this.ledger.openRegister(this.prisma)) throw alreadyOpen;
+    try {
+      return await this.prisma.cashRegister.create({
         data: { operatorId, openingBalance: new Decimal(input.openingBalance) },
         include: withOperator,
       });
-    });
+    } catch (error) {
+      if (isUniqueViolation(error)) throw alreadyOpen;
+      throw error;
+    }
   }
 
   addMovement(input: CashMovementInput) {

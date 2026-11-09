@@ -26,6 +26,15 @@ describe('Financial', () => {
       await admin().post('/api/cash-register/open').send({ openingBalance: 50 }).expect(409);
     });
 
+    it('o banco também barra um segundo caixa aberto (índice único parcial)', async () => {
+      const open = await t.prisma.cashRegister.findFirstOrThrow({ where: { status: 'OPEN' } });
+      await expect(
+        t.prisma.cashRegister.create({
+          data: { operatorId: open.operatorId, openingBalance: 0 },
+        }),
+      ).rejects.toMatchObject({ code: 'P2002' });
+    });
+
     it('acumula sangria/suprimento no saldo esperado em dinheiro', async () => {
       await admin()
         .post('/api/cash-register/movements')

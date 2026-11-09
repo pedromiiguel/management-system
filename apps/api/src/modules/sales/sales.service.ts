@@ -16,6 +16,7 @@ import {
   SaleStatus,
   SystemCategory,
 } from '@beverage/shared';
+import { isUniqueViolation } from '../../prisma/errors';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CashLedger } from '../cash-register/cash-ledger';
 import { ProductsService } from '../products/products.service';
@@ -58,14 +59,25 @@ export class SalesService {
     private readonly receivables: ReceivablesService,
   ) {}
 
-  /** FR-09: abre o "carrinho". Reaproveita venda em andamento do operador, se houver. */
+  /**
+   * FR-09: abre o "carrinho". Reaproveita a venda em andamento do operador —
+   * só pode haver uma (índice único parcial), inclusive com aberturas simultâneas.
+   */
   async open(operatorId: string) {
-    const existing = await this.prisma.sale.findFirst({
-      where: { operatorId, status: SaleStatus.IN_PROGRESS },
-      include: saleInclude,
-    });
+    const inProgress = () =>
+      this.prisma.sale.findFirst({
+        where: { operatorId, status: SaleStatus.IN_PROGRESS },
+        include: saleInclude,
+      });
+    const existing = await inProgress();
     if (existing) return existing;
-    return this.prisma.sale.create({ data: { operatorId }, include: saleInclude });
+    try {
+      return await this.prisma.sale.create({ data: { operatorId }, include: saleInclude });
+    } catch (error) {
+      const opened = isUniqueViolation(error) ? await inProgress() : null;
+      if (opened) return opened;
+      throw error;
+    }
   }
 
   /**

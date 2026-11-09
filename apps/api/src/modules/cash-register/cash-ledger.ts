@@ -26,7 +26,7 @@ type Decimal = Prisma.Decimal;
  */
 @Injectable()
 export class CashLedger {
-  /** O caixa aberto, ou null. Só pode haver um (garantido em `CashRegisterService.open`). */
+  /** O caixa aberto, ou null. Só pode haver um (índice único parcial em `cash_register`). */
   openRegister(db: Db) {
     return db.cashRegister.findFirst({
       where: { status: CashRegisterStatus.OPEN },

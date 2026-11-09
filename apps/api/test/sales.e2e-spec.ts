@@ -149,6 +149,14 @@ describe('Sales', () => {
       expect(JSON.stringify(credit.body)).toContain('Venda a prazo exige cliente');
     });
 
+    it('aberturas simultâneas retomam a mesma Venda em andamento do operador', async () => {
+      const [a, b] = await Promise.all([
+        admin().post('/api/sales').expect(201),
+        admin().post('/api/sales').expect(201),
+      ]);
+      expect(a.body.id).toBe(b.body.id);
+    });
+
     it('com política BLOCK, bipar além do saldo é recusado', async () => {
       const product = await createProduct(2);
       const opened = await admin().post('/api/sales').expect(201);
