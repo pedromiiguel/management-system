@@ -10,7 +10,7 @@ const brl = (value: string) => `R$ ${value}`;
 // Suíte E2E de relatórios — trava o comportamento observável das 4 abas
 // ANTES da refatoração estrutural (ADR 0001/0009), mesmo espírito das
 // suítes de financeiro/produtos/estoque. BR-05 (estorno) já está coberta
-// por apps/api/test/reports.e2e-spec.ts (supertest) — aqui só se verifica
+// por apps/api/test/sales.e2e-spec.ts (supertest) — aqui só se verifica
 // a integração UI ↔ API do caminho feliz.
 
 test.describe('Relatórios — navegação e filtro de período', () => {
@@ -94,7 +94,8 @@ test.describe('Relatórios — Vendas por período (histórico, detalhe e estorn
     await expect(confirm).toBeHidden();
 
     await expect(page.locator('.s-toast')).toContainText('Venda estornada');
-    await expect(row.getByText('cancelada', { exact: true })).toBeVisible();
+    // Estornar grava VOIDED — rótulo "estornada", distinto da venda em andamento cancelada.
+    await expect(row.getByText('estornada', { exact: true })).toBeVisible();
     await expect(row.getByRole('button', { name: 'Estornar' })).toHaveCount(0);
   });
 

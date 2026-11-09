@@ -9,7 +9,7 @@ export function brl(value: number): string {
   return brlFormatter.format(value);
 }
 
-/** Espelha `apps/web/src/lib/cupom.ts#brl` (texto do cupom) — usa espaço comum. */
+/** Espelha `apps/web/src/features/sale/receipt.ts#brl` (texto do cupom) — usa espaço comum. */
 export function cupomBrl(value: number): string {
   return `R$ ${cupomMoneyFormatter.format(value)}`;
 }

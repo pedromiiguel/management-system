@@ -10,7 +10,7 @@ const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
  * domínio é acumulativo (estoque, caixa, fiado) e cada arquivo precisa
  * partir de um estado conhecido, independente do que outro arquivo deixou.
  *
- * `prisma migrate reset --force` já roda o seed automaticamente ao final.
+ * `db:reset` = `prisma migrate reset` sem seed + seed base com `--fixtures`.
  */
 export function resetDatabase(): void {
   execFileSync(npmCmd, ['run', 'db:reset', '--workspace', 'apps/api'], {
