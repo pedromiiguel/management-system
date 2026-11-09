@@ -4,11 +4,19 @@ import { parseEnv } from 'node:util';
 
 // Sem imports do app/seed: roda no globalSetup do Jest e no Playwright (apps/e2e).
 
-const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]', 'postgres']);
+// Só a própria máquina. `postgres` (host do compose `prod`) fica de fora.
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 const API_DOTENV = path.resolve(__dirname, '../../.env');
 
-/** Os testes apagam o banco inteiro: só aceitam um Postgres local. */
+/**
+ * Os testes apagam o banco inteiro: recusam `NODE_ENV=production` e um host
+ * que não seja esta máquina. Não distingue o banco de desenvolvimento de outro
+ * banco local — nunca aponte os testes para o banco da loja.
+ */
 export function assertLocalDatabase(url = process.env.DATABASE_URL) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Testes recusam apagar o banco com NODE_ENV=production');
+  }
   if (!url) throw new Error('DATABASE_URL não definido para os testes');
   const host = new URL(url).hostname;
   if (!LOCAL_HOSTS.has(host)) {
@@ -17,11 +25,10 @@ export function assertLocalDatabase(url = process.env.DATABASE_URL) {
 }
 
 /**
- * Ambiente para resetar o banco dos testes (`prisma migrate reset`): confere
- * que o `DATABASE_URL` efetivo (processo, senão `apps/api/.env`) é local e
- * dá o consentimento que o Prisma exige quando roda sob um agente de IA. O
- * consentimento vale só para esse Postgres local de testes — único lugar
- * onde ele é dado (suíte da API e Playwright).
+ * Ambiente para resetar o banco dos testes (`prisma migrate reset`): passa o
+ * `DATABASE_URL` efetivo (processo, senão `apps/api/.env`) por
+ * `assertLocalDatabase` e dá o consentimento que o Prisma exige quando roda sob um agente de IA. O
+ * consentimento é dado só aqui (suíte da API e Playwright).
  */
 export function localResetEnv(): NodeJS.ProcessEnv {
   const fromFile = existsSync(API_DOTENV) ? parseEnv(readFileSync(API_DOTENV, 'utf8')) : {};

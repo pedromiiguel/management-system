@@ -43,7 +43,9 @@ Database runs via `docker compose up -d postgres` (Postgres 17 on `localhost:543
 
 API-only workflows (from `apps/api`): `npm run db:migrate:dev` (create/apply a dev migration), `npm run db:generate` (regenerate Prisma client after schema edits; also runs on `postinstall`).
 
-**Single test:** `npm test --workspace apps/api -- shared-enums` (filename substring or `-t "name"`); `npm test --workspace apps/web -- receipt`; `npm test --workspace packages/shared`. API unit specs are `*.spec.ts` colocated in `src/`; API e2e specs live in `apps/api/test/` (`*.e2e-spec.ts`, shared harness in `test/support/`: one `migrate reset` per run, refuses non-local databases, `createTestApp()` uses the production `configureApp`). Jest and vitest map `@beverage/shared` to its TypeScript source.
+**Single test:** `npm test --workspace apps/api -- shared-enums` (filename substring or `-t "name"`); `npm test --workspace apps/web -- receipt`; `npm test --workspace packages/shared`. API unit specs are `*.spec.ts` colocated in `src/`; API e2e specs live in `apps/api/test/` (`*.e2e-spec.ts`, shared harness in `test/support/`: one `migrate reset` per run, refuses `NODE_ENV=production` and non-localhost hosts, `createTestApp()` uses the production `configureApp`). Jest and vitest map `@beverage/shared` to its TypeScript source.
+
+**Never run the e2e suites (`test:e2e:api`, `test:e2e`) against the store's database** — they wipe whatever `DATABASE_URL` points to, and the guard cannot tell the dev database from the store's on the same machine.
 
 **Env:** copy `apps/api/.env.example` to `apps/api/.env`. [config/env.ts](apps/api/src/config/env.ts) loads that file outside production (process env wins) and validates with Zod at boot: `DATABASE_URL` required; `JWT_SECRET` required in production (dev fallback otherwise); `JWT_EXPIRES_IN` (default `12h`); `PORT`; `CORS_ORIGIN` (comma-separated; required in production, empty = reflect any origin outside it); optional `OBSERVE_APP_KEY`/`OBSERVE_APP_SECRET`.
 

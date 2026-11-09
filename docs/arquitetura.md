@@ -95,5 +95,8 @@ permissão → `features/<f>/api.ts` + página → rota.
   então testes de um mesmo arquivo compartilham estado e cada arquivo parte do
   zero. Dados esperados vêm do seed da API (`support/seed-data.ts`) e os
   formatos de dinheiro do próprio web (`support/format.ts`).
-- Só um Postgres local pode ser apagado: `apps/api/test/support/local-database.ts`
-  confere o host e dá o consentimento do Prisma, nas duas suítes.
+- As duas suítes apagam o banco do `DATABASE_URL`.
+  `apps/api/test/support/local-database.ts` recusa `NODE_ENV=production` e
+  hosts que não sejam esta máquina (`localhost`/`127.0.0.1`/`::1`) e dá o
+  consentimento do Prisma. Não reconhece qual banco local é qual: nunca rode
+  os testes contra o banco da loja.
