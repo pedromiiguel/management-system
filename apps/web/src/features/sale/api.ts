@@ -97,7 +97,7 @@ export const salesHistoryQuery = (from: string, to: string, page: number) =>
     queryFn: () => http.get<Paginated<Sale>>('/sales/history', { from, to, page }),
   });
 
-/** Estornar: cancela uma venda concluída, devolvendo estoque e valores. */
+/** Estornar: desfaz uma venda concluída (VOIDED), devolvendo estoque e valores. */
 export function useVoidSale() {
   const onSuccess = useInvalidate(...SALE_SETTLEMENT_EFFECTS);
   return useMutation({
