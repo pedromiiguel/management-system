@@ -5,7 +5,9 @@ import { SearchStockMovementsHandler } from './search-stock-movements-handler';
 describe('SearchStockMovementsHandler', () => {
   it('busca as movimentações via GET /stock/movements, sem filtro', async () => {
     const movements = [{ id: 'm1' }];
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: movements }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: movements }),
+    };
     const handler = new SearchStockMovementsHandler(httpClient);
 
     const result = await handler.search();
@@ -20,7 +22,9 @@ describe('SearchStockMovementsHandler', () => {
 
   it('filtra por productId quando informado', async () => {
     const movements: unknown[] = [];
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: movements }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: movements }),
+    };
     const handler = new SearchStockMovementsHandler(httpClient);
 
     await handler.search('p1');

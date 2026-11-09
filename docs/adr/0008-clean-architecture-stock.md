@@ -78,13 +78,13 @@ corrigiu para o tipo `Product`.
 
 Inventário completo (5 chamadas de API usadas hoje por `stock.tsx`):
 
-| Chamada atual                              | Entidade      | Usecase                          | Handler                    | Factory                  |
-| ------------------------------------------- | ------------- | ------------------------------------ | ------------------------------ | ---------------------------- |
-| `GET /stock/alerts`                        | StockAlerts   | `IGetStockAlerts` *(custom, movido)* | `GetStockAlertsHandler`        | `makeGetStockAlerts`         |
-| `GET /stock/movements`                     | StockMovement | `ISearchStockMovements` *(custom)*   | `SearchStockMovementsHandler`  | `makeSearchStockMovements`   |
-| `POST /stock/entries`                      | StockMovement | `ICreateStockEntry` *(movido)*       | `CreateStockEntryHandler`      | `makeCreateStockEntry`       |
-| `POST /stock/adjustments`                  | StockMovement | `ICreateStockAdjustment` *(custom)*  | `CreateStockAdjustmentHandler` | `makeCreateStockAdjustment`  |
-| `GET /products?search=&perPage=` (`AdjustModal`) | Product | `ISearchProductCatalog` *(reuso)*    | `SearchProductCatalogHandler`  | `makeSearchProductCatalog`   |
+| Chamada atual                                    | Entidade      | Usecase                              | Handler                        | Factory                     |
+| ------------------------------------------------ | ------------- | ------------------------------------ | ------------------------------ | --------------------------- |
+| `GET /stock/alerts`                              | StockAlerts   | `IGetStockAlerts` _(custom, movido)_ | `GetStockAlertsHandler`        | `makeGetStockAlerts`        |
+| `GET /stock/movements`                           | StockMovement | `ISearchStockMovements` _(custom)_   | `SearchStockMovementsHandler`  | `makeSearchStockMovements`  |
+| `POST /stock/entries`                            | StockMovement | `ICreateStockEntry` _(movido)_       | `CreateStockEntryHandler`      | `makeCreateStockEntry`      |
+| `POST /stock/adjustments`                        | StockMovement | `ICreateStockAdjustment` _(custom)_  | `CreateStockAdjustmentHandler` | `makeCreateStockAdjustment` |
+| `GET /products?search=&perPage=` (`AdjustModal`) | Product       | `ISearchProductCatalog` _(reuso)_    | `SearchProductCatalogHandler`  | `makeSearchProductCatalog`  |
 
 **Reuso deliberado cross-domínio**: `AdjustModal` busca produto pelo mesmo
 endpoint paginado do catálogo (`GET /products?search=&perPage=6`) —
@@ -184,8 +184,7 @@ corrigido no mesmo PR, documentado nesta ADR — não vira item separado.
   "Entrada de estoque" abre normalmente em `/products` e em `/stock`, sem
   erro de console).
 - `ICreateStockEntry` e `IGetStockAlerts` saíram de `domain/usecases/products`
-  para `domain/usecases/stock` — fecha o desvio temporário registrado na ADR
-  0007. `StockMovement` nasceu em `domain/models/stock.ts`, ao lado de
+  para `domain/usecases/stock` — fecha o desvio temporário registrado na ADR 0007. `StockMovement` nasceu em `domain/models/stock.ts`, ao lado de
   `StockAlerts`. `lib/types.ts` perdeu os reexports de `Product` e
   `StockAlerts` (sem consumidor depois desta migração — só `reports.tsx`
   ainda usa `Paginated`/`Sale` daquele arquivo).

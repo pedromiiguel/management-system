@@ -4,7 +4,9 @@ import { CancelSaleHandler } from './cancel-sale-handler';
 
 describe('CancelSaleHandler', () => {
   it('cancela a venda em andamento via POST /sales/:id/cancel', async () => {
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: {} }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: {} }),
+    };
     const handler = new CancelSaleHandler(httpClient);
 
     await handler.cancel('s1');

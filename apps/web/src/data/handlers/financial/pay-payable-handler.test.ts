@@ -5,7 +5,9 @@ import { PayPayableHandler } from './pay-payable-handler';
 describe('PayPayableHandler', () => {
   it('paga uma conta via POST /payables/:id/pay', async () => {
     const payable = { id: 'p1', status: 'PAID' };
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 201, body: payable }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 201, body: payable }),
+    };
     const handler = new PayPayableHandler(httpClient);
 
     const result = await handler.pay('p1');

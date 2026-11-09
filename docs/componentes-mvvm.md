@@ -38,15 +38,15 @@ CustomerModal/
 
 ## Papéis (MVVM)
 
-| Arquivo       | Papel         | Faz                                                                                 | Não faz                                  |
-| ------------- | ------------- | ----------------------------------------------------------------------------------- | ---------------------------------------- |
-| `.model.ts`   | **Model**     | Hook `use{Componente}Model`. Estado, queries/mutations de `main`, `useForm` (RHF), regra | JSX. Formatação de exibição.             |
-| `.tsx`        | **ViewModel** | Consome o Model, adapta domínio → props de View (formata, monta rows, flags)        | Fetch direto. Markup além de `<View />`. |
-| `.view.tsx`   | **View**      | Recebe props prontas e renderiza. `<form>` + `register`. Ícones lucide               | Chamar `main`. Regra de negócio.         |
-| `.types.ts`   | Tipos         | `Props` do componente e `ViewProps`                                                  | Lógica.                                  |
-| `.schema.ts`  | Validação     | `z.object({...})` + `z.infer`. Só quando há formulário (ver [Formulários](#formulários-react-hook-form)) | Lógica de UI.       |
-| `.styles.ts`  | Estilos       | Raro — só CSS que o Tailwind não expressa (ver [Estilização](#estilização-tailwind)) | Substituir Tailwind. `style={{}}` inline. |
-| `index.ts`    | Barrel        | Reexporta o componente e os tipos públicos                                           | Lógica.                                  |
+| Arquivo      | Papel         | Faz                                                                                                      | Não faz                                   |
+| ------------ | ------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `.model.ts`  | **Model**     | Hook `use{Componente}Model`. Estado, queries/mutations de `main`, `useForm` (RHF), regra                 | JSX. Formatação de exibição.              |
+| `.tsx`       | **ViewModel** | Consome o Model, adapta domínio → props de View (formata, monta rows, flags)                             | Fetch direto. Markup além de `<View />`.  |
+| `.view.tsx`  | **View**      | Recebe props prontas e renderiza. `<form>` + `register`. Ícones lucide                                   | Chamar `main`. Regra de negócio.          |
+| `.types.ts`  | Tipos         | `Props` do componente e `ViewProps`                                                                      | Lógica.                                   |
+| `.schema.ts` | Validação     | `z.object({...})` + `z.infer`. Só quando há formulário (ver [Formulários](#formulários-react-hook-form)) | Lógica de UI.                             |
+| `.styles.ts` | Estilos       | Raro — só CSS que o Tailwind não expressa (ver [Estilização](#estilização-tailwind))                     | Substituir Tailwind. `style={{}}` inline. |
+| `index.ts`   | Barrel        | Reexporta o componente e os tipos públicos                                                               | Lógica.                                   |
 
 Fluxo em runtime:
 
@@ -171,8 +171,7 @@ import { CustomerModalView } from './CustomerModal.view';
 import type { CustomerModalProps, CustomerRow } from './CustomerModal.types';
 
 export function CustomerModal({ onPick, onClose }: CustomerModalProps) {
-  const { registerFilter, customers, register, submit, canCreate } =
-    useCustomerModalModel(onPick);
+  const { registerFilter, customers, register, submit, canCreate } = useCustomerModalModel(onPick);
 
   const rows: CustomerRow[] = customers.map((customer) => ({
     key: customer.id,
@@ -335,12 +334,12 @@ inputs com máscara).
 
 Divisão nas camadas MVVM:
 
-| Onde              | O quê                                                                 |
-| ----------------- | --------------------------------------------------------------------- |
-| `.schema.ts`      | `z.object({...})` + tipo inferido (`z.infer`). Fonte de verdade.       |
-| `.model.ts`       | `useForm({ resolver: zodResolver(schema) })`. Expõe `register`, `submit = handleSubmit(...)`, `formState`. |
-| `.tsx` (ViewModel)| Repassa `register`/`submit`/`errors` para a View.                     |
-| `.view.tsx`       | `<form onSubmit={submit}>` + `<input {...register('campo')} />`.      |
+| Onde               | O quê                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `.schema.ts`       | `z.object({...})` + tipo inferido (`z.infer`). Fonte de verdade.                                           |
+| `.model.ts`        | `useForm({ resolver: zodResolver(schema) })`. Expõe `register`, `submit = handleSubmit(...)`, `formState`. |
+| `.tsx` (ViewModel) | Repassa `register`/`submit`/`errors` para a View.                                                          |
+| `.view.tsx`        | `<form onSubmit={submit}>` + `<input {...register('campo')} />`.                                           |
 
 - **`submit` já vem pronto do Model** (`handleSubmit(fn)`), a View só o liga no
   `<form onSubmit>`. A View não conhece `handleSubmit`.
@@ -365,15 +364,15 @@ Não reexporte `model`, `view` nem `types` internos: só o que é consumido de f
 
 ## Quando cada arquivo é opcional
 
-| Arquivo       | Quando existe                                                            |
-| ------------- | ------------------------------------------------------------------------ |
-| `.types.ts`   | Sempre que o componente tem tipos próprios (quase sempre).               |
-| `.model.ts`   | Sempre que há estado ou acesso a dados. Componente 100% visual não tem.  |
-| `.view.tsx`   | Quando há model/adaptação (o `.tsx` é o ViewModel e a View é separada).  |
-| `.tsx`        | Sempre (é o export público).                                            |
-| `.schema.ts`  | Só quando o componente tem formulário (zod + RHF).                      |
-| `.styles.ts`  | Raro. Só CSS que o Tailwind não cobre — não é o caminho padrão.         |
-| `index.ts`    | Sempre.                                                                  |
+| Arquivo      | Quando existe                                                           |
+| ------------ | ----------------------------------------------------------------------- |
+| `.types.ts`  | Sempre que o componente tem tipos próprios (quase sempre).              |
+| `.model.ts`  | Sempre que há estado ou acesso a dados. Componente 100% visual não tem. |
+| `.view.tsx`  | Quando há model/adaptação (o `.tsx` é o ViewModel e a View é separada). |
+| `.tsx`       | Sempre (é o export público).                                            |
+| `.schema.ts` | Só quando o componente tem formulário (zod + RHF).                      |
+| `.styles.ts` | Raro. Só CSS que o Tailwind não cobre — não é o caminho padrão.         |
+| `index.ts`   | Sempre.                                                                 |
 
 Componente sem estado nenhum (puramente apresentacional) pode dispensar o
 `.model.ts`: o ViewModel (`.tsx`) recebe props, adapta e entrega à View. Não crie

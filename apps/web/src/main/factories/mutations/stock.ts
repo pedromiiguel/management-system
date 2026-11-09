@@ -4,7 +4,9 @@ import { makeCreateStockAdjustment, makeCreateStockEntry } from '@/main/factorie
 
 /** Movida de main/factories/mutations/products — também consumida por ProductsPage (Decisão 1 da ADR 0008). */
 export function useCreateStockEntryMutation() {
-  return useMutation({ mutationFn: (input: StockEntryInput) => makeCreateStockEntry().create(input) });
+  return useMutation({
+    mutationFn: (input: StockEntryInput) => makeCreateStockEntry().create(input),
+  });
 }
 
 export function useCreateStockAdjustmentMutation() {

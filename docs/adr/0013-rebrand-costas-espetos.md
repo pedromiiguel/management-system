@@ -5,8 +5,8 @@
   convenção MVVM de [componentes-mvvm.md](../componentes-mvvm.md) para o novo
   `LoginBrandPanel`
 - **Não reabre:** [ADR 0012](0012-migracao-sol-lucide.md) — os ícones
-  continuam vindo de `lucide-react`; esta rodada só troca *quais* ícones e
-  *quais* cores, não a fonte
+  continuam vindo de `lucide-react`; esta rodada só troca _quais_ ícones e
+  _quais_ cores, não a fonte
 
 ## Contexto
 
@@ -88,15 +88,15 @@ Decisão do usuário: como os ~20 valores hardcoded iam ser tocados de
 qualquer jeito nesta troca de paleta, este é o momento barato de nomeá-los.
 Novos tokens em `styles.css`:
 
-| Token | Valor | Papel |
-|---|---|---|
-| `--surface-soft` | `#faf7f2` | hover de botão, fundo de linha "forte" no DRE, fundo do cupom |
-| `--surface-mute` | `#f0ebe3` | tag "dim", faixa de atalhos do PDV (`.s-strip`) |
-| `--surface-sunk` | `#ede7de` | fundo do `.s-seg` (tabs segmentadas) |
-| `--line-soft` | `#f0ebe4` | borda de linha de tabela/DRE (mais clara que `--line`) |
-| `--track` | `#ebe5dc` | trilho da barra de progresso |
-| `--track-strong` | `#d3cac0` | trilho do toggle (estado "off") |
-| `--shadow-rgb` | `23 18 15` | componentes RGB de `--ink-900`, para uso em `rgb(var(--shadow-rgb) / alpha)` em sombras/overlays |
+| Token            | Valor      | Papel                                                                                            |
+| ---------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `--surface-soft` | `#faf7f2`  | hover de botão, fundo de linha "forte" no DRE, fundo do cupom                                    |
+| `--surface-mute` | `#f0ebe3`  | tag "dim", faixa de atalhos do PDV (`.s-strip`)                                                  |
+| `--surface-sunk` | `#ede7de`  | fundo do `.s-seg` (tabs segmentadas)                                                             |
+| `--line-soft`    | `#f0ebe4`  | borda de linha de tabela/DRE (mais clara que `--line`)                                           |
+| `--track`        | `#ebe5dc`  | trilho da barra de progresso                                                                     |
+| `--track-strong` | `#d3cac0`  | trilho do toggle (estado "off")                                                                  |
+| `--shadow-rgb`   | `23 18 15` | componentes RGB de `--ink-900`, para uso em `rgb(var(--shadow-rgb) / alpha)` em sombras/overlays |
 
 Todo `rgba(2, 47, 64, X)` do CSS antigo virou `rgb(var(--shadow-rgb) / X)`.
 Uma próxima troca de marca edita só o bloco `:root`, sem caçar hardcoded de
@@ -149,15 +149,15 @@ rodada. Não é regressão: o elemento anterior também não tinha ação.
   desta rodada com lógica de fato, por isso mora na Model, não só na View.
 - **Lista de 3 features** (Caixa rápido, Estoque baixado a cada venda,
   Fechamento do dia sem planilha): estático, vira `LoginBrandPanel.
-  constants.ts` (`BRAND_FEATURES`), seguindo o padrão de constantes locais
+constants.ts` (`BRAND_FEATURES`), seguindo o padrão de constantes locais
   do componente (mesmo espírito de `Sidebar.constants.ts`/`PaymentTiles.
-  constants.ts`).
+constants.ts`).
 - **Painel de marca vira componente próprio** (`LoginBrandPanel`), com
   ViewModel+View separados mesmo sendo passthrough puro — consistente com a
   convenção que o [ADR 0012](0012-migracao-sol-lucide.md) fixou para este
   repo (todo componente de `presentation/` ganha ViewModel+View, mesmo sem
   lógica), aplicada aqui a um componente novo de flow (`presentation/flows/
-  login/components/`), não só aos globais de `presentation/components/`.
+login/components/`), não só aos globais de `presentation/components/`.
 
 ## Alternativas rejeitadas
 
@@ -191,13 +191,13 @@ rodada. Não é regressão: o elemento anterior também não tinha ação.
 - `LoginPage.model.ts`/`.types.ts`/`.tsx`/`.view.tsx`: ganham
   `passwordVisible`/`onTogglePasswordVisible`; a marca do login (glow,
   halos, emblema, features, rodapé) extraída para `presentation/flows/
-  login/components/LoginBrandPanel/` (MVVM completo: `.tsx`, `.view.tsx`,
+login/components/LoginBrandPanel/` (MVVM completo: `.tsx`, `.view.tsx`,
   `.constants.ts`, `index.ts`).
 - `CLAUDE.md`, `apps/web/index.html`: "Costas BAR"/"Costas's Espetos" →
   "Costa's Espetos".
 - `apps/web/public/logo.png` (944×1120, upload manual do usuário — o MCP
   `claude_design` não baixa acima de 256 KiB) e `apps/web/public/
-  logo-mark.png` (recorte da grelha com espetinhos, 460×270, gerado a
+logo-mark.png` (recorte da grelha com espetinhos, 460×270, gerado a
   partir do primeiro) adicionados ao repo.
 - Typecheck (`tsc --noEmit`) limpo em `apps/web`. Suíte `apps/web` (vitest):
   58/58 verdes, sem regressão (nenhum teste toca `styles.css`/`Sidebar`/

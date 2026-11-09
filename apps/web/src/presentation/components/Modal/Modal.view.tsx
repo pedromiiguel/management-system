@@ -12,7 +12,9 @@ export function ModalView({ title, onClose, children, width }: ModalProps) {
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        <div className="s-modal-title" id={titleId}>{title}</div>
+        <div className="s-modal-title" id={titleId}>
+          {title}
+        </div>
         {children}
       </div>
     </div>

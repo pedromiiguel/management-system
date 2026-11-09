@@ -10,7 +10,8 @@ import { httpClient } from '@/main/factories/http/make-http-client';
 export const makeGetSalesReport = () => new GetSalesReportHandler(httpClient);
 export const makeExportSalesReportCsv = () => new ExportSalesReportCsvHandler(httpClient);
 export const makeGetProductPerformance = () => new GetProductPerformanceHandler(httpClient);
-export const makeExportProductPerformanceCsv = () => new ExportProductPerformanceCsvHandler(httpClient);
+export const makeExportProductPerformanceCsv = () =>
+  new ExportProductPerformanceCsvHandler(httpClient);
 export const makeGetStockPosition = () => new GetStockPositionHandler(httpClient);
 export const makeExportStockPositionCsv = () => new ExportStockPositionCsvHandler(httpClient);
 export const makeGetSalesTotal = () => new GetSalesTotalHandler(httpClient);

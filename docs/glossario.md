@@ -138,7 +138,7 @@ comum (`auth`):
 - `apps/web/src/routes/_app.tsx` (o shell de navegação/sidebar) é um
   wrapper fino; a implementação vive em
   `apps/web/src/presentation/layout/AppShell/` (View pura, sem `domain/
-  data/main` próprios — não há chamada de API por trás, só `clearSession()`
+data/main` próprios — não há chamada de API por trás, só `clearSession()`
   local) + `AppShell/components/Sidebar/` (MVVM completo).
 
 `lib/auth.ts` (`getToken`/`setSession`/`clearSession`/`isAuthenticated`/

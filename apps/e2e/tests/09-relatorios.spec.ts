@@ -81,7 +81,9 @@ test.describe('Relatórios — Vendas por período (histórico, detalhe e estorn
     await expect(dialog).toBeHidden();
   });
 
-  test('estornar a venda pelo modal de confirmação reflete na listagem (BR-05)', async ({ page }) => {
+  test('estornar a venda pelo modal de confirmação reflete na listagem (BR-05)', async ({
+    page,
+  }) => {
     await openReportsTab(page, 'Vendas por período');
     const row = page.locator('.s-tr.is-selectable').first();
     await row.getByRole('button', { name: 'Estornar' }).click();

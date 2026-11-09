@@ -36,7 +36,12 @@ export function GeneralTabView({
         <div className="s-card-title">Formas de pagamento habilitadas (FR-17)</div>
         <div className="flex flex-col gap-2">
           {paymentMethods.map(({ method, label, on }) => (
-            <Toggle key={method} on={on} label={label} onChange={(next) => onTogglePaymentMethod(method, next)} />
+            <Toggle
+              key={method}
+              on={on}
+              label={label}
+              onChange={(next) => onTogglePaymentMethod(method, next)}
+            />
           ))}
         </div>
       </Card>

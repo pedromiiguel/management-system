@@ -30,11 +30,17 @@ export function RegisterTabView({
           <div className="flex gap-2">
             {register ? (
               <>
-                <Button ghost onClick={() => onOpenModal('move')}>Sangria / Suprimento</Button>
-                <Button primary onClick={() => onOpenModal('close')}>Fechar caixa</Button>
+                <Button ghost onClick={() => onOpenModal('move')}>
+                  Sangria / Suprimento
+                </Button>
+                <Button primary onClick={() => onOpenModal('close')}>
+                  Fechar caixa
+                </Button>
               </>
             ) : (
-              <Button primary onClick={() => onOpenModal('open')}>Abrir caixa</Button>
+              <Button primary onClick={() => onOpenModal('open')}>
+                Abrir caixa
+              </Button>
             )}
           </div>
         </div>
@@ -64,13 +70,31 @@ export function RegisterTabView({
           <div className="s-card-title">Situação do caixa</div>
           {register ? (
             <>
-              <div className="s-kv"><span>Status</span><Tag tone="ok">aberto</Tag></div>
-              <div className="s-kv"><span>Operador</span><b>{register.operator.name}</b></div>
-              <div className="s-kv"><span>Abertura</span><b>{formatDateTime(register.openedAt)}</b></div>
-              <div className="s-kv"><span>Saldo inicial</span><b>{formatBRL(register.openingBalance)}</b></div>
+              <div className="s-kv">
+                <span>Status</span>
+                <Tag tone="ok">aberto</Tag>
+              </div>
+              <div className="s-kv">
+                <span>Operador</span>
+                <b>{register.operator.name}</b>
+              </div>
+              <div className="s-kv">
+                <span>Abertura</span>
+                <b>{formatDateTime(register.openedAt)}</b>
+              </div>
+              <div className="s-kv">
+                <span>Saldo inicial</span>
+                <b>{formatBRL(register.openingBalance)}</b>
+              </div>
               <div className="s-divider" />
-              <div className="s-kv"><span>Sangrias</span><b>−{formatBRL(register.summary?.pulls)}</b></div>
-              <div className="s-kv"><span>Suprimentos</span><b>+{formatBRL(register.summary?.floats)}</b></div>
+              <div className="s-kv">
+                <span>Sangrias</span>
+                <b>−{formatBRL(register.summary?.pulls)}</b>
+              </div>
+              <div className="s-kv">
+                <span>Suprimentos</span>
+                <b>+{formatBRL(register.summary?.floats)}</b>
+              </div>
               <div className="s-kv is-troco">
                 <span>Dinheiro esperado na gaveta</span>
                 <b>{formatBRL(register.summary?.expectedCash)}</b>
@@ -87,7 +111,9 @@ export function RegisterTabView({
             <div className="s-card-title">Recebido no turno (por forma)</div>
             {Object.entries(register.summary.inflowsByMethod).map(([method, value]) => (
               <div key={method} className="s-kv">
-                <span>{PAYMENT_METHOD_LABELS[method as keyof typeof PAYMENT_METHOD_LABELS] ?? method}</span>
+                <span>
+                  {PAYMENT_METHOD_LABELS[method as keyof typeof PAYMENT_METHOD_LABELS] ?? method}
+                </span>
                 <b>{formatBRL(value)}</b>
               </div>
             ))}

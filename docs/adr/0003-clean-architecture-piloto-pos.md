@@ -16,7 +16,7 @@ presentation → main → data → domain ← @shared
 
 com vocabulário canônico de CRUD (`Search/GetOne/Create/Update/Delete{Entity}`),
 `IHttpClient` como única fronteira com HTTP, e uma estrutura de pastas para
-`presentation/` (componentes globais vs. locais por *flow*, `hooks/`, `flows/`, etc.).
+`presentation/` (componentes globais vs. locais por _flow_, `hooks/`, `flows/`, etc.).
 
 Isso é ordens de grandeza maior do que o `features/pos/` leve fechado em
 [0002](0002-escopo-refatoracao-pos.md). Decidiu-se (grilling de 2026-07-21) que
@@ -40,18 +40,18 @@ TypeScript puros de HTTP/cookie, locais a `apps/web`) usa outro nome:
 Levantamento completo de `pos.tsx` (11 chamadas de API, nenhuma delas é CRUD
 puro exceto busca de produto/cliente):
 
-| Chamada atual                            | Entidade    | Usecase                     | Handler                       | Factory                          |
-| ----------------------------------------- | ----------- | ---------------------------- | ------------------------------ | --------------------------------- |
-| `GET /products?search=&perPage=`          | Product     | `ISearchProduct`              | `SearchProductHandler`         | `makeSearchProduct`               |
-| `POST /sales`                             | Sale        | `IOpenSale` *(custom)*        | `OpenSaleHandler`               | `makeOpenSale`                    |
-| `POST /sales/:id/items`                   | SaleItem    | `IAddSaleItem` *(custom)*     | `AddSaleItemHandler`           | `makeAddSaleItem`                 |
-| `PATCH /sales/:id/items/:itemId`          | SaleItem    | `IUpdateSaleItemQuantity` *(custom)* | `UpdateSaleItemQuantityHandler` | `makeUpdateSaleItemQuantity`      |
-| `DELETE /sales/:id/items/:itemId`         | SaleItem    | `IDeleteSaleItem`             | `DeleteSaleItemHandler`        | `makeDeleteSaleItem`              |
-| `PUT /sales/:id/discount`                 | Sale        | `ISetSaleDiscount` *(custom)* | `SetSaleDiscountHandler`       | `makeSetSaleDiscount`             |
-| `POST /sales/:id/cancel`                  | Sale        | `ICancelSale` *(custom)*      | `CancelSaleHandler`            | `makeCancelSale`                  |
-| `POST /sales/:id/complete`                | Sale        | `ICompleteSale` *(custom)*    | `CompleteSaleHandler`          | `makeCompleteSale`                |
-| `GET /customers?search=`                  | Customer    | `ISearchCustomer`             | `SearchCustomerHandler`        | `makeSearchCustomer`              |
-| `POST /customers`                         | Customer    | `ICreateCustomer`             | `CreateCustomerHandler`        | `makeCreateCustomer`              |
+| Chamada atual                     | Entidade | Usecase                              | Handler                         | Factory                      |
+| --------------------------------- | -------- | ------------------------------------ | ------------------------------- | ---------------------------- |
+| `GET /products?search=&perPage=`  | Product  | `ISearchProduct`                     | `SearchProductHandler`          | `makeSearchProduct`          |
+| `POST /sales`                     | Sale     | `IOpenSale` _(custom)_               | `OpenSaleHandler`               | `makeOpenSale`               |
+| `POST /sales/:id/items`           | SaleItem | `IAddSaleItem` _(custom)_            | `AddSaleItemHandler`            | `makeAddSaleItem`            |
+| `PATCH /sales/:id/items/:itemId`  | SaleItem | `IUpdateSaleItemQuantity` _(custom)_ | `UpdateSaleItemQuantityHandler` | `makeUpdateSaleItemQuantity` |
+| `DELETE /sales/:id/items/:itemId` | SaleItem | `IDeleteSaleItem`                    | `DeleteSaleItemHandler`         | `makeDeleteSaleItem`         |
+| `PUT /sales/:id/discount`         | Sale     | `ISetSaleDiscount` _(custom)_        | `SetSaleDiscountHandler`        | `makeSetSaleDiscount`        |
+| `POST /sales/:id/cancel`          | Sale     | `ICancelSale` _(custom)_             | `CancelSaleHandler`             | `makeCancelSale`             |
+| `POST /sales/:id/complete`        | Sale     | `ICompleteSale` _(custom)_           | `CompleteSaleHandler`           | `makeCompleteSale`           |
+| `GET /customers?search=`          | Customer | `ISearchCustomer`                    | `SearchCustomerHandler`         | `makeSearchCustomer`         |
+| `POST /customers`                 | Customer | `ICreateCustomer`                    | `CreateCustomerHandler`         | `makeCreateCustomer`         |
 
 Nomes de usecase seguem o verbo da ação de negócio, não o verbo HTTP — ex.
 `PATCH .../items/:id` é `UpdateSaleItemQuantity`, não `PatchSaleItem`, porque
@@ -161,8 +161,8 @@ ser confundido com omissão numa revisão futura.
   `handleCancelSale` (`presentation/pos/PosPage.tsx`) depois de
   `await cancelSale()`. 7 de 25 testes falharam antes da correção, todos
   pela mesma causa; 25/25 passam depois. Fica só sem cobertura dedicada o
-  caso de foco após *abrir a página pela primeira vez* vs. após
-  *reabertura* — mas ambos os fluxos que davam problema (cancelar, adicionar
+  caso de foco após _abrir a página pela primeira vez_ vs. após
+  _reabertura_ — mas ambos os fluxos que davam problema (cancelar, adicionar
   item) estão cobertos.
 - `financial.tsx`, `products.tsx`, `stock.tsx`, `reports.tsx` **não** adotam
   isso agora — só se o piloto do PDV validar o padrão.

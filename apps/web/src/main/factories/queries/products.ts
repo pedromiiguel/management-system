@@ -6,7 +6,12 @@ export function useProductCatalogQuery(search: string, page: number) {
   return useQuery({
     queryKey: ['products', 'list', search, page],
     queryFn: () =>
-      makeSearchProductCatalog().search({ search: search || undefined, page, perPage: 50, activeOnly: false }),
+      makeSearchProductCatalog().search({
+        search: search || undefined,
+        page,
+        perPage: 50,
+        activeOnly: false,
+      }),
   });
 }
 

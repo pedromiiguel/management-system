@@ -159,17 +159,17 @@ separado.
 
 ## Inventário de chamadas (10 no total: 7 de `reports`, 2 de `sale`, 1 já existente movida)
 
-| Chamada atual                              | Entidade         | Domínio    | Usecase                            |
-| -------------------------------------------- | ---------------- | ---------- | -------------------------------------- |
-| `GET /reports/sales?from&to`                 | SalesReport      | `reports`  | `IGetSalesReport` *(custom)*           |
-| `GET /reports/sales?...&format=csv`          | SalesReport      | `reports`  | `IExportSalesReportCsv` *(custom)*     |
-| `GET /reports/products?from&to`              | ProductPerf[]    | `reports`  | `IGetProductPerformance` *(custom)*    |
-| `GET /reports/products?...&format=csv`       | ProductPerf[]    | `reports`  | `IExportProductPerformanceCsv` *(custom)* |
-| `GET /reports/stock-position`                | StockPositionRow[]| `reports` | `IGetStockPosition` *(custom)*         |
-| `GET /reports/stock-position?format=csv`     | StockPositionRow[]| `reports` | `IExportStockPositionCsv` *(custom)*   |
-| `GET /financial/dashboard` → sub-chamada     | Sale (agregado)  | `reports`  | `IGetSalesTotal` *(movida de `financial`, ADR 0006)* |
-| `GET /sales/history?from&to`                 | Paginated\<Sale\> | `sale`    | `ISearchSaleHistory` *(custom)*        |
-| `POST /sales/:id/void`                       | Sale             | `sale`     | `IVoidSale` *(custom)*                 |
+| Chamada atual                            | Entidade           | Domínio   | Usecase                                              |
+| ---------------------------------------- | ------------------ | --------- | ---------------------------------------------------- |
+| `GET /reports/sales?from&to`             | SalesReport        | `reports` | `IGetSalesReport` _(custom)_                         |
+| `GET /reports/sales?...&format=csv`      | SalesReport        | `reports` | `IExportSalesReportCsv` _(custom)_                   |
+| `GET /reports/products?from&to`          | ProductPerf[]      | `reports` | `IGetProductPerformance` _(custom)_                  |
+| `GET /reports/products?...&format=csv`   | ProductPerf[]      | `reports` | `IExportProductPerformanceCsv` _(custom)_            |
+| `GET /reports/stock-position`            | StockPositionRow[] | `reports` | `IGetStockPosition` _(custom)_                       |
+| `GET /reports/stock-position?format=csv` | StockPositionRow[] | `reports` | `IExportStockPositionCsv` _(custom)_                 |
+| `GET /financial/dashboard` → sub-chamada | Sale (agregado)    | `reports` | `IGetSalesTotal` _(movida de `financial`, ADR 0006)_ |
+| `GET /sales/history?from&to`             | Paginated\<Sale\>  | `sale`    | `ISearchSaleHistory` _(custom)_                      |
+| `POST /sales/:id/void`                   | Sale               | `sale`    | `IVoidSale` _(custom)_                               |
 
 Nomes seguem verbo de negócio, não HTTP — `IGetSalesReport` em vez de
 `IGetSales` porque `sale/search-product.ts` e o catálogo de `products` já
@@ -184,11 +184,11 @@ claro que é dado agregado, não a entidade crua.
 4. `domain/models/reports.ts` (`SalesReport`, `ProductPerf`,
    `StockPositionRow`) + `domain/usecases/reports/*` (7 usecases, incl.
    `IGetSalesTotal` movido) + `domain/usecases/sale/{void-sale,search-sale-history}.ts`
-   + `data/handlers/{reports,sale}/*` (cada um com teste unitário) +
-   `infra/endpoints/reports.ts` + 2 entradas novas em `saleEndpoints` +
-   `main/factories/{queries,mutations}/{reports,sale}` — código novo, morto,
-   não conectado. As duas suítes da fase 1-2 não deveriam mudar de
-   resultado.
+   - `data/handlers/{reports,sale}/*` (cada um com teste unitário) +
+     `infra/endpoints/reports.ts` + 2 entradas novas em `saleEndpoints` +
+     `main/factories/{queries,mutations}/{reports,sale}` — código novo, morto,
+     não conectado. As duas suítes da fase 1-2 não deveriam mudar de
+     resultado.
 5. `presentation/components/CupomReceipt/` extraído de `ReceiptModal`
    (sale) — refactor local, sem mudar comportamento observável do PDV
    (suíte E2E do PDV não deveria mudar de resultado).
@@ -229,7 +229,7 @@ claro que é dado agregado, não a entidade crua.
   `financial`, cumprindo o desvio da ADR 0006) e 2 em `domain/usecases/sale`
   (`IVoidSale`, `ISearchSaleHistory`), cada um com handler + teste unitário —
   48/48 testes verdes em `apps/web` (suíte completa). Typecheck (`tsc
-  --noEmit`) limpo.
+--noEmit`) limpo.
 - `presentation/components/CupomReceipt.tsx` extraído de `ReceiptModal`
   (sale) — componente global puramente apresentacional (sem Model, ver
   "Componente puramente apresentacional" em `componentes-mvvm.md`), consumido
@@ -239,11 +239,11 @@ claro que é dado agregado, não a entidade crua.
 - `reports.tsx` (400 linhas, 1 arquivo) virou
   `presentation/flows/reports/` — `ReportsPage` (Model/ViewModel/View, com
   estado de aba/período/chip elevado à página, mesmo padrão do `SalePage`)
-  + 3 componentes locais MVVM (`SalesTab` com `SaleDetailModal` aninhado,
-  `ProductsTab` reaproveitado para "mais vendidos"/"margem" via prop
-  `margin`, `StockTab`). `routes/_app/reports.tsx` é hoje um wrapper de
-  6 linhas. Sem `main/factories/flows/use-reports-flow.ts` — mesmo padrão do
-  `financial`/`products` (abas não compartilham um agregado único).
+  - 3 componentes locais MVVM (`SalesTab` com `SaleDetailModal` aninhado,
+    `ProductsTab` reaproveitado para "mais vendidos"/"margem" via prop
+    `margin`, `StockTab`). `routes/_app/reports.tsx` é hoje um wrapper de
+    6 linhas. Sem `main/factories/flows/use-reports-flow.ts` — mesmo padrão do
+    `financial`/`products` (abas não compartilham um agregado único).
 - `financial.tsx` (`OverviewTab.model.ts`) troca o import de
   `makeGetSalesTotal` para `@/main/factories/handlers/reports` — uma linha,
   resto do módulo intocado. `useSalesTotalQuery` (código morto, nunca

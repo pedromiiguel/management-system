@@ -11,7 +11,10 @@ export class UpdateSaleItemQuantityHandler implements IUpdateSaleItemQuantity {
     itemId: string,
     input: UpdateSaleItemInput,
   ): Promise<{ sale: Sale; warning: string | null }> {
-    const response = await this.httpClient.request<UpdateSaleItemInput, { sale: Sale; warning: string | null }>({
+    const response = await this.httpClient.request<
+      UpdateSaleItemInput,
+      { sale: Sale; warning: string | null }
+    >({
       url: saleEndpoints.saleItem(saleId, itemId),
       method: 'PATCH',
       body: input,

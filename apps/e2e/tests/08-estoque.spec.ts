@@ -31,7 +31,9 @@ test.describe('Estoque — Entrada de estoque avulsa (rota /stock)', () => {
   test.beforeAll(() => resetDatabase());
   test.beforeEach(async ({ page }) => openStockPage(page));
 
-  test('registra entrada avulsa via StockEntryModal e aparece na listagem de movimentações', async ({ page }) => {
+  test('registra entrada avulsa via StockEntryModal e aparece na listagem de movimentações', async ({
+    page,
+  }) => {
     await page.getByRole('button', { name: 'Entrada de estoque' }).click();
     const dialog = page.getByRole('dialog', { name: 'Entrada de estoque' });
     await dialog.getByPlaceholder('Buscar produto…').fill(PRODUCTS.cocaCola.name);
@@ -45,7 +47,9 @@ test.describe('Estoque — Entrada de estoque avulsa (rota /stock)', () => {
     await expect(row).toContainText('+5');
   });
 
-  test('entrada avulsa com validade próxima aparece no card "Vencimento próximo" (FEFO)', async ({ page }) => {
+  test('entrada avulsa com validade próxima aparece no card "Vencimento próximo" (FEFO)', async ({
+    page,
+  }) => {
     await page.getByRole('button', { name: 'Entrada de estoque' }).click();
     const dialog = page.getByRole('dialog', { name: 'Entrada de estoque' });
     await dialog.getByPlaceholder('Buscar produto…').fill(PRODUCTS.heineken.name);
@@ -60,7 +64,9 @@ test.describe('Estoque — Entrada de estoque avulsa (rota /stock)', () => {
     await dialog.getByRole('button', { name: 'Registrar entrada' }).click();
     await expect(dialog).toBeHidden();
 
-    const expiringCard = page.locator('.s-card').filter({ hasText: 'Vencimento próximo — FEFO (FR-08)' });
+    const expiringCard = page
+      .locator('.s-card')
+      .filter({ hasText: 'Vencimento próximo — FEFO (FR-08)' });
     await expect(expiringCard).toBeVisible();
     await expect(expiringCard.getByText(PRODUCTS.heineken.name)).toBeVisible();
   });
@@ -76,7 +82,9 @@ test.describe('Estoque — Ajuste manual', () => {
     await dialog.getByPlaceholder('Buscar produto…').fill(PRODUCTS.brahma.name);
     await dialog.getByText(PRODUCTS.brahma.name).click();
     await dialog.getByPlaceholder('ex.: -3 (quebra), 10 (inventário)').fill('10');
-    await dialog.getByPlaceholder('ex.: quebra, perda, contagem de inventário').fill('contagem de inventário');
+    await dialog
+      .getByPlaceholder('ex.: quebra, perda, contagem de inventário')
+      .fill('contagem de inventário');
     await dialog.getByRole('button', { name: 'Registrar ajuste' }).click();
     await expect(dialog).toBeHidden();
 

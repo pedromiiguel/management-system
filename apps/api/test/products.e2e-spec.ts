@@ -81,7 +81,14 @@ describe('Products — regras de negócio (ADR 0007)', () => {
       await request(app.getHttpServer())
         .post('/api/products')
         .set('Authorization', auth(productsOnlyToken))
-        .send({ name: 'Produto sem entrada', sku: 'TEST-SEM-ENTRADA', unit: 'un', purchasePrice: 1, salePrice: 2, minimumStock: 0 })
+        .send({
+          name: 'Produto sem entrada',
+          sku: 'TEST-SEM-ENTRADA',
+          unit: 'un',
+          purchasePrice: 1,
+          salePrice: 2,
+          minimumStock: 0,
+        })
         .expect(201);
     });
 
@@ -121,7 +128,14 @@ describe('Products — regras de negócio (ADR 0007)', () => {
       const created = await request(app.getHttpServer())
         .post('/api/products')
         .set('Authorization', auth(adminToken))
-        .send({ name: 'Produto para editar', sku: 'TEST-EDITAR', unit: 'un', purchasePrice: 1, salePrice: 2, minimumStock: 0 })
+        .send({
+          name: 'Produto para editar',
+          sku: 'TEST-EDITAR',
+          unit: 'un',
+          purchasePrice: 1,
+          salePrice: 2,
+          minimumStock: 0,
+        })
         .expect(201);
 
       const res = await request(app.getHttpServer())
@@ -137,7 +151,14 @@ describe('Products — regras de negócio (ADR 0007)', () => {
       const created = await request(app.getHttpServer())
         .post('/api/products')
         .set('Authorization', auth(adminToken))
-        .send({ name: 'Produto sem venda', sku: 'TEST-SEM-VENDA', unit: 'un', purchasePrice: 1, salePrice: 2, minimumStock: 0 })
+        .send({
+          name: 'Produto sem venda',
+          sku: 'TEST-SEM-VENDA',
+          unit: 'un',
+          purchasePrice: 1,
+          salePrice: 2,
+          minimumStock: 0,
+        })
         .expect(201);
 
       await request(app.getHttpServer())

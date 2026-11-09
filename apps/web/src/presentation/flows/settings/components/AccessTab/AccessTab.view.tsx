@@ -27,7 +27,13 @@ export function AccessTabView({
             + Novo usuário
           </Button>
         </div>
-        <Table cols={['Nome', 'Perfil', 'Ativo']} widths="1fr 100px 60px" align={[null, null, 'center']} dense rows={userRows} />
+        <Table
+          cols={['Nome', 'Perfil', 'Ativo']}
+          widths="1fr 100px 60px"
+          align={[null, null, 'center']}
+          dense
+          rows={userRows}
+        />
         <div className="s-dim text-[12.5px] p-2.5">
           O MVP opera apenas com o perfil Admin. Os demais perfis já ficam mapeados para a
           contratação futura.
@@ -42,7 +48,10 @@ export function AccessTabView({
           </Button>
         </div>
         <div className="s-table is-dense">
-          <div className="s-tr s-th" style={{ gridTemplateColumns: `1fr repeat(${roleHeaders.length}, 105px)` }}>
+          <div
+            className="s-tr s-th"
+            style={{ gridTemplateColumns: `1fr repeat(${roleHeaders.length}, 105px)` }}
+          >
             <div>Funcionalidade</div>
             {roleHeaders.map((r) => (
               <div key={r.id} className="text-center">
@@ -71,7 +80,9 @@ export function AccessTabView({
         </div>
       </Card>
 
-      {modal === 'user' ? <UserModal roles={roles} onDone={onUserCreated} onClose={onCloseModal} /> : null}
+      {modal === 'user' ? (
+        <UserModal roles={roles} onDone={onUserCreated} onClose={onCloseModal} />
+      ) : null}
       {modal === 'role' ? <RoleModal onDone={onRoleCreated} onClose={onCloseModal} /> : null}
     </div>
   );

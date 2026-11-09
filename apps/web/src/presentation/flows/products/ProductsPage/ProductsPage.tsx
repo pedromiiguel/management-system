@@ -60,16 +60,30 @@ export function ProductsPage() {
         p.ean ?? '—',
         p.name,
         formatBRL(p.salePrice),
-        low ? <b key="s" className="s-low">{p.currentStock}</b> : p.currentStock,
+        low ? (
+          <b key="s" className="s-low">
+            {p.currentStock}
+          </b>
+        ) : (
+          p.currentStock
+        ),
         p.minimumStock,
         !p.active ? (
-          <Tag key="t" tone="dim">inativo</Tag>
+          <Tag key="t" tone="dim">
+            inativo
+          </Tag>
         ) : expiry ? (
-          <Tag key="t" tone="warn">{expiry}</Tag>
+          <Tag key="t" tone="warn">
+            {expiry}
+          </Tag>
         ) : low ? (
-          <Tag key="t" tone="warn">estoque baixo</Tag>
+          <Tag key="t" tone="warn">
+            estoque baixo
+          </Tag>
         ) : (
-          <Tag key="t" tone="ok">ativo</Tag>
+          <Tag key="t" tone="ok">
+            ativo
+          </Tag>
         ),
         <IconButton
           key="del"

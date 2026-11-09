@@ -1,10 +1,5 @@
 import { z } from 'zod';
-import {
-  CashMovementType,
-  FinancialCategoryKind,
-  PaymentMethod,
-  StockPolicy,
-} from './enums';
+import { CashMovementType, FinancialCategoryKind, PaymentMethod, StockPolicy } from './enums';
 
 /** Valor monetário em reais com até 2 casas (nunca float arbitrário). */
 export const money = z
@@ -56,7 +51,11 @@ export type ProductStockEntryInput = z.infer<typeof productStockEntrySchema>;
 export const productSchema = z.object({
   name: z.string().min(1, 'Informe o nome'),
   sku: z.string().min(1, 'Informe o SKU'),
-  ean: z.string().regex(/^\d{8,14}$/, 'EAN deve ter de 8 a 14 dígitos').optional().or(z.literal('')),
+  ean: z
+    .string()
+    .regex(/^\d{8,14}$/, 'EAN deve ter de 8 a 14 dígitos')
+    .optional()
+    .or(z.literal('')),
   unit: z.string().min(1, 'Informe a unidade (ex.: un, cx, L)'),
   purchasePrice: money,
   salePrice: money,
@@ -83,7 +82,10 @@ export type StockEntryInput = z.infer<typeof stockEntrySchema>;
 export const stockAdjustmentSchema = z.object({
   productId: z.string().min(1),
   /** Positivo aumenta, negativo reduz. */
-  quantity: z.number().int().refine((v) => v !== 0, 'Quantidade não pode ser zero'),
+  quantity: z
+    .number()
+    .int()
+    .refine((v) => v !== 0, 'Quantidade não pode ser zero'),
   reason: z.string().min(3, 'Informe o motivo do ajuste'),
 });
 export type StockAdjustmentInput = z.infer<typeof stockAdjustmentSchema>;

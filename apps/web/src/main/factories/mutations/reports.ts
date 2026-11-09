@@ -7,7 +7,8 @@ import {
 
 export function useExportSalesReportCsvMutation() {
   return useMutation({
-    mutationFn: ({ from, to }: { from: string; to: string }) => makeExportSalesReportCsv().export(from, to),
+    mutationFn: ({ from, to }: { from: string; to: string }) =>
+      makeExportSalesReportCsv().export(from, to),
   });
 }
 

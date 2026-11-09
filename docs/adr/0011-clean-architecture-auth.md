@@ -101,7 +101,7 @@ todas as rodadas anteriores — única exceção documentada em
 descuido. `componentes-mvvm.md` recomenda `lucide-react` em código novo,
 mas esses são glifos hi-fi específicos da marca (traço customizado, sem
 equivalente 1:1 no lucide) — trocar mudaria a aparência visual da sidebar,
-que é *redesign*, fora do escopo de uma refatoração estrutural (mesma
+que é _redesign_, fora do escopo de uma refatoração estrutural (mesma
 distinção da Decisão "Refatoração puramente estrutural" no glossário).
 Diferente de `search`/`trash` (já trocados por `Search`/`Trash2` em modais
 migrados anteriormente) — esses são genéricos, sem carga de marca.
@@ -190,7 +190,7 @@ existente.
   fora da Clean Architecture (Decisão 3) — `getToken`/`setSession`/
   `clearSession`/`isAuthenticated`/`hasPermission` inalterados.
 - `login.tsx` (108 linhas, 1 arquivo) virou `presentation/flows/login/
-  LoginPage/` (MVVM completo — `useSearch({ from: '/login' })` no lugar de
+LoginPage/` (MVVM completo — `useSearch({ from: '/login' })` no lugar de
   `Route.useSearch()` pra evitar import circular com o arquivo de rota, sem
   mudar comportamento). `routes/login.tsx` é hoje um wrapper de 12 linhas
   (mantém `validateSearch`/`beforeLoad`, que são configuração de rota, não

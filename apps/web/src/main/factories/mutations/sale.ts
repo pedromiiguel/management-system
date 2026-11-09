@@ -1,5 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import type { AddSaleItemInput, CompleteSaleInput, DiscountInput, UpdateSaleItemInput } from '@/domain/models/sale';
+import type {
+  AddSaleItemInput,
+  CompleteSaleInput,
+  DiscountInput,
+  UpdateSaleItemInput,
+} from '@/domain/models/sale';
 import {
   makeAddSaleItem,
   makeCancelSale,
@@ -25,8 +30,15 @@ export function useAddSaleItemMutation() {
 
 export function useUpdateSaleItemQuantityMutation() {
   return useMutation({
-    mutationFn: ({ saleId, itemId, input }: { saleId: string; itemId: string; input: UpdateSaleItemInput }) =>
-      makeUpdateSaleItemQuantity().update(saleId, itemId, input),
+    mutationFn: ({
+      saleId,
+      itemId,
+      input,
+    }: {
+      saleId: string;
+      itemId: string;
+      input: UpdateSaleItemInput;
+    }) => makeUpdateSaleItemQuantity().update(saleId, itemId, input),
   });
 }
 

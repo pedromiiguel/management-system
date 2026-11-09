@@ -41,7 +41,9 @@ test.describe('Configurações — Geral', () => {
 
     // Só resta "Fiado (a prazo)" habilitado — tentar desligar é bloqueado no cliente.
     await page.getByRole('button', { name: 'Fiado (a prazo)' }).click();
-    await expect(page.locator('.s-toast')).toContainText('Mantenha ao menos uma forma de pagamento');
+    await expect(page.locator('.s-toast')).toContainText(
+      'Mantenha ao menos uma forma de pagamento',
+    );
     await expect(page.getByRole('button', { name: 'Fiado (a prazo)' })).toHaveAttribute(
       'aria-pressed',
       'true',
@@ -57,10 +59,7 @@ test.describe('Configurações — Usuários & Perfis', () => {
     await page.getByRole('button', { name: '+ Novo perfil' }).click();
     const dialog = page.getByRole('dialog', { name: 'Novo perfil' });
     await dialog.getByTestId('role-name').fill('Caixa E2E');
-    await dialog
-      .locator('label', { hasText: 'Operar o PDV' })
-      .getByRole('button')
-      .click();
+    await dialog.locator('label', { hasText: 'Operar o PDV' }).getByRole('button').click();
     await dialog.getByRole('button', { name: 'Criar perfil' }).click();
     await expect(dialog).toBeHidden();
 

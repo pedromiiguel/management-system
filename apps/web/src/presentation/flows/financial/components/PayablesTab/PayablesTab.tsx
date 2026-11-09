@@ -16,9 +16,17 @@ export function PayablesTab() {
         p.description,
         p.supplier ?? '—',
         p.category?.name ?? '—',
-        overdue ? <Tag key="d" tone="danger">{formatDate(p.dueDate)}</Tag> : formatDate(p.dueDate),
+        overdue ? (
+          <Tag key="d" tone="danger">
+            {formatDate(p.dueDate)}
+          </Tag>
+        ) : (
+          formatDate(p.dueDate)
+        ),
         <b key="v">{formatBRL(p.amount)}</b>,
-        <Button key="b" ghost onClick={() => pay(p.id)}>Pagar</Button>,
+        <Button key="b" ghost onClick={() => pay(p.id)}>
+          Pagar
+        </Button>,
       ],
     };
   });

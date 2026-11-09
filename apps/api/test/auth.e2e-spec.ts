@@ -71,7 +71,13 @@ describe('Auth — regras de negócio (ADR 0011)', () => {
       const created = await request(app.getHttpServer())
         .post('/api/users')
         .set('Authorization', auth(adminToken))
-        .send({ name: 'Inativo Teste', login: 'inativo-teste', password: 'senha123', roleId, active: false })
+        .send({
+          name: 'Inativo Teste',
+          login: 'inativo-teste',
+          password: 'senha123',
+          roleId,
+          active: false,
+        })
         .expect(201);
       expect(created.body.active).toBe(false);
 
@@ -88,7 +94,13 @@ describe('Auth — regras de negócio (ADR 0011)', () => {
       await request(app.getHttpServer())
         .post('/api/users')
         .set('Authorization', auth(adminToken))
-        .send({ name: 'Ativo Teste', login: 'ativo-teste', password: 'senha123', roleId, active: true })
+        .send({
+          name: 'Ativo Teste',
+          login: 'ativo-teste',
+          password: 'senha123',
+          roleId,
+          active: true,
+        })
         .expect(201);
 
       const res = await request(app.getHttpServer())

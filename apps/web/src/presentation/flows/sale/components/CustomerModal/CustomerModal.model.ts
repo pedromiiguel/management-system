@@ -23,7 +23,6 @@ export function useCustomerModalModel(onPick: (customer: Customer) => void) {
 
   const createCustomer = useCreateCustomerMutation();
 
-
   const { register, handleSubmit, reset, formState } = useForm<CustomerFormInput>({
     resolver: zodResolver(customerFormSchema),
     mode: 'onChange',

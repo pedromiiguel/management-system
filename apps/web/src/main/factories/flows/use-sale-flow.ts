@@ -1,5 +1,10 @@
 import { useCallback, useState } from 'react';
-import type { AddSaleItemInput, CompleteSaleInput, DiscountInput, Sale } from '@/domain/models/sale';
+import type {
+  AddSaleItemInput,
+  CompleteSaleInput,
+  DiscountInput,
+  Sale,
+} from '@/domain/models/sale';
 import {
   useAddSaleItemMutation,
   useCancelSaleMutation,

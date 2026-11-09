@@ -5,7 +5,9 @@ import { SearchRoleHandler } from './search-role-handler';
 describe('SearchRoleHandler', () => {
   it('lista papéis via GET /users/roles/all', async () => {
     const roles = [{ id: 'r1' }];
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: roles }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: roles }),
+    };
     const handler = new SearchRoleHandler(httpClient);
 
     const result = await handler.search();

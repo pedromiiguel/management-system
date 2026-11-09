@@ -9,7 +9,7 @@ O piloto de Clean Architecture ([ADR 0003](0003-clean-architecture-piloto-pos.md
 nomeou todas as pastas/arquivos novos como `pos` (`domain/usecases/pos/`,
 `presentation/pos/`, `PosPage`, `usePosFlow`, etc.) — herdando o nome da
 rota que já existia antes desta refatoração (`routes/_app/pos.tsx`, servindo
-`/pos`). "pos" vem de *point of sale*; nos ADRs e comentários em português o
+`/pos`). "pos" vem de _point of sale_; nos ADRs e comentários em português o
 termo usado é "PDV".
 
 Ao revisar o resultado, ficou claro que o nome não era o melhor: o
@@ -24,18 +24,18 @@ Renomear `pos` → `sale` em tudo: pastas, arquivos, identificadores, rota e
 URL. Não ficou restrito só às pastas internas — a rota mudou de `/pos` para
 `/sale`.
 
-| Antes | Depois |
-| --- | --- |
-| `domain/usecases/pos/` | `domain/usecases/sale/` |
-| `domain/models/pos.ts` | `domain/models/sale.ts` |
-| `data/handlers/pos/` | `data/handlers/sale/` |
-| `infra/endpoints/pos.ts` (`posEndpoints`) | `infra/endpoints/sale.ts` (`saleEndpoints`) |
-| `main/factories/{handlers,mutations,queries}/pos.ts` | `.../sale.ts` |
-| `main/factories/flows/use-pos-flow.ts` (`usePosFlow`) | `use-sale-flow.ts` (`useSaleFlow`) |
-| `presentation/pos/` (`PosPage`) | `presentation/sale/` (`SalePage`) |
-| `routes/_app/pos.tsx`, rota `/pos` | `routes/_app/sale.tsx`, rota `/sale` |
-| `apps/e2e/tests/support/pos.ts` (`openPos`) | `support/sale.ts` (`openSalePage`) |
-| `data-testid="pos-total"` (e os outros 4: `pos-change`, `pos-discount-value`, `pos-service-fee-value`, `pos-selected-customer`) | `data-testid="sale-total"` etc. |
+| Antes                                                                                                                           | Depois                                      |
+| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `domain/usecases/pos/`                                                                                                          | `domain/usecases/sale/`                     |
+| `domain/models/pos.ts`                                                                                                          | `domain/models/sale.ts`                     |
+| `data/handlers/pos/`                                                                                                            | `data/handlers/sale/`                       |
+| `infra/endpoints/pos.ts` (`posEndpoints`)                                                                                       | `infra/endpoints/sale.ts` (`saleEndpoints`) |
+| `main/factories/{handlers,mutations,queries}/pos.ts`                                                                            | `.../sale.ts`                               |
+| `main/factories/flows/use-pos-flow.ts` (`usePosFlow`)                                                                           | `use-sale-flow.ts` (`useSaleFlow`)          |
+| `presentation/pos/` (`PosPage`)                                                                                                 | `presentation/sale/` (`SalePage`)           |
+| `routes/_app/pos.tsx`, rota `/pos`                                                                                              | `routes/_app/sale.tsx`, rota `/sale`        |
+| `apps/e2e/tests/support/pos.ts` (`openPos`)                                                                                     | `support/sale.ts` (`openSalePage`)          |
+| `data-testid="pos-total"` (e os outros 4: `pos-change`, `pos-discount-value`, `pos-service-fee-value`, `pos-selected-customer`) | `data-testid="sale-total"` etc.             |
 
 `openPos` virou `openSalePage`, não `openSale` — o backend já tem o conceito
 de "abrir uma venda" (`POST /sales`, usecase `IOpenSale`); um helper de teste

@@ -15,7 +15,9 @@ export function PayablesTabView({
     <Card pad={8} className="flex-1 min-h-0 overflow-auto">
       <div className="flex justify-between px-2.5 pt-2 pb-1">
         <div className="s-card-title m-0">Contas em aberto</div>
-        <Button primary onClick={onOpenCreate}>+ Nova conta</Button>
+        <Button primary onClick={onOpenCreate}>
+          + Nova conta
+        </Button>
       </div>
       <Table
         cols={['Descrição', 'Fornecedor', 'Categoria', 'Vencimento', 'Valor', '']}

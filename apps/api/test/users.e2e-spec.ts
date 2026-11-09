@@ -101,7 +101,10 @@ describe('Users — regras de negócio (ADR 0010)', () => {
       await request(app.getHttpServer())
         .patch(`/api/users/roles/${role.body.id}`)
         .set('Authorization', auth(adminToken))
-        .send({ name: 'Papel comum (teste)', permissions: [Permission.SALES_OPERATE, Permission.STOCK_READ] })
+        .send({
+          name: 'Papel comum (teste)',
+          permissions: [Permission.SALES_OPERATE, Permission.STOCK_READ],
+        })
         .expect(200);
     });
   });

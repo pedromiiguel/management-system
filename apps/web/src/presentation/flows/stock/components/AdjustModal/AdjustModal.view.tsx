@@ -38,7 +38,9 @@ export function AdjustModalView({
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <div className="s-kv">
             <span>Produto</span>
-            <b>{picked.name} (estoque: {picked.currentStock})</b>
+            <b>
+              {picked.name} (estoque: {picked.currentStock})
+            </b>
           </div>
           <div>
             <div className="s-label">Quantidade (positivo aumenta, negativo reduz)</div>
@@ -63,7 +65,9 @@ export function AdjustModalView({
             {errors.reason && <div className="s-error">{errors.reason.message}</div>}
           </div>
           <div className="flex gap-2 justify-end">
-            <Button ghost onClick={onUnpick}>Trocar produto</Button>
+            <Button ghost onClick={onUnpick}>
+              Trocar produto
+            </Button>
             <Button primary type="submit" disabled={!canSubmit || saving}>
               {saving ? 'Salvando…' : 'Registrar ajuste'}
             </Button>

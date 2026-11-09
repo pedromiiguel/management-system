@@ -6,7 +6,13 @@ export function ToastView({ children, toast }: ToastViewProps) {
     <>
       {children}
       {toast && (
-        <div className={clsx('s-toast', toast.tone === 'warn' && 'is-warn', toast.tone === 'danger' && 'is-danger')}>
+        <div
+          className={clsx(
+            's-toast',
+            toast.tone === 'warn' && 'is-warn',
+            toast.tone === 'danger' && 'is-danger',
+          )}
+        >
           {toast.message}
         </div>
       )}

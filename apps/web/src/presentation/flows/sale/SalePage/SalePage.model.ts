@@ -54,7 +54,7 @@ export function useSalePageModel(operatorName: SalePageProps['operatorName']) {
   }, [scan]);
 
   const { data: suggestData } = useSearchProductsQuery(debouncedScan, 6);
-  const suggestions = debouncedScan.length >= 2 ? suggestData?.items ?? [] : [];
+  const suggestions = debouncedScan.length >= 2 ? (suggestData?.items ?? []) : [];
   const suggestOpen = scan.trim().length >= 2 && suggestions.length > 0;
   const highlighted = Math.min(activeSuggestion, suggestions.length - 1);
 

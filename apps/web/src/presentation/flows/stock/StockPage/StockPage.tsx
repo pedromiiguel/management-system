@@ -17,18 +17,31 @@ export function StockPage() {
         {m.note ? <span className="s-dim"> — {m.note}</span> : null}
       </span>,
       m.type === 'ENTRY' ? (
-        <Tag key="t" tone="ok">entrada</Tag>
+        <Tag key="t" tone="ok">
+          entrada
+        </Tag>
       ) : (
-        <Tag key="t" tone="dim">saída</Tag>
+        <Tag key="t" tone="dim">
+          saída
+        </Tag>
       ),
       SOURCE_LABELS[m.source],
-      <b key="q">{m.type === 'ENTRY' ? '+' : '−'}{m.quantity}</b>,
+      <b key="q">
+        {m.type === 'ENTRY' ? '+' : '−'}
+        {m.quantity}
+      </b>,
     ],
   }));
 
   const lowStockRows: LowStockRow[] = (alerts?.lowStock ?? []).map((p) => ({
     key: p.id,
-    cells: [p.name, <b key="c" className="s-low">{p.currentStock}</b>, p.minimumStock],
+    cells: [
+      p.name,
+      <b key="c" className="s-low">
+        {p.currentStock}
+      </b>,
+      p.minimumStock,
+    ],
   }));
 
   const expiringRows: ExpiringRow[] = (alerts?.expiring ?? []).map((b) => ({
@@ -36,7 +49,9 @@ export function StockPage() {
     cells: [
       b.product.name,
       b.batch ?? '—',
-      <Tag key="v" tone="warn">{formatDate(b.expiresAt)}</Tag>,
+      <Tag key="v" tone="warn">
+        {formatDate(b.expiresAt)}
+      </Tag>,
       b.quantity,
     ],
   }));

@@ -3,7 +3,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/presentation/components/Toast';
 import { apiErrorMessage } from '@/lib/api';
 import { useOpenCashRegisterMutation } from '@/main/factories/mutations/financial';
-import { useCashRegisterHistoryQuery, useCurrentCashRegisterQuery } from '@/main/factories/queries/financial';
+import {
+  useCashRegisterHistoryQuery,
+  useCurrentCashRegisterQuery,
+} from '@/main/factories/queries/financial';
 import type { RegisterModal } from './RegisterTab.types';
 
 export function useRegisterTabModel() {

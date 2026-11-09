@@ -7,7 +7,11 @@ export function StatCardView({ label, value, sub, accent, style }: StatCardProps
     <Card style={{ flex: 1, ...style }}>
       <div className="s-stat-label">{label}</div>
       <div className={clsx('s-stat-value', accent && 'is-accent')}>{value}</div>
-      {sub ? <div className="s-dim" style={{ fontSize: 12.5 }}>{sub}</div> : null}
+      {sub ? (
+        <div className="s-dim" style={{ fontSize: 12.5 }}>
+          {sub}
+        </div>
+      ) : null}
     </Card>
   );
 }

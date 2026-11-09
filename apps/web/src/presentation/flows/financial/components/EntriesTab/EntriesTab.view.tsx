@@ -25,14 +25,20 @@ export function EntriesTabView({
       <div className="flex gap-2.5 items-end">
         <div>
           <div className="s-label">De</div>
-          <div className="s-input"><input type="date" value={from} onChange={(e) => onChangeFrom(e.target.value)} /></div>
+          <div className="s-input">
+            <input type="date" value={from} onChange={(e) => onChangeFrom(e.target.value)} />
+          </div>
         </div>
         <div>
           <div className="s-label">Até</div>
-          <div className="s-input"><input type="date" value={to} onChange={(e) => onChangeTo(e.target.value)} /></div>
+          <div className="s-input">
+            <input type="date" value={to} onChange={(e) => onChangeTo(e.target.value)} />
+          </div>
         </div>
         <span className="flex-1" />
-        <Button primary onClick={onOpenCreate}>+ Lançamento avulso</Button>
+        <Button primary onClick={onOpenCreate}>
+          + Lançamento avulso
+        </Button>
       </div>
       <div className="flex gap-3">
         <StatCard label="Entradas" value={formatBRL(inflows)} />

@@ -43,7 +43,7 @@ Inspeção confirmou o uso real de cada peça antes de decidir o que fazer:
 - O [ADR 0011](0011-clean-architecture-auth.md) (rodada anterior) havia
   decidido explicitamente **manter** `SolIcon` para os ícones de marca,
   argumentando que eram "glifos hi-fi específicos da marca, sem equivalente
-  1:1 no lucide" e que trocar seria *redesign*, fora do escopo de uma
+  1:1 no lucide" e que trocar seria _redesign_, fora do escopo de uma
   refatoração estrutural.
 
 ## Decisão
@@ -63,20 +63,20 @@ fechando a única ponta que ainda dependia do ícone caseiro.
 Mapeamento aplicado (só os nomes efetivamente usados no código; `search`/
 `scan` nunca tiveram consumidor, mapeamento é só para referência futura):
 
-| `IconName` | lucide-react | Onde |
-|---|---|---|
-| `sun` | `Sun` | logo (Sidebar, LoginPage) |
-| `pdv` | `Barcode` | nav |
-| `produtos` | `Package` | nav |
-| `estoque` | `Boxes` | nav |
-| `financeiro` | `CircleDollarSign` | nav |
-| `relatorios` | `ChartColumn` | nav |
-| `config` | `SlidersHorizontal` | nav |
-| `trash` | `Trash2` | `ProductsPage`, `SaleItemsCard` (`icon=`) |
-| `search` | `Search` | não usado — só documentado |
-| `scan` | `ScanLine` | não usado — só documentado |
+| `IconName`   | lucide-react        | Onde                                      |
+| ------------ | ------------------- | ----------------------------------------- |
+| `sun`        | `Sun`               | logo (Sidebar, LoginPage)                 |
+| `pdv`        | `Barcode`           | nav                                       |
+| `produtos`   | `Package`           | nav                                       |
+| `estoque`    | `Boxes`             | nav                                       |
+| `financeiro` | `CircleDollarSign`  | nav                                       |
+| `relatorios` | `ChartColumn`       | nav                                       |
+| `config`     | `SlidersHorizontal` | nav                                       |
+| `trash`      | `Trash2`            | `ProductsPage`, `SaleItemsCard` (`icon=`) |
+| `search`     | `Search`            | não usado — só documentado                |
+| `scan`       | `ScanLine`          | não usado — só documentado                |
 
-Diferente do ADR 0011 (que tratou os ícones de marca como *redesign* fora de
+Diferente do ADR 0011 (que tratou os ícones de marca como _redesign_ fora de
 escopo), esta rodada trata a troca de glifo como consequência aceita da
 migração — a aparência visual muda (traço lucide no lugar do SVG
 hand-drawn), mas não há mudança de comportamento/estrutura de navegação.
@@ -141,7 +141,7 @@ Segue o padrão das rodadas anteriores. `componentes-mvvm.md` e
 3. **`Confirm`/`CupomReceipt`/`Screen`**: movidos para pastas MVVM próprias
    em `presentation/components/`. `CupomReceipt`/`Screen` não exigiram
    mudança nos imports dos consumidores (o path `@/presentation/components/
-   {Nome}` já era usado, resolvendo agora pro `index.ts` da pasta em vez do
+{Nome}` já era usado, resolvendo agora pro `index.ts` da pasta em vez do
    arquivo solto). `main.tsx` e os 2 consumidores de `Confirm`
    (`ProductsPage.model.ts`, `SalePage.model.ts`) tiveram o import
    atualizado manualmente (o script da fase 2 só cobria `components/sol`).
@@ -150,15 +150,14 @@ Segue o padrão das rodadas anteriores. `componentes-mvvm.md` e
 
 ## Alternativas rejeitadas
 
-- **Manter `SolIcon` nos ícones de marca (repetir a Decisão 2 do ADR
-  0011)**: rejeitado pelo usuário nesta rodada — migração de ícone
+- **Manter `SolIcon` nos ícones de marca (repetir a Decisão 2 do ADR 0011)**: rejeitado pelo usuário nesta rodada — migração de ícone
   intencionalmente completa, não parcial.
 - **Migrar só os usos diretos de `SolIcon`, deixar `SBtn`/`SIconBtn` com
   `icon: IconName`**: rejeitado — deixaria `IconName`/`SolIcon` vivos só
   para servir essas duas primitivas, sem fechar a pendência.
 - **Deixar `sol.tsx` onde está, só tirar o ícone**: rejeitado pelo usuário
   — optou por migrar as 16 primitivas inteiras para `presentation/
-  components/`, não só o ícone.
+components/`, não só o ícone.
 - **Colapsar os componentes puramente apresentacionais em arquivo único**
   (opção que `componentes-mvvm.md` permite): rejeitado pelo usuário — prior
   idade para consistência de pasta entre todos os ~19 componentes desta

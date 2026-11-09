@@ -15,7 +15,9 @@ export function useQuantityDebounce(
   onError: (error: unknown) => void,
 ) {
   const [pendingQty, setPendingQty] = useState<Record<string, number>>({});
-  const qtyPending = useRef<Record<string, { quantity: number; timer: ReturnType<typeof setTimeout> }>>({});
+  const qtyPending = useRef<
+    Record<string, { quantity: number; timer: ReturnType<typeof setTimeout> }>
+  >({});
 
   const commitQuantity = useCallback(
     async (itemId: string, quantity: number) => {

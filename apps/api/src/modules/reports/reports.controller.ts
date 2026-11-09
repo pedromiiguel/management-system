@@ -71,10 +71,7 @@ export class ReportsController {
 
   /** FR-40: posição atual de estoque. */
   @Get('stock-position')
-  async stockPosition(
-    @Res({ passthrough: true }) res: Response,
-    @Query('format') format?: string,
-  ) {
+  async stockPosition(@Res({ passthrough: true }) res: Response, @Query('format') format?: string) {
     const report = await this.stockService.position();
     if (format === 'csv') {
       const columns: CsvColumn[] = [

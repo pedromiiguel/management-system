@@ -17,7 +17,9 @@ export function SaleModals({
   onReceiptClose,
 }: SaleModalsProps) {
   if (modal.kind === 'search') {
-    return <SearchModal initialQuery={modal.initialQuery} onPick={onSearchPick} onClose={onModalClose} />;
+    return (
+      <SearchModal initialQuery={modal.initialQuery} onPick={onSearchPick} onClose={onModalClose} />
+    );
   }
   if (modal.kind === 'discount') {
     return <DiscountModal onSubmit={onDiscountSubmit} onClose={onModalClose} />;

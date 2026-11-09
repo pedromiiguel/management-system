@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { makeSearchCustomer, makeSearchProduct, makeSearchSaleHistory } from '@/main/factories/handlers/sale';
+import {
+  makeSearchCustomer,
+  makeSearchProduct,
+  makeSearchSaleHistory,
+} from '@/main/factories/handlers/sale';
 
 export function useSearchProductsQuery(query: string, perPage: number) {
   return useQuery({

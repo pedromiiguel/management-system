@@ -4,8 +4,7 @@ import { CustomerModalView } from './CustomerModal.view';
 import type { CustomerModalProps, CustomerRow } from './CustomerModal.types';
 
 export function CustomerModal({ onPick, onClose }: CustomerModalProps) {
-  const { registerFilter, customers, register, submit, canCreate } =
-    useCustomerModalModel(onPick);
+  const { registerFilter, customers, register, submit, canCreate } = useCustomerModalModel(onPick);
 
   const rows: CustomerRow[] = customers.map((customer) => ({
     key: customer.id,

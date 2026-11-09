@@ -21,8 +21,12 @@ export function StockPageView({
       title="Estoque"
       topRight={
         <>
-          <Button ghost onClick={onOpenAdjust}>Ajuste manual</Button>
-          <Button primary onClick={onOpenEntry}>Entrada de estoque</Button>
+          <Button ghost onClick={onOpenAdjust}>
+            Ajuste manual
+          </Button>
+          <Button primary onClick={onOpenEntry}>
+            Entrada de estoque
+          </Button>
         </>
       }
     >

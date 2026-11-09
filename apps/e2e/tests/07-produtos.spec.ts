@@ -108,7 +108,9 @@ test.describe('Produtos — Entrada de estoque avulsa', () => {
   test.beforeAll(() => resetDatabase());
   test.beforeEach(async ({ page }) => openProductsPage(page));
 
-  test('registra entrada avulsa via StockEntryModal e soma ao estoque existente', async ({ page }) => {
+  test('registra entrada avulsa via StockEntryModal e soma ao estoque existente', async ({
+    page,
+  }) => {
     await page.getByRole('button', { name: 'Entrada de estoque' }).click();
     const dialog = page.getByRole('dialog', { name: 'Entrada de estoque' });
     await dialog.getByPlaceholder('Buscar produto…').fill(PRODUCTS.cocaCola.name);
@@ -122,7 +124,9 @@ test.describe('Produtos — Entrada de estoque avulsa', () => {
     await expect(row).toContainText('65');
   });
 
-  test('entrada avulsa com validade próxima aparece no filtro "Vencimento próximo"', async ({ page }) => {
+  test('entrada avulsa com validade próxima aparece no filtro "Vencimento próximo"', async ({
+    page,
+  }) => {
     const heinekenName = PRODUCTS.heineken.name;
     await page.getByRole('button', { name: 'Entrada de estoque' }).click();
     const dialog = page.getByRole('dialog', { name: 'Entrada de estoque' });

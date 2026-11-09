@@ -5,7 +5,9 @@ import { ExportProductPerformanceCsvHandler } from './export-product-performance
 describe('ExportProductPerformanceCsvHandler', () => {
   it('busca o CSV via GET /reports/products?format=csv, como blob', async () => {
     const blob = new Blob(['csv']);
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: blob }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: blob }),
+    };
     const handler = new ExportProductPerformanceCsvHandler(httpClient);
 
     const result = await handler.export('2026-07-01', '2026-07-24');

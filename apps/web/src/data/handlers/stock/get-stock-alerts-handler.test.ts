@@ -5,7 +5,9 @@ import { GetStockAlertsHandler } from './get-stock-alerts-handler';
 describe('GetStockAlertsHandler', () => {
   it('busca os alertas via GET /stock/alerts', async () => {
     const alerts = { lowStock: [], expiring: [] };
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: alerts }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: alerts }),
+    };
     const handler = new GetStockAlertsHandler(httpClient);
 
     const result = await handler.get();

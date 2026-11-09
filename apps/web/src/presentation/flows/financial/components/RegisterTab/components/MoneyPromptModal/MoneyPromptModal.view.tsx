@@ -25,8 +25,12 @@ export function MoneyPromptModalView({
         />
       </div>
       <div className="flex gap-2 justify-end mt-3.5">
-        <Button ghost onClick={onClose}>Voltar</Button>
-        <Button primary disabled={!valid} onClick={onSubmit}>{submitLabel}</Button>
+        <Button ghost onClick={onClose}>
+          Voltar
+        </Button>
+        <Button primary disabled={!valid} onClick={onSubmit}>
+          {submitLabel}
+        </Button>
       </div>
     </Modal>
   );

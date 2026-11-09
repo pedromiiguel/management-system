@@ -111,7 +111,7 @@ Toda operação padrão usa este vocabulário, **sem variação**. `{Entity}` é
 **singular** (`SearchPaymentConditionHandler`, nunca `...Conditions...`).
 
 | Operação     | Verbo     | Handler                 | Usecase           | Método     | Factory                  |
-| ------------ | --------- | ----------------------- | ------------------ | ---------- | ------------------------ |
+| ------------ | --------- | ----------------------- | ----------------- | ---------- | ------------------------ |
 | Listagem     | `search`  | `Search{Entity}Handler` | `ISearch{Entity}` | `search()` | `makeSearch{Entity}`     |
 | Busca por ID | `get-one` | `GetOne{Entity}Handler` | `IGetOne{Entity}` | `getOne()` | `makeGetOne{Entity}(id)` |
 | Criação      | `create`  | `Create{Entity}Handler` | `ICreate{Entity}` | `create()` | `makeCreate{Entity}`     |

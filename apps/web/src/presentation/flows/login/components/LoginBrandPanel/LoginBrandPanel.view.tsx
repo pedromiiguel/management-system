@@ -1,4 +1,9 @@
-import { BRAND_FEATURES, BRAND_LOGO_SRC, BRAND_NAME, BRAND_VERSION } from './LoginBrandPanel.constants';
+import {
+  BRAND_FEATURES,
+  BRAND_LOGO_SRC,
+  BRAND_NAME,
+  BRAND_VERSION,
+} from './LoginBrandPanel.constants';
 
 export function LoginBrandPanelView() {
   return (

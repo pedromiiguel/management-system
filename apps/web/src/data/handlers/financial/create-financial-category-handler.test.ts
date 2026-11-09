@@ -5,7 +5,9 @@ import { CreateFinancialCategoryHandler } from './create-financial-category-hand
 describe('CreateFinancialCategoryHandler', () => {
   it('cria uma categoria financeira via POST /financial/categories', async () => {
     const category = { id: 'c1' };
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 201, body: category }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 201, body: category }),
+    };
     const handler = new CreateFinancialCategoryHandler(httpClient);
     const input = { name: 'Manutenção', kind: 'EXPENSE' as const };
 
