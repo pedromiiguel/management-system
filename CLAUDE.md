@@ -43,6 +43,8 @@ Database runs via `docker compose up -d postgres` (Postgres 17 on `localhost:543
 
 API-only workflows (from `apps/api`): `npm run db:migrate:dev` (create/apply a dev migration), `npm run db:generate` (regenerate Prisma client after schema edits; also runs on `postinstall`).
 
+Two partial unique indexes exist only in SQL (migration `20261109130100`: one OPEN cash register, one IN_PROGRESS sale per operator) — Prisma can't express them, so `prisma migrate dev` generates `DROP INDEX` for them: **delete those lines from the generated migration** before applying. `test/schema.e2e-spec.ts` fails if either index is missing.
+
 **Single test:** `npm test --workspace apps/api -- shared-enums` (filename substring or `-t "name"`); `npm test --workspace apps/web -- receipt`; `npm test --workspace packages/shared`. API unit specs are `*.spec.ts` colocated in `src/`; API e2e specs live in `apps/api/test/` (`*.e2e-spec.ts`, shared harness in `test/support/`: one `migrate reset` per run, refuses `NODE_ENV=production` and non-localhost hosts, `createTestApp()` uses the production `configureApp`). Jest and vitest map `@beverage/shared` to its TypeScript source.
 
 **Never run the e2e suites (`test:e2e:api`, `test:e2e`) against the store's database** — they wipe whatever `DATABASE_URL` points to, and the guard cannot tell the dev database from the store's on the same machine.

@@ -186,6 +186,8 @@ model Sale {
 
   @@index([status, completedAt])
   // Índice parcial (só em SQL, migração 20261109130100): uma Venda IN_PROGRESS por operador.
+  // `prisma migrate dev` gera um DROP INDEX para ele: apague essa linha da migração
+  // (test/schema.e2e-spec.ts falha se o índice sumir).
   @@map("sale")
 }
 
@@ -227,6 +229,8 @@ model CashRegister {
   sales           Sale[]
 
   // Índice parcial (só em SQL, migração 20261109130100): um único caixa OPEN.
+  // `prisma migrate dev` gera um DROP INDEX para ele: apague essa linha da migração
+  // (test/schema.e2e-spec.ts falha se o índice sumir).
   @@map("cash_register")
 }
 
