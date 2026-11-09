@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { endOfStoreDay, startOfStoreDay, storeCalendarStarts, storeDateKey } from './time';
+import {
+  addDaysToKey,
+  dateOnlyKey,
+  daysBetweenKeys,
+  endOfStoreDay,
+  startOfStoreDay,
+  storeCalendarStarts,
+  storeDateKey,
+  storeMonthKeys,
+} from './time';
 import { periodQuerySchema } from './schemas';
 
 describe('dia civil da loja (America/Sao_Paulo, UTC−3)', () => {
@@ -31,5 +40,28 @@ describe('dia civil da loja (America/Sao_Paulo, UTC−3)', () => {
     });
     expect(instants.from.toISOString()).toBe('2026-11-01T10:00:00.000Z');
     expect(periodQuerySchema.safeParse({ from: 'ontem', to: '2026-11-01' }).success).toBe(false);
+  });
+});
+
+describe('datas sem hora e chaves AAAA-MM-DD', () => {
+  it('lê o dia gravado (meia-noite UTC) sem deslocar pelo fuso', () => {
+    expect(dateOnlyKey('2026-11-09T00:00:00.000Z')).toBe('2026-11-09');
+    expect(dateOnlyKey(new Date('2026-11-09'))).toBe('2026-11-09');
+  });
+
+  it('soma e conta dias civis, atravessando mês e ano', () => {
+    expect(addDaysToKey('2026-03-01', -1)).toBe('2026-02-28');
+    expect(addDaysToKey('2025-12-31', 1)).toBe('2026-01-01');
+    expect(daysBetweenKeys('2026-11-09', '2026-11-12')).toBe(3);
+    expect(daysBetweenKeys('2026-11-09', '2026-11-01')).toBe(-8);
+  });
+
+  it('últimos meses da loja terminam no mês corrente do fuso da loja', () => {
+    // 2026-03-01 01:00Z ainda é fevereiro na loja
+    expect(storeMonthKeys(new Date('2026-03-01T01:00:00Z'), 3)).toEqual([
+      '2025-12',
+      '2026-01',
+      '2026-02',
+    ]);
   });
 });

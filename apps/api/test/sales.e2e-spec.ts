@@ -115,6 +115,38 @@ describe('Sales', () => {
         .expect(400);
     });
 
+    it('Bipar devolve o item bipado — o mesmo ao somar a quantidade', async () => {
+      const product = await createProduct(10);
+      const opened = await admin().post('/api/sales').expect(201);
+      const first = await admin()
+        .post(`/api/sales/${opened.body.id}/items`)
+        .send({ code: product.sku, quantity: 1 })
+        .expect(201);
+      const again = await admin()
+        .post(`/api/sales/${opened.body.id}/items`)
+        .send({ code: product.sku, quantity: 2 })
+        .expect(201);
+      expect(again.body.itemId).toBe(first.body.itemId);
+      expect(again.body.sale.items).toContainEqual(
+        expect.objectContaining({ id: first.body.itemId, quantity: 3 }),
+      );
+    });
+
+    it('dinheiro sem valor recebido e fiado sem cliente são recusados pelo contrato', async () => {
+      const product = await createProduct(10);
+      const saleId = await openSaleWith(product.sku, 1);
+      const cash = await admin()
+        .post(`/api/sales/${saleId}/complete`)
+        .send({ paymentMethod: PaymentMethod.CASH })
+        .expect(400);
+      expect(JSON.stringify(cash.body)).toContain('Informe o valor recebido em dinheiro');
+      const credit = await admin()
+        .post(`/api/sales/${saleId}/complete`)
+        .send({ paymentMethod: PaymentMethod.CREDIT })
+        .expect(400);
+      expect(JSON.stringify(credit.body)).toContain('Venda a prazo exige cliente');
+    });
+
     it('com política BLOCK, bipar além do saldo é recusado', async () => {
       const product = await createProduct(2);
       const opened = await admin().post('/api/sales').expect(201);
@@ -268,10 +300,29 @@ describe('Sales', () => {
         .expect(200);
       const dashboard = await admin().get('/api/financial/dashboard').expect(200);
 
-      expect(report.body).toMatchObject({ count: 1, total: 20, serviceFeeTotal: 2 });
-      expect(report.body.days).toEqual([{ day: today, count: 1, total: 20 }]);
+      expect(report.body).toMatchObject({ count: 1, revenue: 20, serviceFee: 2 });
+      expect(report.body.days).toEqual([{ day: today, count: 1, revenue: 20, serviceFee: 2 }]);
       expect(dashboard.body.revenue.day).toBe(20);
       expect(dashboard.body.revenue.month).toBe(20);
+      expect(dashboard.body.serviceFee.month).toBe(2);
+      // A taxa fica com a casa: entra no resultado, e o cobrado por forma de pagamento é bruto.
+      expect(dashboard.body.result).toMatchObject({ revenue: 20, serviceFee: 2 });
+      expect(dashboard.body.byMethodMonth).toEqual([
+        { paymentMethod: PaymentMethod.PIX, total: 22, count: 1 },
+      ]);
+      expect(dashboard.body.monthly).toHaveLength(6);
+      expect(dashboard.body.monthly.at(-1)).toEqual({
+        month: today.slice(0, 7),
+        revenue: 20,
+        serviceFee: 2,
+      });
+
+      const csv = await admin()
+        .get('/api/reports/sales')
+        .query({ from: today, to: today, format: 'csv' })
+        .expect(200);
+      expect(csv.text).toContain('Dia;Vendas;Receita (R$);Taxa de serviço (R$)');
+      expect(csv.text).toContain(`${today};1;20,00;2,00`);
     });
   });
 });

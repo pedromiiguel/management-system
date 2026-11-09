@@ -26,7 +26,7 @@ export const money = z
     message: 'Valor monetário deve ter no máximo 2 casas decimais',
   });
 
-export const positiveMoney = money.refine((v) => v > 0, 'Valor deve ser maior que zero');
+const positiveMoney = money.refine((v) => v > 0, 'Valor deve ser maior que zero');
 
 export const quantity = z.number().int().positive();
 
@@ -160,23 +160,44 @@ export const serviceFeeSchema = z.object({
 });
 export type ServiceFeeInput = z.infer<typeof serviceFeeSchema>;
 
-export const completeSaleSchema = z
-  .object({
-    paymentMethod: z.enum(PaymentMethod),
-    /** Obrigatório para pagamento em dinheiro (FR-18). */
-    amountPaid: money.optional(),
-    withInvoice: z.boolean().default(false),
-    /** Se enviado, liga/desliga a Taxa de serviço antes de concluir; omitido mantém a da Venda. */
-    serviceFee: z.boolean().optional(),
-    /** Obrigatório para venda a prazo (BR-08). */
-    customerId: z.string().optional(),
-    dueDate: z.coerce.date().optional(),
-  })
-  .refine((s) => s.paymentMethod !== PaymentMethod.CREDIT || !!s.customerId, {
-    message: 'Venda a prazo exige cliente',
-    path: ['customerId'],
-  });
-export type CompleteSaleInput = z.infer<typeof completeSaleSchema>;
+const completeSaleFields = z.object({
+  paymentMethod: z.enum(PaymentMethod),
+  /** Obrigatório para pagamento em dinheiro (FR-18). */
+  amountPaid: money.optional(),
+  withInvoice: z.boolean().default(false),
+  /** Se enviado, liga/desliga a Taxa de serviço antes de concluir; omitido mantém a da Venda. */
+  serviceFee: z.boolean().optional(),
+  /** Obrigatório para venda a prazo (BR-08). */
+  customerId: z.string().optional(),
+  dueDate: z.coerce.date().optional(),
+});
+type CompleteSaleFields = z.output<typeof completeSaleFields>;
+
+/** Dinheiro sempre traz o valor recebido; venda a prazo sempre traz o cliente. */
+export const completeSaleSchema = completeSaleFields
+  .refine(
+    (
+      s,
+    ): s is CompleteSaleFields &
+      (
+        | { paymentMethod: Exclude<PaymentMethod, 'CASH'> }
+        | { paymentMethod: 'CASH'; amountPaid: number }
+      ) => s.paymentMethod !== PaymentMethod.CASH || s.amountPaid !== undefined,
+    { message: 'Informe o valor recebido em dinheiro', path: ['amountPaid'] },
+  )
+  .refine(
+    (
+      s,
+    ): s is typeof s &
+      (
+        | { paymentMethod: Exclude<PaymentMethod, 'CREDIT'> }
+        | { paymentMethod: 'CREDIT'; customerId: string }
+      ) => s.paymentMethod !== PaymentMethod.CREDIT || !!s.customerId,
+    { message: 'Venda a prazo exige cliente', path: ['customerId'] },
+  );
+/** Corpo enviado pelo PDV (antes dos defaults). */
+export type CompleteSaleBody = z.input<typeof completeSaleSchema>;
+export type CompleteSaleInput = z.output<typeof completeSaleSchema>;
 
 // ---------- Caixa (FR-27) ----------
 export const openRegisterSchema = z.object({
@@ -295,12 +316,12 @@ export const periodQuerySchema = z.object({
 });
 export type PeriodQuery = z.output<typeof periodQuerySchema>;
 
-export const optionalPeriodQuerySchema = z.object({
+const optionalPeriodQuerySchema = z.object({
   from: periodBound('start').optional(),
   to: periodBound('end').optional(),
 });
 
-export const pageQuerySchema = z.object({
+const pageQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
 });
 
@@ -341,3 +362,9 @@ export type PayableListQuery = z.output<typeof payableListQuerySchema>;
 export const stockMovementQuerySchema = z.object({
   productId: z.string().optional(),
 });
+export type StockMovementQuery = z.output<typeof stockMovementQuerySchema>;
+
+export const customerListQuerySchema = z.object({
+  search: z.string().optional(),
+});
+export type CustomerListQuery = z.output<typeof customerListQuerySchema>;

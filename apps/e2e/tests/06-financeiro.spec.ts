@@ -127,8 +127,9 @@ test.describe('Financeiro — Visão geral', () => {
   test.beforeEach(async ({ page }) => openFinancialTab(page, 'Visão geral'));
 
   test('mostra os indicadores principais sem nenhuma venda no período (seed)', async ({ page }) => {
-    await expect(page.getByText('Faturamento (mês)')).toBeVisible();
+    await expect(page.getByText('Receita (mês)')).toBeVisible();
+    await expect(page.getByText('Taxa de serviço (mês)')).toBeVisible();
     await expect(page.getByText('Resultado (mês)')).toBeVisible();
-    await expect(page.getByText('Meta de faturamento')).toBeVisible();
+    await expect(page.getByText('Meta de receita')).toBeVisible();
   });
 });

@@ -52,7 +52,9 @@ export class ReceivablesService {
   /** Estorno de venda a prazo: o fiado some, desde que ainda não tenha sido recebido. */
   async cancelForSale(db: Db, saleId: string) {
     const receivable = await db.accountReceivable.findUnique({ where: { saleId } });
-    if (!receivable) return;
+    if (!receivable) {
+      throw new ConflictException('Venda a prazo sem fiado registrado — estorno não aplicado');
+    }
     if (receivable.status === ReceivableStatus.RECEIVED) {
       throw new ConflictException(
         'O fiado desta venda já foi recebido — estorne o recebimento no financeiro antes de estornar a venda',

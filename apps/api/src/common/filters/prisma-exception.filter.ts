@@ -18,11 +18,11 @@ export class PrismaExceptionFilter implements ExceptionFilter {
           (exception.meta?.target as string[] | undefined)?.join(', ') ?? 'campo único';
         return reply(HttpStatus.CONFLICT, `Já existe um registro com o mesmo valor de: ${fields}`);
       }
-      case 'P2003':
-        return reply(
-          HttpStatus.CONFLICT,
-          'Registro em uso por outros dados — não pode ser alterado',
-        );
+      case 'P2003': {
+        // Chave estrangeira apontando para um registro que não existe (ex.: categoryId errado).
+        const field = exception.meta?.field_name as string | undefined;
+        return reply(HttpStatus.BAD_REQUEST, `Referência inválida${field ? `: ${field}` : ''}`);
+      }
       case 'P2025':
         return reply(HttpStatus.NOT_FOUND, 'Registro não encontrado');
       default:

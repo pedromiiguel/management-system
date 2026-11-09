@@ -5,6 +5,7 @@ import {
   stockAdjustmentSchema,
   StockEntryInput,
   stockEntrySchema,
+  StockMovementQuery,
   stockMovementQuerySchema,
 } from '@beverage/shared';
 import { RequirePermission } from '../../common/decorators/require-permission.decorator';
@@ -29,9 +30,7 @@ export class StockController {
 
   @Get('movements')
   @RequirePermission(Permission.STOCK_READ)
-  listMovements(
-    @Query(new ZodValidationPipe(stockMovementQuerySchema)) query: { productId?: string },
-  ) {
+  listMovements(@Query(new ZodValidationPipe(stockMovementQuerySchema)) query: StockMovementQuery) {
     return this.stockService.listMovements(query.productId);
   }
 

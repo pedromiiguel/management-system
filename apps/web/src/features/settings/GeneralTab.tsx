@@ -85,7 +85,7 @@ export function GeneralTab() {
         </div>
       </Card>
       <Card>
-        <div className="s-card-title">Meta de faturamento mensal (FR-36 — opcional)</div>
+        <div className="s-card-title">Meta de receita mensal (FR-36 — opcional)</div>
         <div className="flex gap-2">
           <div className="s-input flex-1">
             <input

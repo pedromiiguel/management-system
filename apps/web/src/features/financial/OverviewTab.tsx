@@ -1,12 +1,11 @@
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
-import { PAYMENT_METHOD_LABELS } from '@beverage/shared';
+import { PAYMENT_METHOD_LABELS, SERVICE_FEE_PERCENT } from '@beverage/shared';
 import { BarChart } from '@/components/BarChart';
 import { Card } from '@/components/Card';
 import { StatCard } from '@/components/StatCard';
-import { formatBRL, toDateInput } from '@/lib/format';
-import { salesReportQuery } from '@/features/reports/api';
+import { formatBRL } from '@/lib/format';
 import { dashboardQuery } from './api';
 
 const MONTH_LABELS = [
@@ -24,25 +23,12 @@ const MONTH_LABELS = [
   'Dez',
 ];
 
-/** Os últimos 6 meses (o atual por último). */
-function lastSixMonths(now = new Date()) {
-  return Array.from({ length: 6 }, (_, i) => {
-    const start = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
-    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
-    return {
-      from: toDateInput(start),
-      to: toDateInput(end),
-      label: MONTH_LABELS[start.getMonth()]!,
-    };
-  });
-}
+/** `AAAA-MM` → "Nov". */
+const monthLabel = (month: string) => MONTH_LABELS[Number(month.slice(5, 7)) - 1] ?? month;
 
 export function OverviewTab() {
   const { data: dashboard } = useQuery(dashboardQuery());
-  const months = lastSixMonths();
-  const monthTotals = useQueries({
-    queries: months.map((m) => ({ ...salesReportQuery(m.from, m.to), staleTime: 60_000 })),
-  }).map((q) => q.data?.total ?? 0);
+  const monthly = dashboard?.monthly ?? [];
 
   const byMethod = dashboard?.byMethodMonth ?? [];
   const totalByMethod = byMethod.reduce((acc, m) => acc + m.total, 0);
@@ -56,31 +42,42 @@ export function OverviewTab() {
     <>
       <div className="flex gap-3">
         <StatCard
-          label="Faturamento (mês)"
+          label="Receita (mês)"
           value={formatBRL(dashboard?.revenue.month)}
-          sub={`acumulado no ano: ${formatBRL(dashboard?.revenue.year)}`}
+          sub={`produtos, sem taxa de serviço · no ano: ${formatBRL(dashboard?.revenue.year)}`}
         />
         <StatCard
-          label="Vendas (hoje)"
+          label="Receita (hoje)"
           value={formatBRL(dashboard?.revenue.day)}
-          sub="receita bruta do dia"
+          sub="produtos vendidos hoje, sem taxa de serviço"
+        />
+        <StatCard
+          label="Taxa de serviço (mês)"
+          value={formatBRL(dashboard?.serviceFee.month)}
+          sub={`${SERVICE_FEE_PERCENT}% do subtotal — fica com a casa`}
         />
         <StatCard
           label="Resultado (mês)"
           value={formatBRL(result?.profit)}
-          sub="receita − CMV − despesas"
+          sub="receita + taxa de serviço − CMV − despesas"
           accent
         />
       </div>
       <div className="grid grid-cols-[1fr_350px] gap-3 flex-1 min-h-0">
         <Card className="flex flex-col overflow-auto">
           <div className="s-card-title">
-            Faturamento mês a mês <span className="s-dim font-normal">(R$)</span>
+            Receita mês a mês <span className="s-dim font-normal">(R$)</span>
           </div>
-          <BarChart values={monthTotals} labels={months.map((m) => m.label)} height={150} hl={5} />
+          <BarChart
+            values={monthly.map((m) => m.revenue)}
+            labels={monthly.map((m) => monthLabel(m.month))}
+            height={150}
+            hl={monthly.length - 1}
+          />
           <div className="s-divider my-3.5" />
           <div className="s-card-title mb-1.5">Resultado do período</div>
-          <DreLine op="" label="Receita bruta de vendas" value={formatBRL(result?.revenue)} />
+          <DreLine op="" label="Receita de vendas (produtos)" value={formatBRL(result?.revenue)} />
+          <DreLine op="+" label="Taxa de serviço" value={formatBRL(result?.serviceFee)} />
           <DreLine
             op="−"
             label="Custo das mercadorias vendidas (CMV)"
@@ -89,7 +86,9 @@ export function OverviewTab() {
           <DreLine
             op="="
             label="Margem bruta"
-            value={formatBRL((result?.revenue ?? 0) - (result?.cogs ?? 0))}
+            value={formatBRL(
+              (result?.revenue ?? 0) + (result?.serviceFee ?? 0) - (result?.cogs ?? 0),
+            )}
             strong
           />
           <DreLine op="−" label="Despesas operacionais" value={formatBRL(result?.expenses)} />
@@ -104,6 +103,7 @@ export function OverviewTab() {
         <div className="flex flex-col gap-3 min-h-0 overflow-auto">
           <Card>
             <div className="s-card-title">Recebimentos por forma de pagamento</div>
+            <div className="s-dim text-xs mb-2">Valor cobrado no mês, com a taxa de serviço.</div>
             {byMethod.map((m) => (
               <div key={m.paymentMethod} className="mb-2.5">
                 <div className="flex justify-between text-[13px] mb-1">
@@ -121,7 +121,7 @@ export function OverviewTab() {
             ) : null}
           </Card>
           <Card className="flex-1">
-            <div className="s-card-title">Meta de faturamento</div>
+            <div className="s-card-title">Meta de receita</div>
             {target ? (
               <>
                 <div className="flex justify-between items-baseline mb-2">

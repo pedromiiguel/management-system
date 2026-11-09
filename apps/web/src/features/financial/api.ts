@@ -80,10 +80,21 @@ export interface Payable {
   category: Pick<FinancialCategory, 'id' | 'name'> | null;
 }
 
+interface DayMonthYear {
+  day: number;
+  month: number;
+  year: number;
+}
+
 export interface Dashboard {
-  revenue: { day: number; month: number; year: number };
+  /** Receita (CONTEXT.md): produtos, sem a Taxa de serviço. */
+  revenue: DayMonthYear;
+  serviceFee: DayMonthYear;
+  /** Valor cobrado (com Taxa de serviço) por forma de pagamento no mês. */
   byMethodMonth: { paymentMethod: PaymentMethod; total: number; count: number }[];
-  result: { revenue: number; cogs: number; expenses: number; profit: number };
+  /** Últimos meses da loja (`AAAA-MM`), o atual por último. */
+  monthly: { month: string; revenue: number; serviceFee: number }[];
+  result: { revenue: number; serviceFee: number; cogs: number; expenses: number; profit: number };
   target: { monthly: number | null; progress: number | null };
 }
 

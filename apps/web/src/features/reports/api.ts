@@ -3,12 +3,15 @@ import { http } from '@/lib/http';
 import { rootKeys } from '@/lib/query-keys';
 import type { Product } from '@/features/products/api';
 
-export interface SalesReport {
-  days: { day: string; count: number; total: number }[];
+/** Receita (CONTEXT.md): só produtos, sem a Taxa de serviço — a taxa vem à parte. */
+interface SalesTotals {
   count: number;
-  /** Receita (CONTEXT.md): só produtos, sem a Taxa de serviço. */
-  total: number;
-  serviceFeeTotal: number;
+  revenue: number;
+  serviceFee: number;
+}
+
+export interface SalesReport extends SalesTotals {
+  days: (SalesTotals & { day: string })[];
 }
 
 export interface ProductPerformance {

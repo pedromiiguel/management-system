@@ -1,5 +1,11 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { CustomerInput, customerSchema, Permission } from '@beverage/shared';
+import {
+  CustomerInput,
+  CustomerListQuery,
+  customerListQuerySchema,
+  customerSchema,
+  Permission,
+} from '@beverage/shared';
 import { RequirePermission } from '../../common/decorators/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CustomersService } from './customers.service';
@@ -10,8 +16,8 @@ export class CustomersController {
 
   @Get()
   @RequirePermission(Permission.CUSTOMERS_READ)
-  list(@Query('search') search?: string) {
-    return this.customersService.list(search);
+  list(@Query(new ZodValidationPipe(customerListQuerySchema)) query: CustomerListQuery) {
+    return this.customersService.list(query.search);
   }
 
   @Post()

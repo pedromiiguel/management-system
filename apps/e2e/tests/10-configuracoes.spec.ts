@@ -25,7 +25,7 @@ test.describe('Configurações — Geral', () => {
     await expect(page.getByRole('button', { name: '60 dias' })).toHaveClass(/is-active/);
   });
 
-  test('salva a meta de faturamento mensal (FR-36)', async ({ page }) => {
+  test('salva a meta de receita mensal (FR-36)', async ({ page }) => {
     await page.getByPlaceholder('ex.: 50000,00').fill('75000,00');
     await page.getByRole('button', { name: 'Salvar' }).click();
     await expect(page.locator('.s-toast')).toContainText('Configuração salva');

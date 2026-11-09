@@ -29,7 +29,8 @@ export class ReportsController {
     return sendCsv(res, 'vendas-por-periodo.csv', report.days, [
       { key: 'day', label: 'Dia' },
       { key: 'count', label: 'Vendas' },
-      { key: 'total', label: 'Total (R$)' },
+      { key: 'revenue', label: 'Receita (R$)' },
+      { key: 'serviceFee', label: 'Taxa de serviço (R$)' },
     ]);
   }
 

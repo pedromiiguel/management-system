@@ -30,7 +30,7 @@ export function SalesTab({ from, to }: { from: string; to: string }) {
   const voidSale = useVoidSale();
 
   const voided = sales.filter((s) => s.status === SaleStatus.VOIDED).length;
-  const ticket = report && report.count > 0 ? report.total / report.count : 0;
+  const ticket = report && report.count > 0 ? report.revenue / report.count : 0;
 
   const confirmVoid = (sale: Sale) =>
     voidSale.mutate(sale.id, {
@@ -45,12 +45,12 @@ export function SalesTab({ from, to }: { from: string; to: string }) {
       <div className="flex gap-3">
         <StatCard
           label="Receita no período"
-          value={formatBRL(report?.total)}
+          value={formatBRL(report?.revenue)}
           sub="produtos, líquida de taxa de serviço"
         />
         <StatCard
           label="Taxa de serviço"
-          value={formatBRL(report?.serviceFeeTotal)}
+          value={formatBRL(report?.serviceFee)}
           sub={`${SERVICE_FEE_PERCENT}% do subtotal — fica com a casa`}
         />
         <StatCard label="Nº de vendas" value={report?.count ?? 0} />
@@ -62,7 +62,7 @@ export function SalesTab({ from, to }: { from: string; to: string }) {
           Receita por dia <span className="s-dim font-normal">(R$)</span>
         </div>
         <BarChart
-          values={days.map((d) => d.total)}
+          values={days.map((d) => d.revenue)}
           labels={days.map((d) => d.day.slice(8))}
           height={110}
           hl={days.length - 1}

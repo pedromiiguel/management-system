@@ -5,7 +5,10 @@ import {
   FinancialCategoryInput,
   FinancialCategoryKind,
   ManualEntryInput,
+  startOfStoreDay,
   storeCalendarStarts,
+  storeDateKey,
+  storeMonthKeys,
 } from '@beverage/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CashLedger } from '../cash-register/cash-ledger';
@@ -13,6 +16,9 @@ import { Period, SalesQuery } from '../sales/sales-query';
 import { SettingsService } from '../settings/settings.service';
 
 const Decimal = Prisma.Decimal;
+
+/** Meses na série do painel (o atual por último). */
+const MONTHLY_SERIES_LENGTH = 6;
 
 @Injectable()
 export class FinancialService {
@@ -72,37 +78,52 @@ export class FinancialService {
 
   /**
    * FR-32/33/34/36 — receita do dia/mês/ano-calendário da loja (BR-01/BR-02),
-   * resultado do mês e consolidação por forma de pagamento. Receita segue a
-   * definição única de `SalesQuery` (sem Taxa de serviço — Receita no CONTEXT.md).
+   * resultado do mês, cobrado por forma de pagamento e a série dos últimos
+   * meses da loja. Receita segue a definição única de `SalesQuery` (sem Taxa
+   * de serviço); a taxa vem à parte e entra no resultado — fica com a casa.
    */
   async dashboard() {
     const now = new Date();
     const starts = storeCalendarStarts(now);
     const month = { from: starts.month, to: now };
+    const monthKeys = storeMonthKeys(now, MONTHLY_SERIES_LENGTH);
+    const seriesPeriod = { from: startOfStoreDay(`${monthKeys[0]}-01`), to: now };
 
-    const [revenueDay, revenueMonth, revenueYear, byMethod, cogsMonth, expensesMonth, target] =
-      await Promise.all([
-        this.sales.revenue({ from: starts.day, to: now }),
-        this.sales.revenue(month),
-        this.sales.revenue({ from: starts.year, to: now }),
-        this.sales.revenueByMethod(month),
-        this.sales.cogs(month),
-        this.cash.expenses(this.prisma, month),
-        this.settings.get('revenueTargetMonthly'),
-      ]);
+    const [day, monthTotals, year, byMethod, cogs, expenses, byMonth, target] = await Promise.all([
+      this.sales.totals({ from: starts.day, to: now }),
+      this.sales.totals(month),
+      this.sales.totals({ from: starts.year, to: now }),
+      this.sales.chargedByMethod(month),
+      this.sales.cogs(month),
+      this.cash.expenses(this.prisma, month),
+      this.sales.totalsBy(seriesPeriod, (at) => storeDateKey(at).slice(0, 7)),
+      this.settings.get('revenueTargetMonthly'),
+    ]);
+    const { revenue, serviceFee } = monthTotals;
 
     return {
-      revenue: { day: revenueDay, month: revenueMonth, year: revenueYear },
+      revenue: { day: day.revenue, month: revenue, year: year.revenue },
+      serviceFee: { day: day.serviceFee, month: serviceFee, year: year.serviceFee },
+      /** Valor cobrado (com Taxa de serviço) por forma de pagamento no mês. */
       byMethodMonth: byMethod,
+      monthly: monthKeys.map((key) => {
+        const totals = byMonth.find((m) => m.key === key);
+        return {
+          month: key,
+          revenue: totals?.revenue ?? new Decimal(0),
+          serviceFee: totals?.serviceFee ?? new Decimal(0),
+        };
+      }),
       result: {
-        revenue: revenueMonth,
-        cogs: cogsMonth,
-        expenses: expensesMonth,
-        profit: revenueMonth.sub(cogsMonth).sub(expensesMonth),
+        revenue,
+        serviceFee,
+        cogs,
+        expenses,
+        profit: revenue.add(serviceFee).sub(cogs).sub(expenses),
       },
       target: {
         monthly: target,
-        progress: target === null ? null : revenueMonth.div(target).toDecimalPlaces(4),
+        progress: target === null ? null : revenue.div(target).toDecimalPlaces(4),
       },
     };
   }

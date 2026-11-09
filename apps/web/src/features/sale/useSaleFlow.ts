@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import type { CompleteSaleInput, DiscountInput } from '@beverage/shared';
+import type { CompleteSaleBody, DiscountInput } from '@beverage/shared';
 import { toast } from '@/components/Toast';
 import { ApiError } from '@/lib/http';
 import { useInvalidate } from '@/lib/query-keys';
@@ -9,7 +9,7 @@ import { createSaleQueue, PendingQuantityError } from './sale-queue';
 const QUANTITY_DEBOUNCE_MS = 400;
 
 export type AddItemResult =
-  | { status: 'added'; itemId: string | null }
+  | { status: 'added'; itemId: string }
   | { status: 'not-found' }
   | { status: 'failed' };
 
@@ -85,16 +85,10 @@ export function useSaleFlow({ onSettled }: { onSettled: () => void }) {
       setAdding(true);
       try {
         return await queue.run(async () => {
-          const { sale: updated, warning } = await saleApi.addItem(current().id, input);
+          const { sale: updated, itemId, warning } = await saleApi.addItem(current().id, input);
           current(updated);
           if (warning) toast(warning, 'warn');
-          const added = updated.items.find(
-            (item) =>
-              item.product.ean === input.code ||
-              item.product.sku === input.code ||
-              item.productId === input.code,
-          );
-          return { status: 'added' as const, itemId: added?.id ?? null };
+          return { status: 'added' as const, itemId };
         });
       } catch (error) {
         // Código sem cadastro exato (EAN/SKU/id): o PDV cai na busca por nome.
@@ -137,7 +131,7 @@ export function useSaleFlow({ onSettled }: { onSettled: () => void }) {
      * Finaliza. `prepare` roda já com as quantidades confirmadas e decide o
      * pagamento a partir da venda atualizada (ou `null` para não finalizar).
      */
-    complete: (prepare: (sale: Sale) => CompleteSaleInput | null) =>
+    complete: (prepare: (sale: Sale) => CompleteSaleBody | null) =>
       perform(async () => {
         const input = prepare(current());
         if (!input) return undefined;

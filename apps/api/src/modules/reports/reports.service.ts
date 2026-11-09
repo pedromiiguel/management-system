@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { storeDateKey } from '@beverage/shared';
-import { Period, saleRevenue, SalesQuery } from '../sales/sales-query';
+import { Period, SalesQuery } from '../sales/sales-query';
 
 const Decimal = Prisma.Decimal;
 type Decimal = Prisma.Decimal;
@@ -11,25 +11,18 @@ export class ReportsService {
   constructor(private readonly sales: SalesQuery) {}
 
   /**
-   * FR-37: vendas por período, agrupadas pelo dia da loja. `total` é a receita
-   * (sem Taxa de serviço — ver SalesQuery); a taxa acumulada sai em `serviceFeeTotal`.
+   * FR-37: vendas por período, agrupadas pelo dia da loja: receita (sem Taxa
+   * de serviço — ver SalesQuery) e a taxa, à parte, por dia e no período.
    */
   async salesByPeriod(period: Period) {
-    const sales = await this.sales.completedSales(period);
-    const byDay = new Map<string, { day: string; count: number; total: Decimal }>();
-    let total = new Decimal(0);
-    let serviceFeeTotal = new Decimal(0);
-    for (const sale of sales) {
-      const revenue = saleRevenue(sale);
-      const day = storeDateKey(sale.completedAt!);
-      const entry = byDay.get(day) ?? { day, count: 0, total: new Decimal(0) };
-      entry.count += 1;
-      entry.total = entry.total.add(revenue);
-      byDay.set(day, entry);
-      total = total.add(revenue);
-      serviceFeeTotal = serviceFeeTotal.add(sale.serviceFee ?? 0);
-    }
-    return { days: [...byDay.values()], count: sales.length, total, serviceFeeTotal };
+    const byDay = await this.sales.totalsBy(period, storeDateKey);
+    const days = byDay.map(({ key, ...totals }) => ({ day: key, ...totals }));
+    return {
+      days,
+      count: days.reduce((acc, d) => acc + d.count, 0),
+      revenue: days.reduce((acc, d) => acc.add(d.revenue), new Decimal(0)),
+      serviceFee: days.reduce((acc, d) => acc.add(d.serviceFee), new Decimal(0)),
+    };
   }
 
   /**

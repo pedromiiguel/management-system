@@ -14,10 +14,7 @@ export class StockService {
 
   /** FR-05: Entrada de compra/reposição. */
   createEntry(input: StockEntryInput) {
-    const { productId, quantity, unitCost, batch, expiresAt, note } = input;
-    return this.prisma.$transaction((tx) =>
-      this.ledger.entry(tx, { productId, quantity, unitCost, batch, expiresAt, note }),
-    );
+    return this.prisma.$transaction((tx) => this.ledger.entry(tx, input));
   }
 
   /** Ajustar: correção manual auditável (inventário, quebra, perda). */

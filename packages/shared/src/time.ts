@@ -1,6 +1,13 @@
 /**
- * "Um dia" é sempre o dia civil da loja, não o do servidor nem UTC. Relatórios,
- * histórico, fluxo de caixa e painel usam estas funções para cortar períodos.
+ * "Um dia" é sempre o dia civil da loja, não o do navegador, do servidor nem
+ * UTC. Relatórios, histórico, fluxo de caixa, painel e as telas usam estas
+ * funções para cortar períodos e saber que dia é hoje.
+ *
+ * Dois tipos de data:
+ * - Instante (vendas, movimentos): um `Date`; o dia dele é `storeDateKey`.
+ * - Data sem hora (vencimento, validade): o dia civil `AAAA-MM-DD`, enviado
+ *   assim e gravado como meia-noite UTC; lido de volta com `dateOnlyKey`, sem
+ *   conversão de fuso. Comparações usam as chaves `AAAA-MM-DD`.
  */
 export const STORE_TIME_ZONE = 'America/Sao_Paulo';
 
@@ -35,9 +42,7 @@ function storeOffsetMs(instant: Date): number {
 
 /** Instante em que começa o dia civil `YYYY-MM-DD` na loja. */
 export function startOfStoreDay(ymd: string): Date {
-  const match = YMD.exec(ymd);
-  if (!match) throw new Error(`Data inválida (esperado AAAA-MM-DD): ${ymd}`);
-  const wallClock = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  const wallClock = keyToUtc(ymd);
   // Duas passadas acertam o offset mesmo se o dia tiver mudança de horário.
   let instant = wallClock - storeOffsetMs(new Date(wallClock));
   instant = wallClock - storeOffsetMs(new Date(instant));
@@ -56,11 +61,6 @@ export function storeDateKey(instant: Date): string {
   return `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`;
 }
 
-/** Período fechado [início do dia `from`, fim do dia `to`] no fuso da loja. */
-export function storeDayRange(from: string, to: string): { from: Date; to: Date } {
-  return { from: startOfStoreDay(from), to: endOfStoreDay(to) };
-}
-
 /** Início do dia, do mês e do ano-calendário (BR-02) da loja que contêm `now`. */
 export function storeCalendarStarts(now: Date) {
   const today = storeDateKey(now);
@@ -70,4 +70,34 @@ export function storeCalendarStarts(now: Date) {
     month: startOfStoreDay(`${year}-${month}-01`),
     year: startOfStoreDay(`${year}-01-01`),
   };
+}
+
+/** O dia `AAAA-MM-DD` de uma data sem hora (vencimento, validade), como foi gravado. */
+export function dateOnlyKey(value: string | Date): string {
+  return (typeof value === 'string' ? value : value.toISOString()).slice(0, 10);
+}
+
+/** `AAAA-MM-DD` deslocado em `days` dias civis. */
+export function addDaysToKey(ymd: string, days: number): string {
+  return new Date(keyToUtc(ymd) + days * DAY_MS).toISOString().slice(0, 10);
+}
+
+/** Dias civis de `from` até `to` (negativo se `to` vem antes). */
+export function daysBetweenKeys(from: string, to: string): number {
+  return Math.round((keyToUtc(to) - keyToUtc(from)) / DAY_MS);
+}
+
+/** Os últimos `count` meses da loja (`AAAA-MM`), terminando no mês de `now`. */
+export function storeMonthKeys(now: Date, count: number): string[] {
+  const [year, month] = storeDateKey(now).split('-').map(Number) as [number, number];
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(Date.UTC(year, month - 1 - (count - 1 - i), 1));
+    return d.toISOString().slice(0, 7);
+  });
+}
+
+function keyToUtc(ymd: string): number {
+  const match = YMD.exec(ymd);
+  if (!match) throw new Error(`Data inválida (esperado AAAA-MM-DD): ${ymd}`);
+  return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 }

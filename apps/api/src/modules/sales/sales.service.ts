@@ -68,9 +68,13 @@ export class SalesService {
     return this.prisma.sale.create({ data: { operatorId }, include: saleInclude });
   }
 
-  /** Bipar (FR-10/11/12/15): soma a quantidade se o produto já está na venda. */
+  /**
+   * Bipar (FR-10/11/12/15): soma a quantidade se o produto já está na venda.
+   * Devolve o item bipado (`itemId`) — criado ou somado.
+   */
   async addItem(saleId: string, input: AddSaleItemInput) {
     let warning: string | null = null;
+    let itemId = '';
     const sale = await this.changeInProgress(saleId, async (tx) => {
       const product = await this.products.findByCode(input.code);
       const existing = await tx.saleItem.findUnique({
@@ -78,21 +82,20 @@ export class SalesService {
       });
       const quantity = (existing?.quantity ?? 0) + input.quantity;
       warning = this.stock.checkAvailability(product, quantity, await this.stockPolicy());
-      if (existing) {
-        await tx.saleItem.update({ where: { id: existing.id }, data: { quantity } });
-      } else {
-        await tx.saleItem.create({
-          data: {
-            saleId,
-            productId: product.id,
-            quantity,
-            unitPrice: product.salePrice,
-            unitCost: product.purchasePrice,
-          },
-        });
-      }
+      const item = existing
+        ? await tx.saleItem.update({ where: { id: existing.id }, data: { quantity } })
+        : await tx.saleItem.create({
+            data: {
+              saleId,
+              productId: product.id,
+              quantity,
+              unitPrice: product.salePrice,
+              unitCost: product.purchasePrice,
+            },
+          });
+      itemId = item.id;
     });
-    return { sale, warning };
+    return { sale, itemId, warning };
   }
 
   /** Alterar quantidade (FR-14) de um Item já na venda. */
@@ -154,10 +157,8 @@ export class SalesService {
     if (!enabledPaymentMethods.includes(input.paymentMethod)) {
       throw new BadRequestException('Forma de pagamento desabilitada nas configurações');
     }
-    const isCash = input.paymentMethod === PaymentMethod.CASH;
-    if (isCash && input.amountPaid === undefined) {
-      throw new BadRequestException('Informe o valor recebido em dinheiro');
-    }
+    // O schema garante: dinheiro traz o valor recebido; a prazo traz o cliente.
+    const amountPaid = input.paymentMethod === PaymentMethod.CASH ? input.amountPaid : null;
 
     return this.prisma.$transaction(async (tx) => {
       await this.requireInProgress(tx, saleId);
@@ -170,7 +171,7 @@ export class SalesService {
       });
       if (sale.items.length === 0) throw new BadRequestException('Venda sem itens');
 
-      const price = priceOf(sale, isCash ? input.amountPaid : null);
+      const price = priceOf(sale, amountPaid);
       if (price.change !== null && price.change < 0) {
         throw new BadRequestException('Valor recebido é menor que o total da venda');
       }
@@ -181,7 +182,7 @@ export class SalesService {
       let cashRegisterId: string | null = null;
       if (input.paymentMethod === PaymentMethod.CREDIT) {
         await this.receivables.createForSale(tx, {
-          customerId: input.customerId!,
+          customerId: input.customerId,
           saleId: sale.id,
           amount: total,
           dueDate: input.dueDate,
@@ -204,7 +205,7 @@ export class SalesService {
           completedAt: new Date(),
           ...pricingColumns(price),
           paymentMethod: input.paymentMethod,
-          amountPaid: isCash ? toDecimal(input.amountPaid!) : null,
+          amountPaid: amountPaid === null ? null : toDecimal(amountPaid),
           change: price.change === null ? null : toDecimal(price.change),
           withInvoice: input.withInvoice,
           customerId: input.customerId,
@@ -324,7 +325,7 @@ function priceOf(
     discountValue: Decimal | null;
     serviceFee: Decimal | null;
   },
-  amountPaid: number | null | undefined,
+  amountPaid: number | null,
 ) {
   return priceSale({
     items: sale.items.map((i) => ({ unitPrice: i.unitPrice.toNumber(), quantity: i.quantity })),

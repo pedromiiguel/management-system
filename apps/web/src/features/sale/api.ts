@@ -2,7 +2,7 @@ import { queryOptions, useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 import type {
   addSaleItemSchema,
-  CompleteSaleInput,
+  CompleteSaleBody,
   CustomerInput,
   DiscountInput,
   DiscountType,
@@ -56,12 +56,14 @@ export interface Sale {
 
 export type AddSaleItemInput = z.input<typeof addSaleItemSchema>;
 export type SaleItemResult = { sale: Sale; warning: string | null };
+/** Bipar devolve também o item bipado (criado ou somado). */
+export type AddSaleItemResult = SaleItemResult & { itemId: string };
 
 /** Operações da venda em andamento — só o `useSaleFlow` chama, em fila. */
 export const saleApi = {
   open: () => http.post<Sale>('/sales'),
   addItem: (saleId: string, input: AddSaleItemInput) =>
-    http.post<SaleItemResult>(`/sales/${saleId}/items`, input),
+    http.post<AddSaleItemResult>(`/sales/${saleId}/items`, input),
   updateQuantity: (saleId: string, itemId: string, quantity: number) =>
     http.patch<SaleItemResult>(`/sales/${saleId}/items/${itemId}`, { quantity }),
   removeItem: (saleId: string, itemId: string) =>
@@ -71,7 +73,7 @@ export const saleApi = {
   setServiceFee: (saleId: string, enabled: boolean) =>
     http.put<Sale>(`/sales/${saleId}/service-fee`, { enabled }),
   cancel: (saleId: string) => http.post<unknown>(`/sales/${saleId}/cancel`),
-  complete: (saleId: string, input: CompleteSaleInput) =>
+  complete: (saleId: string, input: CompleteSaleBody) =>
     http.post<Sale>(`/sales/${saleId}/complete`, input),
 };
 

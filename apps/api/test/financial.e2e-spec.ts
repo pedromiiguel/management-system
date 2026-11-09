@@ -77,6 +77,19 @@ describe('Financial', () => {
       payableId = res.body.id;
     });
 
+    it('categoria inexistente é referência inválida (400), não conflito', async () => {
+      const res = await admin()
+        .post('/api/payables')
+        .send({
+          description: 'Categoria errada',
+          amount: 10,
+          dueDate: today(),
+          categoryId: 'nao-existe',
+        })
+        .expect(400);
+      expect(res.body.message).toMatch(/^Referência inválida/);
+    });
+
     it('cria a conta em aberto', async () => {
       const open = await admin().get('/api/payables').expect(200);
       expect(open.body.find((p: { id: string }) => p.id === payableId).status).toBe('OPEN');

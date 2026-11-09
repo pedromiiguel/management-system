@@ -4,7 +4,7 @@ import {
   DiscountType,
   PaymentMethod,
   saleCode,
-  type CompleteSaleInput,
+  type CompleteSaleBody,
   type DiscountInput,
 } from '@beverage/shared';
 import { Button } from '@/components/Button';
@@ -132,7 +132,7 @@ export function SalePage() {
     toast('Venda cancelada');
   }
 
-  function prepareCompletion(current: Sale): CompleteSaleInput | null {
+  function prepareCompletion(current: Sale): CompleteSaleBody | null {
     if (current.items.length === 0) {
       toast('Adicione itens antes de finalizar', 'warn');
       return null;

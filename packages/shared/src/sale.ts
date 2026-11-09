@@ -7,7 +7,6 @@ export function saleCode(saleId: string): string {
 
 /** Taxa de serviço: percentual sobre o subtotal (pré-desconto). Ver CONTEXT.md. */
 export const SERVICE_FEE_PERCENT = 10;
-export const SERVICE_FEE_RATE = SERVICE_FEE_PERCENT / 100;
 export const SERVICE_FEE_LABEL = `Taxa de serviço (${SERVICE_FEE_PERCENT}%)`;
 
 export interface SalePricingInput {
