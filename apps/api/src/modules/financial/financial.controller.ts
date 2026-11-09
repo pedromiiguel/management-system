@@ -1,10 +1,12 @@
-import { BadRequestException, Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import {
   FinancialCategoryInput,
   financialCategorySchema,
   ManualEntryInput,
   manualEntrySchema,
   Permission,
+  PeriodQuery,
+  periodQuerySchema,
 } from '@beverage/shared';
 import { RequirePermission } from '../../common/decorators/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
@@ -16,9 +18,8 @@ export class FinancialController {
 
   @Get('cash-flow')
   @RequirePermission(Permission.FINANCIAL_READ)
-  cashFlow(@Query('from') from?: string, @Query('to') to?: string) {
-    if (!from || !to) throw new BadRequestException('Informe o período (from/to)');
-    return this.financialService.cashFlow(new Date(from), new Date(to));
+  cashFlow(@Query(new ZodValidationPipe(periodQuerySchema)) period: PeriodQuery) {
+    return this.financialService.cashFlow(period);
   }
 
   @Get('dashboard')
