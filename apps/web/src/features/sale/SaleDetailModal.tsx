@@ -11,11 +11,14 @@ import { Modal } from '@/components/Modal';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
 import { formatBRL, formatDateTime } from '@/lib/format';
-import type { Sale } from '@/features/sale/api';
-import { CupomReceipt } from '@/features/sale/CupomReceipt';
-import { salePricing } from '@/features/sale/sale';
+import type { Sale } from './api';
+import { CupomReceipt } from './CupomReceipt';
+import { salePricing } from './sale';
 
-/** Só Venda concluída tem Cupom; estornada ou cancelada é só consulta. */
+/**
+ * Detalhe de uma Venda do histórico (componente de entrada: usado pelos
+ * Relatórios). Só Venda concluída tem Cupom; estornada ou cancelada é só consulta.
+ */
 export function SaleDetailModal({ sale, onClose }: { sale: Sale; onClose: () => void }) {
   const hasCupom = sale.status === SaleStatus.COMPLETED;
   const { discount } = salePricing(sale);

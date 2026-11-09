@@ -58,6 +58,22 @@ apps/e2e          Playwright contra web + api
   `query-client`, `format`.
 - `components/` — componentes de UI compartilhados, numa pasta plana.
 
+### Dependências
+
+Tudo depende do que muda menos: `routes → features → components → lib → shared`.
+
+- `lib/` não importa `components/` nem `features/`; `components/` não importa
+  `features/`.
+- Entre funcionalidades, só o `api.ts` (tipos, `queryOptions`, mutations) e os
+  **componentes de entrada** — feitos para serem embutidos por outra tela:
+  `financial/CategoriesTab` e `users/AccessTab` (Configurações),
+  `stock/StockEntryModal` (Produtos) e `sale/SaleDetailModal` (Relatórios).
+  Páginas são importadas só pelas rotas. O resto (lógica pura, componentes
+  internos) fica dentro da funcionalidade; se outra precisar, vira um
+  componente de entrada ou sobe para `components/`/`lib/`/shared.
+- O ESLint (`apps/web/eslint.config.js`, `no-restricted-imports`) barra o resto;
+  um componente de entrada novo entra na lista de lá e daqui.
+
 Uma funcionalidade nova costuma ser: schema no shared → módulo na API com
 permissão → `features/<f>/api.ts` + página → rota.
 

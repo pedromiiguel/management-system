@@ -17,8 +17,8 @@ import { Tag } from '@/components/Tag';
 import { toast } from '@/components/Toast';
 import { formatBRL, formatDateTime } from '@/lib/format';
 import { salesHistoryQuery, useVoidSale, type Sale } from '@/features/sale/api';
+import { SaleDetailModal } from '@/features/sale/SaleDetailModal';
 import { salesReportQuery } from './api';
-import { SaleDetailModal } from './SaleDetailModal';
 
 export function SalesTab({ from, to }: { from: string; to: string }) {
   const { data: report } = useQuery(salesReportQuery(from, to));
