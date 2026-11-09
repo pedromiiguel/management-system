@@ -8,7 +8,7 @@ import {
   StockMovementQuery,
   stockMovementQuerySchema,
 } from '@beverage/shared';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
+import { RequirePermission } from '../auth/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { StockService } from './stock.service';
 

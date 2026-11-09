@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { LoginInput, loginSchema } from '@beverage/shared';
-import { AuthUser, CurrentUser } from '../../common/decorators/current-user.decorator';
-import { Public } from '../../common/decorators/public.decorator';
+import { AuthUser, CurrentUser } from './current-user.decorator';
+import { Public } from './public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { AuthService } from './auth.service';
 

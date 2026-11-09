@@ -1,8 +1,8 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Permission } from '@beverage/shared';
-import { AuthUser } from '../decorators/current-user.decorator';
-import { PERMISSION_KEY } from '../decorators/require-permission.decorator';
+import { AuthUser } from './current-user.decorator';
+import { PERMISSION_KEY } from './require-permission.decorator';
 
 /** Lança 403 se o usuário não tiver a permissão. */
 export function assertPermission(user: AuthUser | undefined, permission: Permission) {

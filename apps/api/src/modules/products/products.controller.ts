@@ -8,9 +8,9 @@ import {
   UpdateProductInput,
   updateProductSchema,
 } from '@beverage/shared';
-import { AuthUser, CurrentUser } from '../../common/decorators/current-user.decorator';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
-import { assertPermission } from '../../common/guards/permissions.guard';
+import { AuthUser, CurrentUser } from '../auth/current-user.decorator';
+import { RequirePermission } from '../auth/require-permission.decorator';
+import { assertPermission } from '../auth/permissions.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { ProductsService } from './products.service';
 

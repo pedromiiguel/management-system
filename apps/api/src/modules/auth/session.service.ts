@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ALL_PERMISSIONS, isPermission, Permission } from '@beverage/shared';
-import { AuthUser } from '../../common/decorators/current-user.decorator';
+import { AuthUser } from './current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 
 const CACHE_TTL_MS = 30_000;

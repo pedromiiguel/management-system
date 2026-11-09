@@ -14,8 +14,8 @@ import {
   UpdateSaleItemInput,
   updateSaleItemSchema,
 } from '@beverage/shared';
-import { AuthUser, CurrentUser } from '../../common/decorators/current-user.decorator';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
+import { AuthUser, CurrentUser } from '../auth/current-user.decorator';
+import { RequirePermission } from '../auth/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { SalesService } from './sales.service';
 

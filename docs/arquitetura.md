@@ -35,8 +35,12 @@ apps/e2e          Playwright contra web + api
     do "caixa aberto".
   - `receivables` — fiado; `sales/sales-query.ts` — venda concluída no período e
     Receita.
-- `modules/auth` — guards globais (JWT + permissão); usuário e permissões
-  resolvidos por requisição.
+- `modules/auth` — tudo de autenticação/autorização junto: guards globais
+  (`jwt-auth.guard`, `permissions.guard`), decorators (`@Public`,
+  `@RequirePermission`, `@CurrentUser`/`AuthUser`) e `SessionService` (usuário e
+  permissões resolvidos por requisição).
+- `common/` — só o que não é de nenhum domínio: `ZodValidationPipe`, filtro de
+  erros do Prisma, CSV.
 - `config/` — `env.ts` (ambiente validado na subida) e `configureApp` (prefixo
   `/api`, CORS, filtro de erros do Prisma, Decimal → número), usado também
   pelos testes e2e.

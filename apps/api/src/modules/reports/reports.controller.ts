@@ -2,7 +2,7 @@ import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { Permission, ReportQuery, reportQuerySchema } from '@beverage/shared';
 import { z } from 'zod';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
+import { RequirePermission } from '../auth/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CsvColumn, toCsv } from '../../common/utils/csv';
 import { StockService } from '../stock/stock.service';

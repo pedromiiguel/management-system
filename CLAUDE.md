@@ -51,7 +51,7 @@ API-only workflows (from `apps/api`): `npm run db:migrate:dev` (create/apply a d
 
 ### Auth & authorization (the backbone — understand this first)
 
-`AuthModule` registers two **global** `APP_GUARD`s that run on every request:
+`AuthModule` registers two **global** `APP_GUARD`s that run on every request. Guards and decorators (`@Public`, `@RequirePermission`, `@CurrentUser`/`AuthUser`) live together in `modules/auth/`:
 
 1. `JwtAuthGuard` — validates the Bearer token (the JWT carries only `sub`). Opt a route out with `@Public()`.
 2. `PermissionsGuard` — enforces the permission declared by `@RequirePermission(Permission.X)` on the handler.
