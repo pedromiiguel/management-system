@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { PermissionsGuard } from './common/guards/permissions.guard';
+import { createObserveModule } from '@nestjs/observe';
+import { env } from './config/env';
 import { AuthModule } from './modules/auth/auth.module';
 import { CashRegisterModule } from './modules/cash-register/cash-register.module';
 import { CustomersModule } from './modules/customers/customers.module';
@@ -15,14 +14,17 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { StockModule } from './modules/stock/stock.module';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { createObserveModule } from '@nestjs/observe';
 
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
+const observe = createObserveModule();
+
+/** Telemetria só liga com credenciais; sem elas o coletor responderia 401. */
+export const ObserveInstrument = env.observe ? observe.ObserveInstrument : undefined;
+
 @Module({
   imports: [
     PrismaModule,
-    SettingsModule,
     AuthModule,
+    SettingsModule,
     UsersModule,
     ProductsModule,
     StockModule,
@@ -33,16 +35,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ReceivablesModule,
     PayablesModule,
     ReportsModule,
-    ObserveModule.forRoot({
-      appKey: process.env.OBSERVE_APP_KEY!,
-      appSecret: process.env.OBSERVE_APP_SECRET!,
-      serviceId: 'management-system-app',
-    }),
-  ],
-  providers: [
-    // Autenticação e autorização globais (NFR-05)
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
-    { provide: APP_GUARD, useClass: PermissionsGuard },
+    ...(env.observe
+      ? [observe.ObserveModule.forRoot({ ...env.observe, serviceId: 'management-system-app' })]
+      : []),
   ],
 })
 export class AppModule {}
