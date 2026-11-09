@@ -36,8 +36,8 @@ Uma auditoria de acoplamento ("as peças que mudam juntas moram juntas?") do
    componentes de UI. Sem interfaces de implementação única, factories,
    ViewModels de repasse nem barrels.
 2. **Contrato no shared.** Schemas Zod (corpo e query), enums com rótulos
-   (`SALE_STATUS_LABELS`, `PAYMENT_METHOD_LABELS`…), `settingsSchema` com
-   `DEFAULT_SETTINGS`, `priceSale`, `saleCode` e `SERVICE_FEE_LABEL` têm uma
+   (`SALE_STATUS_LABELS`, `PAYMENT_METHOD_LABELS`…), as configurações
+   (`parseSetting`, `DEFAULT_SETTINGS`), `priceSale`, `saleCode` e `SERVICE_FEE_LABEL` têm uma
    fonte só, usada pela API e pelo web.
 3. **API com donos de agregado.** `StockLedger` e `CashLedger` são os únicos
    escritores das tabelas de estoque e caixa; `SalesQuery` é a única definição

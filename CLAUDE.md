@@ -76,7 +76,7 @@ One NestJS module per domain under `apps/api/src/modules/` (auth, products, stoc
 - `CashLedger` (`cash-register/cash-ledger.ts`) — only writer of `cash_movement` and owner of "the open register": sale receipts, void refunds (always to the register open now), drawer movements, expenses. System financial categories are found by stable `code` (`SystemCategory`), not name; they are created by a migration (not the seed), so every database has them.
 - `ReceivablesService` owns fiado (`createForSale` / `cancelForSale` / `openBalances`); `SalesQuery` (`sales/sales-query.ts`) owns "completed sale in period" and the single revenue definition used by dashboard and reports.
 
-`SettingsService` is the source of runtime-configurable behavior: keys, types and defaults come from `settingsSchema` / `DEFAULT_SETTINGS` in shared, and each DB value is validated on read (falls back to default). Setting rows are not seeded — a missing row means the default; a row is written only when someone saves that setting. E.g. `stockPolicy` (BLOCK vs WARN) is read at sale time.
+`SettingsService` is the source of runtime-configurable behavior: keys (`SETTING_KEYS`), per-value validation (`parseSetting`) and defaults (`DEFAULT_SETTINGS`) come from one settings schema in shared, and each DB value is validated on read (falls back to default). Setting rows are not seeded — a missing row means the default; a row is written only when someone saves that setting. E.g. `stockPolicy` (BLOCK vs WARN) is read at sale time.
 
 ### Money / Decimal
 

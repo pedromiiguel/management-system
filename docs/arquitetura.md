@@ -15,8 +15,9 @@ apps/e2e          Playwright contra web + api
 
 - `schemas.ts` — validação de corpo e de query string, usada pelo `ZodValidationPipe`
   da API e pelo `zodResolver` dos formulários. Schemas base sem `.default()`;
-  criação aplica defaults; atualização é `base.partial()`. `settingsSchema` +
-  `DEFAULT_SETTINGS` definem as configurações.
+  criação aplica defaults; atualização é `base.partial()`. As configurações
+  têm chaves e tipos num schema só (`SETTING_KEYS`, `parseSetting` para cada
+  valor lido, `updateSettingsSchema` para o PUT) e defaults em `DEFAULT_SETTINGS`.
 - `enums.ts` — vocabulário (status da venda, formas de pagamento…) com rótulos
   pt-BR; espelha o `schema.prisma` (um teste da API falha se divergirem).
 - `permissions.ts` — catálogo de permissões e rótulos.

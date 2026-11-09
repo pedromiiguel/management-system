@@ -10,9 +10,10 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 
 /**
- * Configurações em runtime (NFR-10). Forma, chaves e defaults vêm de
- * `settingsSchema` em @beverage/shared; cada linha do banco é validada na
- * leitura e, se inválida, cai no default.
+ * Configurações em runtime (NFR-10). Chaves (`SETTING_KEYS`), validação
+ * (`parseSetting`) e defaults (`DEFAULT_SETTINGS`) vêm de @beverage/shared;
+ * cada linha do banco é validada na leitura e, se inválida, cai no default.
+ * Chave sem linha no banco = default.
  */
 @Injectable()
 export class SettingsService {

@@ -18,7 +18,7 @@ INSERT INTO "financial_category" ("id", "name", "kind", "code", "system", "activ
 SELECT gen_random_uuid()::text, 'Recebimento de fiado', 'INCOME', 'RECEIVABLE_SETTLEMENT', true, true
 WHERE NOT EXISTS (SELECT 1 FROM "financial_category" WHERE "code" = 'RECEIVABLE_SETTLEMENT');
 
--- Configurações passam a ser gravadas pelo nome do campo de `settingsSchema`
+-- Configurações passam a ser gravadas pela chave de `SETTING_KEYS`
 -- (@beverage/shared). `DEFAULT_MINIMUM_STOCK` nunca foi lido e sai.
 UPDATE "setting" SET "key" = 'stockPolicy' WHERE "key" = 'STOCK_POLICY';
 UPDATE "setting" SET "key" = 'revenueTargetMonthly' WHERE "key" = 'REVENUE_TARGET_MONTHLY';

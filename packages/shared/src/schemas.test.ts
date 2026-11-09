@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DEFAULT_SETTINGS,
   productSchema,
   roleSchema,
-  settingsSchema,
   updateProductSchema,
   updateSettingsSchema,
   updateUserSchema,
@@ -37,8 +35,7 @@ describe('contrato Zod: defaults só na criação', () => {
     expect(roleSchema.safeParse({ name: 'X', permissions: ['root'] }).success).toBe(false);
   });
 
-  it('configurações: vazio dá os defaults; atualização não injeta defaults', () => {
-    expect(settingsSchema.parse({})).toEqual(DEFAULT_SETTINGS);
+  it('configurações: atualização não injeta defaults', () => {
     expect(updateSettingsSchema.parse({ expiryAlertDays: 10 })).toEqual({ expiryAlertDays: 10 });
     expect(updateSettingsSchema.safeParse({ revenueTargetMonthly: 0 }).success).toBe(false);
   });

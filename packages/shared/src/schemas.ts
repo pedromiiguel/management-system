@@ -250,6 +250,7 @@ export const settleReceivableSchema = z.object({
 export type SettleReceivableInput = z.infer<typeof settleReceivableSchema>;
 
 // ---------- Configurações (NFR-10) ----------
+/** Fonte única das configurações: chaves e tipos aqui, defaults em `DEFAULT_SETTINGS`. */
 const settingsFields = z.object({
   stockPolicy: z.enum(StockPolicy),
   revenueTargetMonthly: positiveMoney.nullable(),
@@ -267,11 +268,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
   expiryAlertDays: 30,
 };
 
-/** Configurações completas: campos ausentes recebem o default. */
-export const settingsSchema = settingsFields
-  .partial()
-  .transform((v): AppSettings => ({ ...DEFAULT_SETTINGS, ...definedOnly(v) }));
-
 /** Corpo do PUT /settings: só os campos alterados. */
 export const updateSettingsSchema = settingsFields.partial();
 export type SettingsInput = z.infer<typeof updateSettingsSchema>;
@@ -279,10 +275,6 @@ export type SettingsInput = z.infer<typeof updateSettingsSchema>;
 /** Valida um único valor de configuração (ex.: lido do banco). */
 export function parseSetting<K extends SettingKey>(key: K, value: unknown) {
   return settingsFields.shape[key].safeParse(value) as z.ZodSafeParseResult<AppSettings[K]>;
-}
-
-function definedOnly<T extends object>(obj: T): Partial<T> {
-  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as Partial<T>;
 }
 
 // ---------- Consultas (query string) ----------
