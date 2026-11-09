@@ -84,18 +84,21 @@ export class ProductsService {
   }
 
   /**
-   * Excluir (CONTEXT.md) só vale para cadastro sem histórico. Produto que já
-   * movimentou estoque — inclusive por venda (BR-04) — é desativado, para não
-   * apagar a auditoria do estoque.
+   * Excluir (CONTEXT.md): produto com venda registrada não é excluído, só
+   * desativado (BR-04). Sem venda, sai o cadastro junto com suas linhas de
+   * estoque (Entradas, Ajustes, lotes), numa transação.
    */
   async remove(id: string) {
-    if (await this.stock.hasHistory(this.prisma, id)) {
-      throw new BadRequestException(
-        'Produto tem vendas ou movimentações de estoque e não pode ser excluído — desative-o (BR-04)',
-      );
-    }
-    await this.prisma.product.delete({ where: { id } });
-    return { deleted: true };
+    return this.prisma.$transaction(async (tx) => {
+      if ((await tx.saleItem.count({ where: { productId: id } })) > 0) {
+        throw new BadRequestException(
+          'Produto possui vendas registradas e não pode ser excluído — desative-o (BR-04)',
+        );
+      }
+      await this.stock.deleteProductRows(tx, id);
+      await tx.product.delete({ where: { id } });
+      return { deleted: true };
+    });
   }
 
   /** Entrada embutida no cadastro (o custo é o preço de compra do produto). */

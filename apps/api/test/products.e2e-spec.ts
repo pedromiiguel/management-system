@@ -3,8 +3,8 @@ import { createTestApp, TestApp } from './support/app';
 
 /**
  * Produtos: Entrada embutida no cadastro exige também STOCK_WRITE; Excluir só
- * vale para cadastro sem histórico (BR-04); edição parcial não reescreve o
- * que não foi enviado.
+ * vale para produto sem venda registrada (BR-04), levando junto as linhas de
+ * estoque; edição parcial não reescreve o que não foi enviado.
  */
 describe('Products', () => {
   let t: TestApp;
@@ -112,7 +112,7 @@ describe('Products', () => {
   });
 
   describe('Excluir (BR-04)', () => {
-    it('permite excluir produto sem histórico', async () => {
+    it('permite excluir produto sem venda', async () => {
       const created = await t
         .as(t.adminToken)
         .post('/api/products')
@@ -137,16 +137,30 @@ describe('Products', () => {
         .expect(201);
 
       await t.as(t.adminToken).delete(`/api/products/${created.body.id}`).expect(400);
+      expect(await t.prisma.product.count({ where: { id: created.body.id } })).toBe(1);
     });
 
-    it('rejeita excluir produto com movimentação de estoque (preserva a auditoria)', async () => {
+    it('exclui produto com Entrada e lote mas sem venda, junto com as linhas de estoque', async () => {
       const created = await t
         .as(t.adminToken)
         .post('/api/products')
-        .send(productBody({ stockEntry: { quantity: 3 } }))
+        .send(productBody({ stockEntry: { quantity: 3, batch: 'L1', expiresAt: '2030-01-01' } }))
         .expect(201);
-      await t.as(t.adminToken).delete(`/api/products/${created.body.id}`).expect(400);
-      expect(await t.prisma.stockMovement.count({ where: { productId: created.body.id } })).toBe(1);
+      const productId = created.body.id;
+      await t
+        .as(t.adminToken)
+        .post('/api/stock/adjustments')
+        .send({ productId, quantity: -1, reason: 'quebra' })
+        .expect(201);
+      expect(await t.prisma.stockMovement.count({ where: { productId } })).toBe(2);
+
+      await t.as(t.adminToken).delete(`/api/products/${productId}`).expect(200);
+      expect(await t.prisma.product.count({ where: { id: productId } })).toBe(0);
+      expect(await t.prisma.stockMovement.count({ where: { productId } })).toBe(0);
+      expect(await t.prisma.productBatch.count({ where: { productId } })).toBe(0);
+      expect(await t.prisma.stockMovementBatch.count({ where: { movement: { productId } } })).toBe(
+        0,
+      );
     });
   });
 });

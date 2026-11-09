@@ -177,9 +177,15 @@ export class StockLedger {
     }
   }
 
-  /** Produto que já movimentou estoque tem histórico de auditoria. */
-  async hasHistory(db: Db, productId: string) {
-    return (await db.stockMovement.count({ where: { productId } })) > 0;
+  /**
+   * Excluir (Produto): apaga as linhas de estoque do produto — movimentos,
+   * lotes e o vínculo entre eles — para o cadastro poder ser apagado na mesma
+   * transação. Quem chama garante que o produto não tem venda registrada.
+   */
+  async deleteProductRows(db: Db, productId: string) {
+    await db.stockMovementBatch.deleteMany({ where: { movement: { productId } } });
+    await db.stockMovement.deleteMany({ where: { productId } });
+    await db.productBatch.deleteMany({ where: { productId } });
   }
 
   /** FR-08: consome lotes na ordem de vencimento (FEFO), até onde houver lote. */
