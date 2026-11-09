@@ -165,8 +165,6 @@ const completeSaleFields = z.object({
   /** Obrigatório para pagamento em dinheiro (FR-18). */
   amountPaid: money.optional(),
   withInvoice: z.boolean().default(false),
-  /** Se enviado, liga/desliga a Taxa de serviço antes de concluir; omitido mantém a da Venda. */
-  serviceFee: z.boolean().optional(),
   /** Obrigatório para venda a prazo (BR-08). */
   customerId: z.string().optional(),
   dueDate: z.coerce.date().optional(),

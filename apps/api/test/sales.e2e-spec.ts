@@ -59,10 +59,13 @@ describe('Sales', () => {
       paymentMethod: PaymentMethod;
       customerId?: string;
       amountPaid?: number;
-      serviceFee?: boolean;
     },
+    serviceFee = false,
   ) {
     const saleId = await openSaleWith(sku, quantity);
+    if (serviceFee) {
+      await admin().put(`/api/sales/${saleId}/service-fee`).send({ enabled: true }).expect(200);
+    }
     const completed = await admin().post(`/api/sales/${saleId}/complete`).send(body).expect(201);
     return completed.body as { id: string; total: number; status: SaleStatus };
   }
@@ -303,7 +306,7 @@ describe('Sales', () => {
     it('painel e relatório de vendas mostram a mesma receita, sem Taxa de serviço', async () => {
       await t.reset();
       const product = await createProduct(10);
-      await completeSale(product.sku, 2, { paymentMethod: PaymentMethod.PIX, serviceFee: true }); // 20 + 2
+      await completeSale(product.sku, 2, { paymentMethod: PaymentMethod.PIX }, true); // 20 + 2
       const voided = await completeSale(product.sku, 1, { paymentMethod: PaymentMethod.PIX });
       await admin().post(`/api/sales/${voided.id}/void`).expect(201);
 

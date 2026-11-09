@@ -147,7 +147,13 @@ export class SalesService {
 
   /** Liga/desliga a Taxa de serviço; o total passa a refleti-la imediatamente. */
   setServiceFee(saleId: string, enabled: boolean) {
-    return this.changeInProgress(saleId, (tx) => this.toggleServiceFee(tx, saleId, enabled));
+    // O valor exato é calculado em `reprice`; aqui só liga (≠ null) ou desliga.
+    return this.changeInProgress(saleId, (tx) =>
+      tx.sale.update({
+        where: { id: saleId },
+        data: { serviceFee: enabled ? new Decimal(0) : null },
+      }),
+    );
   }
 
   /** Cancelar (FR-21): abandona a venda em andamento — nada de estoque/financeiro foi tocado. */
@@ -174,9 +180,6 @@ export class SalesService {
 
     return this.prisma.$transaction(async (tx) => {
       await this.requireInProgress(tx, saleId);
-      if (input.serviceFee !== undefined) {
-        await this.toggleServiceFee(tx, saleId, input.serviceFee);
-      }
       const sale = await tx.sale.findUniqueOrThrow({
         where: { id: saleId },
         include: { items: { include: { product: true } } },
@@ -303,14 +306,6 @@ export class SalesService {
       throw new ConflictException('Venda não está em andamento');
     }
     return sale;
-  }
-
-  private async toggleServiceFee(db: Db, saleId: string, enabled: boolean) {
-    // O valor exato é calculado em `reprice`; aqui só liga (≠ null) ou desliga.
-    await db.sale.update({
-      where: { id: saleId },
-      data: { serviceFee: enabled ? new Decimal(0) : null },
-    });
   }
 
   private async reprice(db: Db, saleId: string) {
