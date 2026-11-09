@@ -24,13 +24,17 @@ export type Permission = (typeof Permission)[keyof typeof Permission];
 
 export const ALL_PERMISSIONS: Permission[] = Object.values(Permission);
 
+export function isPermission(value: string): value is Permission {
+  return (ALL_PERMISSIONS as string[]).includes(value);
+}
+
 export const PERMISSION_LABELS: Record<Permission, string> = {
   'products.read': 'Consultar produtos',
   'products.write': 'Cadastrar/editar produtos',
   'stock.read': 'Consultar estoque',
   'stock.write': 'Movimentar estoque',
   'sales.operate': 'Operar o PDV',
-  'sales.void': 'Cancelar venda concluída',
+  'sales.void': 'Estornar venda concluída',
   'sales.history': 'Ver histórico de vendas',
   'customers.read': 'Consultar clientes',
   'customers.write': 'Cadastrar/editar clientes',

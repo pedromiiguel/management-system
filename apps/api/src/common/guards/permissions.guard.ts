@@ -4,6 +4,13 @@ import { Permission } from '@beverage/shared';
 import { AuthUser } from '../decorators/current-user.decorator';
 import { PERMISSION_KEY } from '../decorators/require-permission.decorator';
 
+/** Lança 403 se o usuário não tiver a permissão. */
+export function assertPermission(user: AuthUser | undefined, permission: Permission) {
+  if (!user?.permissions.includes(permission)) {
+    throw new ForbiddenException('Você não tem permissão para esta ação');
+  }
+}
+
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
@@ -16,9 +23,7 @@ export class PermissionsGuard implements CanActivate {
     if (!required) return true;
 
     const { user } = context.switchToHttp().getRequest<{ user?: AuthUser }>();
-    if (!user?.permissions?.includes(required)) {
-      throw new ForbiddenException('Você não tem permissão para esta ação');
-    }
+    assertPermission(user, required);
     return true;
   }
 }

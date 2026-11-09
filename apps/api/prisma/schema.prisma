@@ -63,16 +63,32 @@ model Product {
 
 // Lote/validade (FR-08) — consumo FEFO best-effort na venda.
 model ProductBatch {
-  id        String    @id @default(cuid())
+  id        String               @id @default(cuid())
   productId String
-  product   Product   @relation(fields: [productId], references: [id])
+  product   Product              @relation(fields: [productId], references: [id])
   batch     String?
   expiresAt DateTime?
   quantity  Int
-  createdAt DateTime  @default(now())
+  createdAt DateTime             @default(now())
+  movements StockMovementBatch[]
 
   @@index([productId, expiresAt])
   @@map("product_batch")
+}
+
+// Quanto de cada lote um movimento criou ou consumiu — é o que permite o
+// estorno devolver a quantidade ao lote certo.
+model StockMovementBatch {
+  id         String        @id @default(cuid())
+  movementId String
+  movement   StockMovement @relation(fields: [movementId], references: [id], onDelete: Cascade)
+  batchId    String
+  batch      ProductBatch  @relation(fields: [batchId], references: [id])
+  quantity   Int
+
+  @@index([movementId])
+  @@index([batchId])
+  @@map("stock_movement_batch")
 }
 
 enum StockMovementType {
@@ -88,17 +104,18 @@ enum StockMovementSource {
 }
 
 model StockMovement {
-  id        String              @id @default(cuid())
+  id        String               @id @default(cuid())
   productId String
-  product   Product             @relation(fields: [productId], references: [id])
+  product   Product              @relation(fields: [productId], references: [id])
   type      StockMovementType
   source    StockMovementSource
   quantity  Int
-  unitCost  Decimal?            @db.Decimal(10, 2)
+  unitCost  Decimal?             @db.Decimal(10, 2)
   saleId    String?
-  sale      Sale?               @relation(fields: [saleId], references: [id])
+  sale      Sale?                @relation(fields: [saleId], references: [id])
   note      String?
-  createdAt DateTime            @default(now())
+  createdAt DateTime             @default(now())
+  batches   StockMovementBatch[]
 
   @@index([productId, createdAt])
   @@map("stock_movement")
@@ -124,7 +141,8 @@ model Customer {
 enum SaleStatus {
   IN_PROGRESS
   COMPLETED
-  CANCELLED
+  CANCELLED // Cancelar: venda em andamento abandonada
+  VOIDED // Estornar: venda concluída revertida
 }
 
 enum PaymentMethod {
@@ -160,6 +178,7 @@ model Sale {
   openedAt       DateTime           @default(now())
   completedAt    DateTime?
   cancelledAt    DateTime?
+  voidedAt       DateTime?
   items          SaleItem[]
   stockMovements StockMovement[]
   cashMovements  CashMovement[]
@@ -287,10 +306,17 @@ enum FinancialCategoryKind {
   EXPENSE
 }
 
+// Categorias que o próprio sistema lança, achadas pelo código (não pelo nome).
+enum SystemCategory {
+  SALES
+  RECEIVABLE_SETTLEMENT
+}
+
 model FinancialCategory {
   id            String                @id @default(cuid())
   name          String                @unique
   kind          FinancialCategoryKind
+  code          SystemCategory?       @unique
   system        Boolean               @default(false)
   active        Boolean               @default(true)
   cashMovements CashMovement[]

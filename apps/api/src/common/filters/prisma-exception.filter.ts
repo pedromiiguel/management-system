@@ -1,29 +1,33 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 
-/** Converte erros conhecidos do Prisma em respostas HTTP legíveis. */
+/** Erros conhecidos do Prisma viram respostas HTTP legíveis em pt-BR. */
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(PrismaExceptionFilter.name);
+
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse<Response>();
+    const reply = (status: HttpStatus, message: string) =>
+      response.status(status).json({ statusCode: status, message });
 
-    if (exception.code === 'P2002') {
-      const fields = (exception.meta?.target as string[] | undefined)?.join(', ') ?? 'campo único';
-      return response.status(HttpStatus.CONFLICT).json({
-        statusCode: HttpStatus.CONFLICT,
-        message: `Já existe um registro com o mesmo valor de: ${fields}`,
-      });
+    switch (exception.code) {
+      case 'P2002': {
+        const fields =
+          (exception.meta?.target as string[] | undefined)?.join(', ') ?? 'campo único';
+        return reply(HttpStatus.CONFLICT, `Já existe um registro com o mesmo valor de: ${fields}`);
+      }
+      case 'P2003':
+        return reply(
+          HttpStatus.CONFLICT,
+          'Registro em uso por outros dados — não pode ser alterado',
+        );
+      case 'P2025':
+        return reply(HttpStatus.NOT_FOUND, 'Registro não encontrado');
+      default:
+        this.logger.error(`Erro do Prisma ${exception.code}: ${exception.message}`);
+        return reply(HttpStatus.INTERNAL_SERVER_ERROR, 'Erro interno ao acessar o banco de dados');
     }
-    if (exception.code === 'P2025') {
-      return response.status(HttpStatus.NOT_FOUND).json({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Registro não encontrado',
-      });
-    }
-    return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'Erro interno ao acessar o banco de dados',
-    });
   }
 }

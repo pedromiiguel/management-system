@@ -3,6 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { LoginInput } from '@beverage/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { toAuthUser } from './session.service';
+
+/** O token carrega só a identidade; permissões são resolvidas por requisição. */
+export interface TokenPayload {
+  sub: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -19,17 +25,10 @@ export class AuthService {
     if (!user || !user.active || !(await argon2.verify(user.passwordHash, password))) {
       throw new UnauthorizedException('Login ou senha inválidos');
     }
-
-    const payload = {
-      id: user.id,
-      name: user.name,
-      login: user.login,
-      roleId: user.roleId,
-      permissions: user.role.permissions,
-    };
+    const payload: TokenPayload = { sub: user.id };
     return {
       accessToken: await this.jwtService.signAsync(payload),
-      user: { ...payload, roleName: user.role.name },
+      user: toAuthUser(user),
     };
   }
 }

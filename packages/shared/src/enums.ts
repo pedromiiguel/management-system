@@ -1,3 +1,9 @@
+/**
+ * Vocabulário do domínio. Cada enum aqui espelha um enum de
+ * `apps/api/prisma/schema.prisma` — `apps/api/src/common/shared-enums.spec.ts`
+ * falha se os dois divergirem.
+ */
+
 export const PaymentMethod = {
   CASH: 'CASH',
   PIX: 'PIX',
@@ -13,12 +19,30 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   CREDIT: 'Fiado (a prazo)',
 };
 
+/**
+ * CANCELLED = venda em andamento abandonada (Cancelar — sem efeito em estoque
+ * ou valores). VOIDED = venda concluída estornada (Estornar). Ver CONTEXT.md.
+ */
 export const SaleStatus = {
   IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED',
+  VOIDED: 'VOIDED',
 } as const;
 export type SaleStatus = (typeof SaleStatus)[keyof typeof SaleStatus];
+
+export const SALE_STATUS_LABELS: Record<SaleStatus, string> = {
+  IN_PROGRESS: 'Em andamento',
+  COMPLETED: 'Concluída',
+  CANCELLED: 'Cancelada',
+  VOIDED: 'Estornada',
+};
+
+export const DiscountType = {
+  AMOUNT: 'AMOUNT',
+  PERCENT: 'PERCENT',
+} as const;
+export type DiscountType = (typeof DiscountType)[keyof typeof DiscountType];
 
 export const StockMovementType = {
   ENTRY: 'ENTRY',
@@ -74,18 +98,20 @@ export const FinancialCategoryKind = {
 export type FinancialCategoryKind =
   (typeof FinancialCategoryKind)[keyof typeof FinancialCategoryKind];
 
+/**
+ * Categorias financeiras que o próprio sistema lança. Identificadas por este
+ * código estável (coluna `code`), não pelo nome de exibição — renomear a
+ * categoria na tela não corta o vínculo.
+ */
+export const SystemCategory = {
+  SALES: 'SALES',
+  RECEIVABLE_SETTLEMENT: 'RECEIVABLE_SETTLEMENT',
+} as const;
+export type SystemCategory = (typeof SystemCategory)[keyof typeof SystemCategory];
+
 /** BR-03/FR-15: ao vender sem estoque, bloquear ou apenas avisar. */
 export const StockPolicy = {
   BLOCK: 'BLOCK',
   WARN: 'WARN',
 } as const;
 export type StockPolicy = (typeof StockPolicy)[keyof typeof StockPolicy];
-
-export const SettingKey = {
-  STOCK_POLICY: 'STOCK_POLICY',
-  REVENUE_TARGET_MONTHLY: 'REVENUE_TARGET_MONTHLY',
-  ENABLED_PAYMENT_METHODS: 'ENABLED_PAYMENT_METHODS',
-  DEFAULT_MINIMUM_STOCK: 'DEFAULT_MINIMUM_STOCK',
-  EXPIRY_ALERT_DAYS: 'EXPIRY_ALERT_DAYS',
-} as const;
-export type SettingKey = (typeof SettingKey)[keyof typeof SettingKey];

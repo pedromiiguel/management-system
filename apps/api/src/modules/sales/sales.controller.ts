@@ -7,6 +7,10 @@ import {
   DiscountInput,
   discountSchema,
   Permission,
+  SaleHistoryQuery,
+  saleHistoryQuerySchema,
+  ServiceFeeInput,
+  serviceFeeSchema,
   UpdateSaleItemInput,
   updateSaleItemSchema,
 } from '@beverage/shared';
@@ -27,24 +31,8 @@ export class SalesController {
 
   @Get('history')
   @RequirePermission(Permission.SALES_HISTORY)
-  history(
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-    @Query('status') status?: string,
-    @Query('page') page?: string,
-  ) {
-    return this.salesService.history({
-      from: from ? new Date(from) : undefined,
-      to: to ? new Date(to) : undefined,
-      status,
-      page: page ? Number(page) : undefined,
-    });
-  }
-
-  @Get(':id')
-  @RequirePermission(Permission.SALES_OPERATE)
-  getById(@Param('id') id: string) {
-    return this.salesService.getById(id);
+  history(@Query(new ZodValidationPipe(saleHistoryQuerySchema)) query: SaleHistoryQuery) {
+    return this.salesService.history(query);
   }
 
   @Post(':id/items')
@@ -79,6 +67,15 @@ export class SalesController {
     @Body(new ZodValidationPipe(discountSchema.nullable())) body: DiscountInput | null,
   ) {
     return this.salesService.setDiscount(id, body);
+  }
+
+  @Put(':id/service-fee')
+  @RequirePermission(Permission.SALES_OPERATE)
+  setServiceFee(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(serviceFeeSchema)) body: ServiceFeeInput,
+  ) {
+    return this.salesService.setServiceFee(id, body.enabled);
   }
 
   @Post(':id/complete')

@@ -1,15 +1,19 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PayableInput } from '@beverage/shared';
+import { CashMovementType, PayableInput, PayableStatus } from '@beverage/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CashLedger } from '../cash-register/cash-ledger';
 
 @Injectable()
 export class PayablesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cash: CashLedger,
+  ) {}
 
-  list(status?: 'OPEN' | 'PAID') {
+  list(status: PayableStatus) {
     return this.prisma.accountPayable.findMany({
-      where: { status: status ?? 'OPEN' },
+      where: { status },
       include: { category: true },
       orderBy: [{ dueDate: 'asc' }],
     });
@@ -26,18 +30,18 @@ export class PayablesService {
   pay(id: string) {
     return this.prisma.$transaction(async (tx) => {
       const payable = await tx.accountPayable.findUniqueOrThrow({ where: { id } });
-      if (payable.status === 'PAID') throw new ConflictException('Esta conta já foi paga');
-      await tx.cashMovement.create({
-        data: {
-          type: 'OUTFLOW',
-          amount: payable.amount,
-          description: `Pagamento — ${payable.description}${payable.supplier ? ` (${payable.supplier})` : ''}`,
-          categoryId: payable.categoryId,
-        },
+      if (payable.status === PayableStatus.PAID) {
+        throw new ConflictException('Esta conta já foi paga');
+      }
+      await this.cash.outsideDrawer(tx, {
+        type: CashMovementType.OUTFLOW,
+        amount: payable.amount,
+        description: `Pagamento — ${payable.description}${payable.supplier ? ` (${payable.supplier})` : ''}`,
+        categoryId: payable.categoryId,
       });
       return tx.accountPayable.update({
         where: { id },
-        data: { status: 'PAID', paidAt: new Date() },
+        data: { status: PayableStatus.PAID, paidAt: new Date() },
         include: { category: true },
       });
     });

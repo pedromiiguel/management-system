@@ -1,87 +1,40 @@
-import { execFileSync } from 'node:child_process';
-import path from 'node:path';
-import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import request from 'supertest';
-import { AppModule } from '../src/app.module';
+import { ALL_PERMISSIONS, Permission } from '@beverage/shared';
+import { createTestApp, TestApp } from './support/app';
 
 /**
- * Regra de negócio de `auth` com ramificação real alcançável a partir de
- * `login.tsx` (ADR 0011): `AuthService.login` rejeita usuário inexistente,
- * inativo ou com senha errada com a mesma mensagem genérica (mitigação de
- * enumeração de usuário). Senha errada/usuário inexistente já têm cobertura
- * E2E (`apps/e2e/tests/03-auth-guard.spec.ts`) — este gate cobre só usuário
- * inativo, a única ramificação ainda sem cobertura. Reset de schema único
- * para o arquivo, mesmo padrão de `products.e2e-spec.ts`.
+ * Login rejeita usuário inexistente, inativo ou com senha errada com a mesma
+ * mensagem (sem enumeração de usuário). Permissões e status do usuário são
+ * resolvidos a cada requisição, não congelados no token.
  */
-function resetDatabase(): void {
-  const repoRoot = path.resolve(__dirname, '../../..');
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  execFileSync(npmCmd, ['run', 'db:reset', '--workspace', 'apps/api'], {
-    cwd: repoRoot,
-    stdio: 'inherit',
-    shell: process.platform === 'win32',
-    env: {
-      ...process.env,
-      PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'Sim, pode resetar (Recomendado)',
-    },
-  });
-}
-
-describe('Auth — regras de negócio (ADR 0011)', () => {
-  let app: INestApplication;
-  let adminToken: string;
+describe('Auth', () => {
+  let t: TestApp;
 
   beforeAll(async () => {
-    resetDatabase();
-
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = moduleRef.createNestApplication();
-    app.setGlobalPrefix('api');
-    await app.init();
-
-    const adminLogin = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({ login: 'admin', password: 'admin123' });
-    adminToken = adminLogin.body.accessToken;
+    t = await createTestApp();
   });
 
-  afterAll(async () => {
-    await app.close();
-  });
+  afterAll(() => t.close());
 
-  function auth(token: string) {
-    return `Bearer ${token}`;
-  }
-
-  let seq = 0;
-  async function createRole() {
-    seq += 1;
-    const role = await request(app.getHttpServer())
+  async function createUser(login: string, active: boolean) {
+    const role = await t
+      .as(t.adminToken)
       .post('/api/users/roles')
-      .set('Authorization', auth(adminToken))
-      .send({ name: `Papel auth ${seq} (teste)`, permissions: ['sales.operate'] })
+      .send({ name: `Papel ${login}`, permissions: [Permission.SALES_OPERATE] })
       .expect(201);
-    return role.body.id as string;
+    const created = await t
+      .as(t.adminToken)
+      .post('/api/users')
+      .send({ name: login, login, password: 'senha123', roleId: role.body.id, active })
+      .expect(201);
+    return { userId: created.body.id as string, roleId: role.body.id as string };
   }
 
   describe('Guarda: usuário inativo não pode logar mesmo com senha correta', () => {
     it('rejeita login de usuário inativo (401)', async () => {
-      const roleId = await createRole();
-      const created = await request(app.getHttpServer())
-        .post('/api/users')
-        .set('Authorization', auth(adminToken))
-        .send({
-          name: 'Inativo Teste',
-          login: 'inativo-teste',
-          password: 'senha123',
-          roleId,
-          active: false,
-        })
-        .expect(201);
-      expect(created.body.active).toBe(false);
+      await createUser('inativo-teste', false);
 
-      const res = await request(app.getHttpServer())
+      const res = await t
+        .http()
         .post('/api/auth/login')
         .send({ login: 'inativo-teste', password: 'senha123' });
 
@@ -90,26 +43,52 @@ describe('Auth — regras de negócio (ADR 0011)', () => {
     });
 
     it('controle: usuário ativo com senha correta autentica normalmente', async () => {
-      const roleId = await createRole();
-      await request(app.getHttpServer())
-        .post('/api/users')
-        .set('Authorization', auth(adminToken))
-        .send({
-          name: 'Ativo Teste',
-          login: 'ativo-teste',
-          password: 'senha123',
-          roleId,
-          active: true,
-        })
-        .expect(201);
+      await createUser('ativo-teste', true);
 
-      const res = await request(app.getHttpServer())
+      const res = await t
+        .http()
         .post('/api/auth/login')
         .send({ login: 'ativo-teste', password: 'senha123' })
         .expect(201);
 
-      expect(res.body.accessToken).toBeDefined();
+      expect(typeof res.body.accessToken).toBe('string');
       expect(res.body.user.login).toBe('ativo-teste');
+      expect(res.body.user.permissions).toEqual([Permission.SALES_OPERATE]);
+    });
+  });
+
+  describe('Permissões resolvidas por requisição', () => {
+    it('desativar o usuário invalida o token na hora', async () => {
+      const { userId } = await createUser('desativado-depois', true);
+      const token = await t.login('desativado-depois', 'senha123');
+      await t.as(token).get('/api/auth/me').expect(200);
+
+      await t.as(t.adminToken).patch(`/api/users/${userId}`).send({ active: false }).expect(200);
+
+      await t.as(token).get('/api/auth/me').expect(401);
+    });
+
+    it('mudar as permissões do papel vale sem novo login', async () => {
+      const { roleId } = await createUser('papel-muda', true);
+      const token = await t.login('papel-muda', 'senha123');
+      await t.as(token).get('/api/stock/alerts').expect(403);
+
+      await t
+        .as(t.adminToken)
+        .patch(`/api/users/roles/${roleId}`)
+        .send({ permissions: [Permission.SALES_OPERATE, Permission.STOCK_READ] })
+        .expect(200);
+
+      await t.as(token).get('/api/stock/alerts').expect(200);
+    });
+
+    it('Administrador tem o catálogo inteiro de permissões, sem depender do seed', async () => {
+      await t.prisma.role.update({
+        where: { name: 'Administrador' },
+        data: { permissions: [] },
+      });
+      const me = await t.as(t.adminToken).get('/api/auth/me').expect(200);
+      expect([...me.body.permissions].sort()).toEqual([...ALL_PERMISSIONS].sort());
     });
   });
 });
