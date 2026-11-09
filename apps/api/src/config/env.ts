@@ -7,13 +7,24 @@ const DEV_JWT_SECRET = 'dev-secret-nao-use-em-producao';
 const required = (name: string) =>
   z.string({ error: `${name} é obrigatório` }).min(1, `${name} é obrigatório`);
 
+/** Obrigatório em produção; a mensagem diz o que definir. Itens vazios (`,`) não contam. */
+const requiredInProduction = (name: string, what: string) => {
+  const message = `${name} não definido — em produção, defina ${name} com ${what}`;
+  return z.string({ error: message }).refine((v) => v.split(',').some((p) => p.trim()), message);
+};
+
 const envSchema = (production: boolean) =>
   z
     .object({
       NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
       DATABASE_URL: required('DATABASE_URL'),
       /** Obrigatório em produção; fora dela cai num segredo de desenvolvimento. */
-      JWT_SECRET: production ? required('JWT_SECRET (em produção)') : z.string().optional(),
+      JWT_SECRET: production
+        ? requiredInProduction(
+            'JWT_SECRET',
+            'um segredo longo e aleatório (ex.: openssl rand -hex 32)',
+          )
+        : z.string().optional(),
       JWT_EXPIRES_IN: z
         .string()
         .regex(/^\d+[smhd]?$/, 'Use, por ex., 12h ou 3600')
@@ -24,9 +35,9 @@ const envSchema = (production: boolean) =>
        * vazio = reflete qualquer origem.
        */
       CORS_ORIGIN: production
-        ? required('CORS_ORIGIN (em produção)').refine(
-            (v) => v.split(',').some((o) => o.trim()),
-            'CORS_ORIGIN (em produção) precisa de ao menos uma origem',
+        ? requiredInProduction(
+            'CORS_ORIGIN',
+            'as origens do web separadas por vírgula (ex.: http://localhost:8080)',
           )
         : z.string().optional(),
       OBSERVE_APP_KEY: z.string().optional(),
