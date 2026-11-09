@@ -9,7 +9,6 @@
   --accent-soft: color-mix(in oklab, var(--accent) 13%, #fffbf5);
   --accent-deep: color-mix(in oklab, var(--accent) 72%, #17120f);
   --ink-900: #17120f;
-  --ink-800: #2a211b;
   --cream: #f5e6c8;
 
   /* texto */
@@ -955,24 +954,6 @@ body {
 }
 .s-toast.is-danger {
   background: var(--danger);
-}
-
-/* ---------- caret do scanner ---------- */
-.s-caret {
-  width: 2px;
-  height: 20px;
-  background: var(--accent);
-  animation: s-blink 1.1s steps(2) infinite;
-}
-@keyframes s-blink {
-  50% {
-    opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .s-caret {
-    animation: none;
-  }
 }
 
 /* ---------- cupom não-fiscal (FR-23) — bobina térmica de 80mm ---------- */
