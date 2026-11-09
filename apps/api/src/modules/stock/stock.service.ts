@@ -47,7 +47,10 @@ export class StockService {
     return { lowStock, expiring };
   }
 
-  /** FR-40: posição atual de estoque. */
+  /**
+   * FR-40: posição atual de estoque. `low` é a única regra de "abaixo do
+   * mínimo" (FR-07) — usada pelo alerta e mostrada como veio pelo web.
+   */
   async position() {
     const products = await this.prisma.product.findMany({
       where: { active: true },
@@ -65,6 +68,7 @@ export class StockService {
     });
     return products.map((p) => ({
       ...p,
+      low: isLowStock(p),
       stockCost: p.purchasePrice.mul(p.currentStock),
       stockValue: p.salePrice.mul(p.currentStock),
     }));
@@ -72,16 +76,21 @@ export class StockService {
 
   /** Produtos ativos no mínimo ou abaixo, mais críticos (menor saldo/mínimo) primeiro. */
   private async lowStock() {
-    const products = await this.prisma.product.findMany({
-      where: {
-        active: true,
-        minimumStock: { gt: 0 },
-        currentStock: { lte: this.prisma.product.fields.minimumStock },
-      },
-      select: { id: true, name: true, sku: true, currentStock: true, minimumStock: true },
-    });
-    return products.sort(
-      (a, b) => a.currentStock / a.minimumStock - b.currentStock / b.minimumStock,
-    );
+    const rows = await this.position();
+    return rows
+      .filter((p) => p.low)
+      .map(({ id, name, sku, currentStock, minimumStock }) => ({
+        id,
+        name,
+        sku,
+        currentStock,
+        minimumStock,
+      }))
+      .sort((a, b) => a.currentStock / a.minimumStock - b.currentStock / b.minimumStock);
   }
+}
+
+/** FR-07: com mínimo definido, saldo no mínimo ou abaixo. */
+function isLowStock(p: { currentStock: number; minimumStock: number }): boolean {
+  return p.minimumStock > 0 && p.currentStock <= p.minimumStock;
 }

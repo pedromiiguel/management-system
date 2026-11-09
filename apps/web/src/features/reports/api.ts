@@ -26,7 +26,12 @@ export interface ProductPerformance {
 export type StockPositionRow = Pick<
   Product,
   'id' | 'sku' | 'name' | 'unit' | 'currentStock' | 'minimumStock'
-> & { stockCost: number; stockValue: number };
+> & {
+  /** Abaixo do mínimo (FR-07) — a regra é da API. */
+  low: boolean;
+  stockCost: number;
+  stockValue: number;
+};
 
 export const salesReportQuery = (from: string, to: string) =>
   queryOptions({

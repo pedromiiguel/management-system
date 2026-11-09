@@ -130,4 +130,25 @@ describe('Stock', () => {
       expect(batches).toEqual({ CEDO: 0, TARDE: 3 });
     });
   });
+
+  describe('Abaixo do mínimo (FR-07): uma regra para posição e alerta', () => {
+    it('posição marca `low` e o alerta lista exatamente esses produtos', async () => {
+      const admin = t.as(t.adminToken);
+      const position = await admin.get('/api/reports/stock-position').expect(200);
+      const alerts = await admin.get('/api/stock/alerts').expect(200);
+
+      const rows = position.body as {
+        id: string;
+        currentStock: number;
+        minimumStock: number;
+        low: boolean;
+      }[];
+      for (const r of rows) {
+        expect(r.low).toBe(r.minimumStock > 0 && r.currentStock <= r.minimumStock);
+      }
+      const lowIds = rows.filter((r) => r.low).map((r) => r.id);
+      expect(lowIds.length).toBeGreaterThan(0);
+      expect(alerts.body.lowStock.map((p: { id: string }) => p.id).sort()).toEqual(lowIds.sort());
+    });
+  });
 });
