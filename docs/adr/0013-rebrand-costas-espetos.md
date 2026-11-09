@@ -2,7 +2,7 @@
 
 - **Status:** Aceito (implementado)
 - **Estende:** a convenção de tokens CSS já existente em `styles.css`; a
-  convenção MVVM de [componentes-mvvm.md](../componentes-mvvm.md) para o novo
+  convenção MVVM de `componentes-mvvm.md` (removido — ver [arquitetura.md](../arquitetura.md)) para o novo
   `LoginBrandPanel`
 - **Não reabre:** [ADR 0012](0012-migracao-sol-lucide.md) — os ícones
   continuam vindo de `lucide-react`; esta rodada só troca _quais_ ícones e

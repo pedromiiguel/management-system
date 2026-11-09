@@ -15,7 +15,7 @@ export interface Period {
  * Leituras de vendas concluídas usadas por painel e relatórios — um único
  * "venda concluída no período" e uma única definição de receita.
  *
- * Receita (ADR 0002) = valor dos produtos vendidos, já com desconto e SEM a
+ * Receita (CONTEXT.md) = valor dos produtos vendidos, já com desconto e SEM a
  * Taxa de serviço: `total − serviceFee`. A taxa é informada à parte. Vendas
  * estornadas (VOIDED) ou canceladas não contam.
  */

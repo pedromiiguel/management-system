@@ -1,7 +1,7 @@
 # 0010 — Settings como 6º e último módulo legado da Clean Architecture
 
-- **Status:** Aceito (implementado)
-- **Estende:** o padrão promovido a convenção de repo pela [ADR 0006](0006-clean-architecture-financial-promove-convencao.md); a receita de migração de tipos do [ADR 0005](0005-centraliza-tipos-em-domain.md); a convenção de componentes do [componentes-mvvm.md](../componentes-mvvm.md)
+- **Status:** Substituída pela [ADR 0014](0014-organizacao-por-funcionalidade.md)
+- **Estende:** o padrão promovido a convenção de repo pela [ADR 0006](0006-clean-architecture-financial-promove-convencao.md); a receita de migração de tipos do [ADR 0005](0005-centraliza-tipos-em-domain.md); a convenção de componentes do `componentes-mvvm.md` (removido — ver [arquitetura.md](../arquitetura.md))
 - **Segue o precedente de dono do agregado** fixado pelas ADRs [0007](0007-clean-architecture-products.md) e [0009](0009-clean-architecture-reports.md) ("usecase pertence a quem é dono do agregado, não a quem usa primeiro nem à permissão do endpoint")
 
 ## Contexto
@@ -9,7 +9,7 @@
 Depois de `sale` (ADR 0003), `financial` (ADR 0006), `products` (ADR 0007),
 `stock` (ADR 0008) e `reports` (ADR 0009), `settings.tsx` (458 linhas) era o
 último candidato da lista original de módulos legados (ver
-[glossario.md](../glossario.md)).
+`glossario.md` (removido — ver [arquitetura.md](../arquitetura.md))).
 
 Diferente de todas as rodadas anteriores, `settings.tsx` não é "1 domínio com
 abas" — é uma tela com 3 abas (`SSeg`) que tocam **3 domínios de permissão

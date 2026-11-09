@@ -6,7 +6,7 @@ import type { Product } from '@/features/products/api';
 export interface SalesReport {
   days: { day: string; count: number; total: number }[];
   count: number;
-  /** Receita só de produtos, sem a Taxa de serviço (ADR 0002). */
+  /** Receita (CONTEXT.md): só produtos, sem a Taxa de serviço. */
   total: number;
   serviceFeeTotal: number;
 }

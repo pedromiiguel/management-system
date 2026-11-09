@@ -1,7 +1,7 @@
 # 0012 — `src/components/` migra para `presentation/components/`: sol.tsx vira 16 componentes MVVM, ícones viram lucide-react
 
-- **Status:** Aceito (implementado)
-- **Estende:** a convenção de componentes de [componentes-mvvm.md](../componentes-mvvm.md); a convenção de `presentation/components/` (componentes globais) de [arquiteture.md](../arquiteture.md#padrão-de-presentation)
+- **Status:** Substituída em parte pela [ADR 0014](0014-organizacao-por-funcionalidade.md) (estrutura MVVM; os ícones lucide-react continuam)
+- **Estende:** a convenção de componentes de `componentes-mvvm.md` (removido — ver [arquitetura.md](../arquitetura.md)); a convenção de `presentation/components/` (componentes globais) de `arquiteture.md` (removido — ver [arquitetura.md](../arquitetura.md))
 - **Reverte parcialmente:** a Decisão 2 do [ADR 0011](0011-clean-architecture-auth.md), que manteve `SolIcon` deliberadamente para os ícones de marca da sidebar/login — ver Decisão 1 abaixo
 
 ## Contexto

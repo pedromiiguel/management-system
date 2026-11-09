@@ -1,6 +1,6 @@
 # 0004 — Renomeia o flow `pos` para `sale`
 
-- **Status:** Aceito
+- **Status:** Substituída pela [ADR 0014](0014-organizacao-por-funcionalidade.md)
 - **Data:** 2026-07-22
 
 ## Contexto

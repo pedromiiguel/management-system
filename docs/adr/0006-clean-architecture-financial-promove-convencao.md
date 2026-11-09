@@ -1,6 +1,6 @@
 # 0006 — Financial como 2º módulo da Clean Architecture; promove `arquiteture.md` a convenção de repo
 
-- **Status:** Aceito (em implementação)
+- **Status:** Substituída pela [ADR 0014](0014-organizacao-por-funcionalidade.md)
 - **Data:** 2026-07-23
 - **Resolve:** o bloqueio registrado em [ADR 0001](0001-e2e-antes-da-refatoracao-do-front.md) ("bloqueia incluir `financial.tsx` em refatorações futuras até existir suíte supertest para essas regras")
 - **Estende:** o piloto de Clean Architecture do [ADR 0003](0003-clean-architecture-piloto-pos.md) para um segundo módulo; aplica a mesma receita de migração de tipos do [ADR 0005](0005-centraliza-tipos-em-domain.md)
@@ -32,7 +32,7 @@ ser ignoradas nesta rodada (grilling de 2026-07-23):
 com abas (`SSeg`) que já existe hoje — não vira 5 flows separados. As 5 abas
 (Overview, Register, Receivables, Payables, Entries) nascem como
 `components/` locais do flow, cada uma pasta MVVM com barrel, seguindo
-[componentes-mvvm.md](../componentes-mvvm.md). Motivo: as abas compartilham a
+`componentes-mvvm.md` (removido — ver [arquitetura.md](../arquitetura.md)). Motivo: as abas compartilham a
 mesma rota, a mesma navegação (`SSeg`) e o mesmo contexto de tela — tratá-las
 como flows independentes duplicaria esse esqueleto sem ganho real.
 
@@ -125,7 +125,7 @@ PR, documentada nesta ADR — não vira um item separado.
    agregado `Sale` percorrendo toda a tela), as 5 sub-áreas do financial não
    compartilham estado entre si. Cada `.model.ts` de tab consome
    `main/factories/queries|mutations/financial` diretamente (mesmo padrão do
-   `CustomerModal` em [componentes-mvvm.md](../componentes-mvvm.md)) — um
+   `CustomerModal` em `componentes-mvvm.md` (removido — ver [arquitetura.md](../arquitetura.md))) — um
    hook de flow unificado só agruparia chamadas não relacionadas, sem reduzir
    nenhum acoplamento real.
 5. `presentation/flows/financial/` consome o flow; `routes/_app/financial.tsx`

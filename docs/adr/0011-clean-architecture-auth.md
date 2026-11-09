@@ -1,8 +1,8 @@
 # 0011 — Auth (login + shell) como 7º módulo, além da lista original de 6
 
-- **Status:** Aceito (implementado)
-- **Estende:** a convenção de Clean Architecture do [ADR 0003](0003-clean-architecture-piloto-pos.md); a receita de centralização de tipos do [ADR 0005](0005-centraliza-tipos-em-domain.md); a convenção de componentes do [componentes-mvvm.md](../componentes-mvvm.md)
-- **Diferente das ADRs 0003-0010**: não é um dos 6 módulos da lista original de legado (`sale`/`financial`/`products`/`stock`/`reports`/`settings`, ver [glossario.md](../glossario.md)) — é escopo novo, aberto explicitamente pelo usuário depois de confirmar que a lista original está 100% completa
+- **Status:** Substituída pela [ADR 0014](0014-organizacao-por-funcionalidade.md)
+- **Estende:** a convenção de Clean Architecture do [ADR 0003](0003-clean-architecture-piloto-pos.md); a receita de centralização de tipos do [ADR 0005](0005-centraliza-tipos-em-domain.md); a convenção de componentes do `componentes-mvvm.md` (removido — ver [arquitetura.md](../arquitetura.md))
+- **Diferente das ADRs 0003-0010**: não é um dos 6 módulos da lista original de legado (`sale`/`financial`/`products`/`stock`/`reports`/`settings`, ver `glossario.md` (removido — ver [arquitetura.md](../arquitetura.md))) — é escopo novo, aberto explicitamente pelo usuário depois de confirmar que a lista original está 100% completa
 
 ## Contexto
 

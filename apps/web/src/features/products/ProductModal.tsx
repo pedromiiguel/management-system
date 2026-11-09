@@ -14,7 +14,7 @@ import { toast } from '@/components/Toast';
 import { hasPermission, useSession } from '@/lib/session';
 import { useDeactivateProduct, useSaveProduct, type Product } from './api';
 
-// Entrada embutida (ADR 0001): opcional — só vira movimento de estoque se a
+// Entrada embutida (CONTEXT.md, Entrada): opcional — só vira movimento de estoque se a
 // quantidade for preenchida. O custo é o preço de compra do próprio formulário.
 const formSchema = productSchema
   .extend({ stockEntry: productStockEntrySchema.partial().optional() })

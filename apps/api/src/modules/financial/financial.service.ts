@@ -73,7 +73,7 @@ export class FinancialService {
   /**
    * FR-32/33/34/36 — receita do dia/mês/ano-calendário da loja (BR-01/BR-02),
    * resultado do mês e consolidação por forma de pagamento. Receita segue a
-   * definição única de `SalesQuery` (sem Taxa de serviço — ADR 0002).
+   * definição única de `SalesQuery` (sem Taxa de serviço — Receita no CONTEXT.md).
    */
   async dashboard() {
     const now = new Date();
