@@ -19,7 +19,7 @@ export interface Product {
 
 export const CATALOG_PAGE_SIZE = 50;
 
-export const productKeys = {
+const productKeys = {
   catalog: (search: string, page: number) =>
     [...rootKeys.products, 'catalog', search, page] as const,
   search: (term: string, limit: number) => [...rootKeys.products, 'search', term, limit] as const,

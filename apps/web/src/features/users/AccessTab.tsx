@@ -19,7 +19,7 @@ import { Field } from '@/components/Field';
 import { Modal, ModalActions } from '@/components/Modal';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import {
   rolesQuery,
   useCreateRole,

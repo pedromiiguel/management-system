@@ -19,7 +19,7 @@ import { Chip } from '@/components/Chip';
 import { Modal, ModalActions } from '@/components/Modal';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { formatBRL, formatDateTime, moneyText } from '@/lib/format';
 import {
   currentRegisterQuery,

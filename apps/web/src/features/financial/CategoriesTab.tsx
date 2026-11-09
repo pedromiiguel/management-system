@@ -11,7 +11,7 @@ import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { categoriesQuery, useCreateCategory } from './api';
 
 /** Categorias de receitas e despesas (aba de Configurações). */

@@ -11,7 +11,7 @@ import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { Screen } from '@/components/Screen';
 import { Tag } from '@/components/Tag';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { formatBRL, maskBRL, parseMoney } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import type { Product } from '@/features/products/api';

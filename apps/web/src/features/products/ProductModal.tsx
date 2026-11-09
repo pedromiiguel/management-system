@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/Button';
 import { Field } from '@/components/Field';
 import { Modal } from '@/components/Modal';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { hasPermission, useSession } from '@/lib/session';
 import { useDeactivateProduct, useSaveProduct, type Product } from './api';
 

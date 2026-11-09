@@ -10,7 +10,7 @@ import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { formatBRL, todayKey } from '@/lib/format';
 import { stockAlertsQuery, type StockAlerts } from '@/features/stock/api';
 import { StockEntryModal } from '@/features/stock/StockEntryModal';

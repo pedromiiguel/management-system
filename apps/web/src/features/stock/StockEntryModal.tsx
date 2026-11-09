@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { stockEntrySchema } from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Field } from '@/components/Field';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import type { Product } from '@/features/products/api';
 import { useCreateStockEntry } from './api';
 import { PickedProduct, ProductPickerModal } from './ProductPickerModal';

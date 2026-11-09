@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { stockAdjustmentSchema } from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Field } from '@/components/Field';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import type { Product } from '@/features/products/api';
 import { useCreateStockAdjustment } from './api';
 import { PickedProduct, ProductPickerModal } from './ProductPickerModal';

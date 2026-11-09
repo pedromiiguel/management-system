@@ -17,7 +17,7 @@ import { Modal, ModalActions } from '@/components/Modal';
 import { PeriodPicker } from '@/components/PeriodPicker';
 import { StatCard } from '@/components/StatCard';
 import { Table } from '@/components/Table';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { formatBRL, formatDateTime, monthToDate, moneyText, optionalText } from '@/lib/format';
 import { cashFlowQuery, categoriesQuery, useCreateManualEntry } from './api';
 

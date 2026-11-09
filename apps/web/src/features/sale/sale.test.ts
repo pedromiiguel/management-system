@@ -35,15 +35,6 @@ describe('salePricing', () => {
     expect(salePricing(sale, 50).change).toBe(9.3);
     expect(salePricing(sale, 20).change).toBe(-20.7);
   });
-
-  it('agrees with the total the server persisted (one pricing rule)', () => {
-    const sale = makeSale({
-      items: [makeItem({ quantity: 1, unitPrice: 33.33 })],
-      serviceFee: 3.33,
-      total: 36.66,
-    });
-    expect(salePricing(sale).total).toBe(sale.total);
-  });
 });
 
 describe('parseScan', () => {

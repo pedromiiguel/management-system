@@ -14,7 +14,7 @@ import { Modal } from '@/components/Modal';
 import { StatCard } from '@/components/StatCard';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { formatBRL, formatDateTime } from '@/lib/format';
 import { salesHistoryQuery, useVoidSale, type Sale } from '@/features/sale/api';
 import { SaleDetailModal } from '@/features/sale/SaleDetailModal';

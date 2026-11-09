@@ -15,7 +15,7 @@ import { Field } from '@/components/Field';
 import { Modal } from '@/components/Modal';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { formatBRL, formatDateOnly, moneyText, optionalText, todayKey } from '@/lib/format';
 import { categoriesQuery, payablesQuery, useCreatePayable, usePayPayable } from './api';
 

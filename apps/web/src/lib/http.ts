@@ -14,7 +14,7 @@ export class ApiError extends Error {
 
 type ErrorBody = { message?: string | string[]; errors?: { message: string }[] };
 
-export function errorMessage(body: unknown): string {
+function errorMessage(body: unknown): string {
   const data = body as ErrorBody | undefined;
   if (data?.errors?.length) return data.errors.map((e) => e.message).join('; ');
   if (Array.isArray(data?.message)) return data.message.join('; ');

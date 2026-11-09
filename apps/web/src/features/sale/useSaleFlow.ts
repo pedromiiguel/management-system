@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { CompleteSaleBody, DiscountInput } from '@beverage/shared';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { ApiError } from '@/lib/http';
 import { useInvalidate } from '@/lib/query-keys';
 import { saleApi, SALE_SETTLEMENT_EFFECTS, type AddSaleItemInput, type Sale } from './api';

@@ -111,5 +111,3 @@ export function createSaleQueue(options: {
     },
   };
 }
-
-export type SaleQueue = ReturnType<typeof createSaleQueue>;

@@ -11,7 +11,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
 import { Toggle } from '@/components/Toggle';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { moneyText } from '@/lib/format';
 import { settingsQuery, useUpdateSettings } from './api';
 

@@ -75,7 +75,7 @@ function formatCnpj(raw: string): string {
 }
 
 /** Estabelecimento impresso no cabeçalho; sem CNPJ, a linha é omitida. */
-export const STORE: { name: string; cnpj?: string } = {
+const STORE: { name: string; cnpj?: string } = {
   name: 'COSTAS BAR',
   cnpj: '67.968.751/0001-77',
 };

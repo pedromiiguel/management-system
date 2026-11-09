@@ -11,7 +11,7 @@ import { Card } from '@/components/Card';
 import { Modal } from '@/components/Modal';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
-import { toast } from '@/components/Toast';
+import { toast } from '@/lib/toast';
 import { formatBRL, formatDate, formatDateOnly } from '@/lib/format';
 import { receivablesQuery, useSettleReceivable, type Receivable } from './api';
 

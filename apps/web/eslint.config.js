@@ -23,7 +23,7 @@ export default [
   {
     // Entre funcionalidades, só o api.ts e os componentes de entrada (páginas
     // ficam para as rotas). Ver "Dependências" em docs/arquitetura.md.
-    files: ['src/features/**/*.{ts,tsx}', 'src/components/**/*.{ts,tsx}', 'src/lib/**/*.{ts,tsx}'],
+    files: ['src/features/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -40,6 +40,32 @@ export default [
               ],
               message:
                 'Entre funcionalidades importe só o api.ts ou um componente de entrada (docs/arquitetura.md).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // lib e components dependem só do que muda menos que eles.
+    files: ['src/components/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { patterns: [{ group: ['@/features/*'], message: 'components/ não importa features/.' }] },
+      ],
+    },
+  },
+  {
+    files: ['src/lib/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/features/*', '@/components/*'],
+              message: 'lib/ não importa components/ nem features/.',
             },
           ],
         },
