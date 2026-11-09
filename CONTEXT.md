@@ -41,7 +41,7 @@ Lançamento que soma uma quantidade ao `currentStock` de um Produto, com custo e
 _Avoid_: Ajuste, definir estoque (a Entrada soma; não corrige nem redefine o saldo)
 
 **Taxa de serviço**:
-Acréscimo opcional de 10% (`SERVICE_FEE_PERCENT`) sobre o subtotal da Venda (pré-desconto), desligado por padrão no PDV (o operador liga quando cabe). Ligar/desligar fica gravado na própria Venda (`Sale.serviceFee`; `null` = desligada) e o Total já passa a incluí-la. Fica com a casa (não é repasse a garçom) e integra o total cobrado, o troco e o lançamento financeiro. Não é Receita: no painel e nos relatórios aparece separada.
+Acréscimo opcional de 10% (`SERVICE_FEE_PERCENT`) sobre o subtotal da Venda (pré-desconto), desligado por padrão no PDV (o operador liga quando cabe). Ligar/desligar fica gravado na própria Venda (`Sale.serviceFee`; `null` = desligada) e o Total já passa a incluí-la. Fica com a casa (não é repasse a garçom) e integra o total cobrado, o troco e o lançamento financeiro. Não é Receita: no painel e nos relatórios aparece separada (`serviceFee`), e entra no resultado do mês (receita + taxa − CMV − despesas).
 _Avoid_: Gorjeta, comissão (sugerem repasse a pessoa específica, que não existe no domínio)
 
 **Cupom**:

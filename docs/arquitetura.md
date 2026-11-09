@@ -22,7 +22,10 @@ apps/e2e          Playwright contra web + api
 - `permissions.ts` — catálogo de permissões e rótulos.
 - `sale.ts` — `priceSale` (subtotal, desconto, Taxa de serviço, total, troco, em
   centavos inteiros), `saleCode`, `SERVICE_FEE_LABEL`.
-- `time.ts` — dia civil da loja (America/Sao_Paulo) para períodos e agrupamentos.
+- `time.ts` — a regra única de "um dia": dia civil da loja (America/Sao_Paulo)
+  para períodos, agrupamentos e "hoje"; datas sem hora (vencimento, validade)
+  como `AAAA-MM-DD` sem conversão de fuso (`dateOnlyKey`, `addDaysToKey`,
+  `daysBetweenKeys`, `storeMonthKeys`).
 
 ## API (`apps/api/src`)
 
@@ -54,8 +57,10 @@ apps/e2e          Playwright contra web + api
   invalidam o que o servidor alterou), páginas/componentes `.tsx` e lógica pura
   com teste ao lado. Funcionalidades: `auth`, `sale` (PDV), `products`, `stock`,
   `financial`, `reports`, `settings`, `users`.
-- `lib/` — `http` (erros viram `ApiError`), `session`, `query-keys`,
-  `query-client`, `format`.
+- `lib/` — `http` (erros viram `ApiError`), `session` e `session-query`
+  (permissões vivas de `/auth/me`), `query-keys`, `query-client` (aviso de erro
+  de consultas e ações), `toast`, `format` (dinheiro e datas pela regra do
+  `time.ts`).
 - `components/` — componentes de UI compartilhados, numa pasta plana.
 
 ### Dependências
