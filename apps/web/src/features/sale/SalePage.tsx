@@ -8,7 +8,6 @@ import {
   type DiscountInput,
 } from '@beverage/shared';
 import { Button } from '@/components/Button';
-import { Confirm } from '@/components/Confirm';
 import { Modal } from '@/components/Modal';
 import { Screen } from '@/components/Screen';
 import { Tag } from '@/components/Tag';
@@ -34,6 +33,7 @@ type ModalState =
   | { kind: 'discount' }
   | { kind: 'customer' }
   | { kind: 'confirm-cancel' }
+  | { kind: 'confirm-remove'; item: SaleItem }
   | { kind: 'receipt'; sale: Sale };
 
 export function SalePage() {
@@ -108,14 +108,13 @@ export function SalePage() {
     setScan('');
   }
 
+  /** Remover pede confirmação num modal do PDV (hotkeys e foco seguem os demais modais). */
+  function askRemoveItem(item: SaleItem) {
+    setModal({ kind: 'confirm-remove', item });
+  }
+
   async function removeItem(item: SaleItem) {
-    const confirmed = await Confirm.call({
-      title: 'Remover item?',
-      message: `Remover "${item.product.name}" da venda?`,
-      confirmLabel: 'Remover',
-      danger: true,
-    });
-    if (!confirmed) return;
+    setModal({ kind: 'none' });
     const updated = await flow.removeItem(item.id);
     if (updated) setSelectedId(updated.items.at(-1)?.id ?? null);
   }
@@ -155,6 +154,7 @@ export function SalePage() {
   }
 
   async function finalize() {
+    if (flow.completing) return;
     if (!sale) {
       toast('Adicione itens antes de finalizar', 'warn');
       return;
@@ -173,6 +173,29 @@ export function SalePage() {
 
   const closeModal = () => setModal({ kind: 'none' });
 
+  /** Fechar o cupom (Enter, Esc, botão ou clique fora) já abre a próxima venda. */
+  function startNextSale() {
+    closeModal();
+    void flow.open();
+  }
+
+  /** Esc: fecha o modal aberto — no cupom, isso é começar a próxima venda. */
+  function dismissModal() {
+    if (modal.kind === 'receipt') startNextSale();
+    else closeModal();
+  }
+
+  /** Del só vale no campo de código (ou fora de campos), nunca digitando em outro input. */
+  function removeSelectedFromHotkey() {
+    const focused = document.activeElement;
+    const typing =
+      focused instanceof HTMLInputElement ||
+      focused instanceof HTMLTextAreaElement ||
+      focused instanceof HTMLSelectElement;
+    if (typing && focused !== scanRef.current) return;
+    if (selected) askRemoveItem(selected);
+  }
+
   // ignoreInputs: false — o campo de código vive focado (NFR-12).
   const hk = { ignoreInputs: false, enabled: !modalOpen } as const;
   useHotkey(SALE_HOTKEYS.search.key, () => setModal({ kind: 'search' }), hk);
@@ -182,14 +205,14 @@ export function SalePage() {
   useHotkey(SALE_HOTKEYS.card.key, () => setPayment(PaymentMethod.CARD), hk);
   useHotkey(SALE_HOTKEYS.customer.key, () => setModal({ kind: 'customer' }), hk);
   useHotkey(SALE_HOTKEYS.finalize.key, () => void finalize(), hk);
-  useHotkey(SALE_HOTKEYS.remove.key, () => selected && void removeItem(selected), {
+  useHotkey(SALE_HOTKEYS.remove.key, removeSelectedFromHotkey, {
     ...hk,
     enabled: !modalOpen && scan === '',
   });
   useHotkey(
     SALE_HOTKEYS.cancel.key,
     () => {
-      if (modalOpen) closeModal();
+      if (modalOpen) dismissModal();
       else if (items.length > 0) setModal({ kind: 'confirm-cancel' });
     },
     { ignoreInputs: false },
@@ -207,6 +230,14 @@ export function SalePage() {
       topRight={
         <>
           {sale ? <Tag tone="accent">{`Venda #${saleCode(sale.id)} em andamento`}</Tag> : null}
+          {!sale && !flow.opening && modal.kind !== 'receipt' ? (
+            <>
+              <Tag tone="danger">Nenhuma venda aberta</Tag>
+              <Button primary onClick={() => void flow.open()}>
+                Abrir venda novamente
+              </Button>
+            </>
+          ) : null}
           <Tag tone="dim">Operador: {operatorName ?? '—'}</Tag>
         </>
       }
@@ -229,7 +260,7 @@ export function SalePage() {
             onStep={(item, delta) => flow.stepQuantity(item.id, item.quantity, delta)}
             onSetQuantity={(item, quantity) => flow.setQuantity(item.id, quantity)}
             onQuantityDone={() => void flow.commitQuantities()}
-            onRemove={(item) => void removeItem(item)}
+            onRemove={askRemoveItem}
           />
           <SaleHotkeyStrip />
         </div>
@@ -321,15 +352,22 @@ export function SalePage() {
           </div>
         </Modal>
       ) : null}
-      {modal.kind === 'receipt' ? (
-        <ReceiptModal
-          sale={modal.sale}
-          onClose={() => {
-            closeModal();
-            void flow.open();
-          }}
-        />
+      {modal.kind === 'confirm-remove' ? (
+        <Modal title="Remover item?" onClose={closeModal} width={420}>
+          <p className="text-[13.5px] mb-[18px]">
+            Remover &quot;{modal.item.product.name}&quot; da venda?
+          </p>
+          <div className="flex gap-2 justify-end">
+            <Button ghost onClick={closeModal}>
+              Cancelar
+            </Button>
+            <Button danger onClick={() => void removeItem(modal.item)}>
+              Remover
+            </Button>
+          </div>
+        </Modal>
       ) : null}
+      {modal.kind === 'receipt' ? <ReceiptModal sale={modal.sale} onClose={startNextSale} /> : null}
     </Screen>
   );
 }

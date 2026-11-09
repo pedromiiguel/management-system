@@ -24,6 +24,9 @@ export function useSaleFlow({ onSettled }: { onSettled: () => void }) {
   const [pendingQty, setPendingQty] = useState<Record<string, number>>({});
   const [adding, setAdding] = useState(false);
   const [completing, setCompleting] = useState(false);
+  // Começa "abrindo": o PDV chama `open` ao montar.
+  const [opening, setOpening] = useState(true);
+  const completingRef = useRef(false);
   const saleRef = useRef<Sale | null>(null);
   const invalidateSettlement = useInvalidate(...SALE_SETTLEMENT_EFFECTS);
 
@@ -76,9 +79,18 @@ export function useSaleFlow({ onSettled }: { onSettled: () => void }) {
     pendingQty,
     busy: adding || completing,
     completing,
+    /** Abrindo a venda; sem venda e sem estar abrindo = a abertura falhou. */
+    opening,
 
     /** Abre a venda em andamento do operador (ou retoma a que já existe). */
-    open: () => perform(async () => replaceSale(await saleApi.open())),
+    async open() {
+      setOpening(true);
+      try {
+        await perform(async () => replaceSale(await saleApi.open()));
+      } finally {
+        setOpening(false);
+      }
+    },
 
     /** Bipar: soma a quantidade se o produto já está na venda. */
     async addItem(input: AddSaleItemInput): Promise<AddItemResult> {
@@ -131,8 +143,11 @@ export function useSaleFlow({ onSettled }: { onSettled: () => void }) {
      * Finaliza. `prepare` roda já com as quantidades confirmadas e decide o
      * pagamento a partir da venda atualizada (ou `null` para não finalizar).
      */
-    complete: (prepare: (sale: Sale) => CompleteSaleBody | null) =>
-      perform(async () => {
+    complete: (prepare: (sale: Sale) => CompleteSaleBody | null) => {
+      // Uma finalização por vez: F10/Enter repetidos não enfileiram outra.
+      if (completingRef.current) return Promise.resolve(undefined);
+      completingRef.current = true;
+      return perform(async () => {
         const input = prepare(current());
         if (!input) return undefined;
         setCompleting(true);
@@ -144,7 +159,10 @@ export function useSaleFlow({ onSettled }: { onSettled: () => void }) {
         } finally {
           setCompleting(false);
         }
-      }),
+      }).finally(() => {
+        completingRef.current = false;
+      });
+    },
   };
 }
 
