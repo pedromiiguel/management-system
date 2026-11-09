@@ -27,7 +27,8 @@ export class ReportsService {
 
   /**
    * FR-38: mais vendidos. FR-39: margem por produto, com preço e custo
-   * congelados no item (receita bruta do produto, antes do desconto da venda).
+   * congelados no item. `grossSales` é o valor bruto (preço × quantidade,
+   * antes do desconto da venda) — não é Receita, que é por venda (SalesQuery).
    */
   async productPerformance(period: Period) {
     const items = await this.sales.soldItems(period);
@@ -35,7 +36,7 @@ export class ReportsService {
       string,
       {
         product: (typeof items)[number]['product'];
-        revenue: Decimal;
+        grossSales: Decimal;
         cost: Decimal;
         quantity: number;
       }
@@ -43,11 +44,11 @@ export class ReportsService {
     for (const item of items) {
       const entry = byProduct.get(item.productId) ?? {
         product: item.product,
-        revenue: new Decimal(0),
+        grossSales: new Decimal(0),
         cost: new Decimal(0),
         quantity: 0,
       };
-      entry.revenue = entry.revenue.add(item.unitPrice.mul(item.quantity));
+      entry.grossSales = entry.grossSales.add(item.unitPrice.mul(item.quantity));
       entry.cost = entry.cost.add(item.unitCost.mul(item.quantity));
       entry.quantity += item.quantity;
       byProduct.set(item.productId, entry);
@@ -57,11 +58,11 @@ export class ReportsService {
       .map((e) => ({
         product: e.product,
         quantity: e.quantity,
-        revenue: e.revenue,
+        grossSales: e.grossSales,
         cost: e.cost,
-        margin: e.revenue.sub(e.cost),
-        marginPercent: e.revenue.gt(0)
-          ? e.revenue.sub(e.cost).div(e.revenue).mul(100).toDecimalPlaces(1)
+        margin: e.grossSales.sub(e.cost),
+        marginPercent: e.grossSales.gt(0)
+          ? e.grossSales.sub(e.cost).div(e.grossSales).mul(100).toDecimalPlaces(1)
           : new Decimal(0),
       }))
       .sort((a, b) => b.quantity - a.quantity);

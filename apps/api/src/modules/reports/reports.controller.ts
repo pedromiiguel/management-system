@@ -51,7 +51,7 @@ export class ReportsController {
       { key: 'name', label: 'Produto' },
       { key: 'sku', label: 'SKU' },
       { key: 'quantity', label: 'Qtd vendida' },
-      { key: 'revenue', label: 'Receita (R$)' },
+      { key: 'grossSales', label: 'Valor bruto (R$)' },
       { key: 'cost', label: 'Custo (R$)' },
       { key: 'margin', label: 'Margem (R$)' },
       { key: 'marginPercent', label: 'Margem (%)' },

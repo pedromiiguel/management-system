@@ -130,11 +130,11 @@ test.describe('Relatórios — Mais vendidos / margem', () => {
     await expect(row.getByText('4', { exact: true })).toBeVisible();
   });
 
-  test('margem por produto mostra receita, custo e margem calculados', async ({ page }) => {
+  test('margem por produto mostra valor bruto, custo e margem calculados', async ({ page }) => {
     await openReportsTab(page, 'Margem por produto');
     const row = page.locator('.s-tr').filter({ hasText: PRODUCTS.brahma.name });
     await expect(row).toBeVisible();
-    // Receita 4 x R$4,20 = R$16,80
+    // Valor bruto 4 x R$4,20 = R$16,80
     await expect(row.getByText(brl('16,80'), { exact: true })).toBeVisible();
   });
 });

@@ -17,7 +17,8 @@ export interface SalesReport extends SalesTotals {
 export interface ProductPerformance {
   product: Pick<Product, 'id' | 'name' | 'sku' | 'unit'> | null;
   quantity: number;
-  revenue: number;
+  /** Preço × quantidade, antes do desconto da venda — não é Receita. */
+  grossSales: number;
   cost: number;
   margin: number;
   marginPercent: number;

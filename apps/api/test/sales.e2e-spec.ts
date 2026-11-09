@@ -338,5 +338,43 @@ describe('Sales', () => {
       expect(csv.text).toContain('Dia;Vendas;Receita (R$);Taxa de serviço (R$)');
       expect(csv.text).toContain(`${today};1;20,00;2,00`);
     });
+
+    it('desempenho por produto mostra o valor bruto, antes do desconto da venda', async () => {
+      await t.reset();
+      const product = await createProduct(10); // venda 10,00, custo 5,00
+      const saleId = await openSaleWith(product.sku, 3); // 30,00
+      await admin()
+        .put(`/api/sales/${saleId}/discount`)
+        .send({ type: DiscountType.AMOUNT, value: 5 })
+        .expect(200);
+      await admin()
+        .post(`/api/sales/${saleId}/complete`)
+        .send({ paymentMethod: PaymentMethod.PIX })
+        .expect(201);
+
+      const today = storeDateKey(new Date());
+      const report = await admin()
+        .get('/api/reports/products')
+        .query({ from: today, to: today })
+        .expect(200);
+      expect(report.body).toEqual([
+        expect.objectContaining({
+          quantity: 3,
+          grossSales: 30,
+          cost: 15,
+          margin: 15,
+          marginPercent: 50,
+        }),
+      ]);
+
+      const csv = await admin()
+        .get('/api/reports/products')
+        .query({ from: today, to: today, format: 'csv' })
+        .expect(200);
+      expect(csv.text).toContain(
+        'Produto;SKU;Qtd vendida;Valor bruto (R$);Custo (R$);Margem (R$);Margem (%)',
+      );
+      expect(csv.text).toContain(`;${product.sku};3;30,00;15,00;15,00;50`);
+    });
   });
 });

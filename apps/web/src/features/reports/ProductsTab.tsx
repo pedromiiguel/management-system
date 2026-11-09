@@ -19,7 +19,7 @@ export function ProductsTab({
   return (
     <Card pad={8} className="flex-1 min-h-0 overflow-auto">
       <Table
-        cols={['Produto', 'SKU', 'Qtd vendida', 'Receita', 'Custo', 'Margem', 'Margem %']}
+        cols={['Produto', 'SKU', 'Qtd vendida', 'Valor bruto', 'Custo', 'Margem', 'Margem %']}
         widths="1fr 100px 100px 110px 110px 110px 90px"
         align={[null, null, 'center', 'right', 'right', 'right', 'right']}
         dense
@@ -30,7 +30,7 @@ export function ProductsTab({
             r.product?.name ?? '—',
             r.product?.sku ?? '—',
             <b key="q">{r.quantity}</b>,
-            formatBRL(r.revenue),
+            formatBRL(r.grossSales),
             formatBRL(r.cost),
             <b key="m">{formatBRL(r.margin)}</b>,
             `${r.marginPercent.toFixed(1)}%`,
