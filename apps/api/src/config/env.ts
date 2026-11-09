@@ -19,8 +19,16 @@ const envSchema = (production: boolean) =>
         .regex(/^\d+[smhd]?$/, 'Use, por ex., 12h ou 3600')
         .default('12h'),
       PORT: z.coerce.number().int().positive().default(3000),
-      /** Origens separadas por vírgula. Vazio = reflete qualquer origem (só dev). */
-      CORS_ORIGIN: z.string().optional(),
+      /**
+       * Origens separadas por vírgula. Obrigatório em produção; fora dela,
+       * vazio = reflete qualquer origem.
+       */
+      CORS_ORIGIN: production
+        ? required('CORS_ORIGIN (em produção)').refine(
+            (v) => v.split(',').some((o) => o.trim()),
+            'CORS_ORIGIN (em produção) precisa de ao menos uma origem',
+          )
+        : z.string().optional(),
       OBSERVE_APP_KEY: z.string().optional(),
       OBSERVE_APP_SECRET: z.string().optional(),
     })
