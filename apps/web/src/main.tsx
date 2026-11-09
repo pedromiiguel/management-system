@@ -1,17 +1,12 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Confirm } from '@/presentation/components/Confirm';
-import { ToastProvider } from '@/presentation/components/Toast';
+import { Confirm } from '@/components/Confirm';
+import { Toaster } from '@/components/Toast';
+import { queryClient } from '@/lib/query-client';
 import { routeTree } from './routeTree.gen';
 import './styles.css';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { retry: 1, refetchOnWindowFocus: false, staleTime: 15_000 },
-  },
-});
 
 const router = createRouter({ routeTree });
 
@@ -24,10 +19,9 @@ declare module '@tanstack/react-router' {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <RouterProvider router={router} />
-        <Confirm />
-      </ToastProvider>
+      <RouterProvider router={router} />
+      <Confirm />
+      <Toaster />
     </QueryClientProvider>
   </StrictMode>,
 );
