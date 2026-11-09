@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { z } from 'zod';
 import {
-  money,
   PAYMENT_METHOD_LABELS,
   PaymentMethod,
   StockPolicy,
+  updateSettingsSchema,
   type SettingsInput,
 } from '@beverage/shared';
 import { Button } from '@/components/Button';
@@ -17,7 +18,16 @@ import { settingsQuery, useUpdateSettings } from './api';
 
 const EXPIRY_ALERT_DAYS_OPTIONS = [15, 30, 60];
 
-const targetText = moneyText(money);
+/** Meta é opcional: campo vazio remove a meta (null); senão vale a regra do shared (> 0). */
+const targetText = z
+  .string()
+  .trim()
+  .pipe(
+    z.union([
+      z.literal('').transform(() => null),
+      moneyText(updateSettingsSchema.shape.revenueTargetMonthly.unwrap().unwrap()),
+    ]),
+  );
 
 export function GeneralTab() {
   const { data: settings } = useQuery(settingsQuery());
