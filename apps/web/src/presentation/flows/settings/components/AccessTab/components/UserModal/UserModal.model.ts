@@ -11,7 +11,8 @@ export function useUserModalModel(roles: Role[], onDone: () => void) {
   const [password, setPassword] = useState('');
   const [roleId, setRoleId] = useState(roles[0]?.id ?? '');
 
-  const valid = name.trim().length > 0 && login.trim().length >= 3 && password.length >= 6 && roleId.length > 0;
+  const valid =
+    name.trim().length > 0 && login.trim().length >= 3 && password.length >= 6 && roleId.length > 0;
 
   const save = useCreateUserMutation();
 

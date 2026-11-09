@@ -25,7 +25,7 @@ diferentes**:
   de `settings.write`.
 - **Categorias financeiras** (NFR-10): lista e cria categorias de
   receita/despesa. `GET /financial/categories` exige `financial.read`; **`POST
-  /financial/categories` exige `settings.write`** (não `financial.write`) —
+/financial/categories` exige `settings.write`** (não `financial.write`) —
   provavelmente porque só quem administra o sistema cadastra categoria, não
   quem opera o financeiro no dia a dia.
 
@@ -156,12 +156,12 @@ módulo legado pendente).
 3. `domain/models/{settings,users}.ts` + `domain/usecases/settings/*` (2
    usecases) + `domain/usecases/users/*` (6 usecases) +
    `domain/usecases/financial/create-financial-category.ts` (1 usecase novo)
-   + `data/handlers/{settings,users,financial}/*` (cada um com teste
-   unitário) + `infra/endpoints/{settings,users}.ts` + entrada nova em
-   `financialEndpoints` (a URL `/financial/categories` já existe, só ganha o
-   verbo `POST`) + `main/factories/{queries,mutations}/{settings,users,financial}`
-   — código novo, morto, não conectado. As duas suítes da fase 1-2 não
-   deveriam mudar de resultado.
+   - `data/handlers/{settings,users,financial}/*` (cada um com teste
+     unitário) + `infra/endpoints/{settings,users}.ts` + entrada nova em
+     `financialEndpoints` (a URL `/financial/categories` já existe, só ganha o
+     verbo `POST`) + `main/factories/{queries,mutations}/{settings,users,financial}`
+     — código novo, morto, não conectado. As duas suítes da fase 1-2 não
+     deveriam mudar de resultado.
 4. `presentation/flows/settings/` consome as factories;
    `routes/_app/settings.tsx` vira wrapper fino. As suítes de `settings` e
    `financial` rodam de novo — ponto real de risco.

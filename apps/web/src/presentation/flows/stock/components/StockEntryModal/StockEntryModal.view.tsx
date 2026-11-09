@@ -22,11 +22,7 @@ export function StockEntryModalView({
         <>
           <div className="s-input mb-2.5">
             <Search size={15} />
-            <input
-              autoFocus
-              placeholder="Buscar produto…"
-              {...registerFilter('search')}
-            />
+            <input autoFocus placeholder="Buscar produto…" {...registerFilter('search')} />
           </div>
           <Table
             cols={['Produto', 'Estoque']}
@@ -41,7 +37,9 @@ export function StockEntryModalView({
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <div className="s-kv">
             <span>Produto</span>
-            <b>{picked.name} (estoque: {picked.currentStock})</b>
+            <b>
+              {picked.name} (estoque: {picked.currentStock})
+            </b>
           </div>
           <div className="flex gap-2.5">
             <div className="flex-1">
@@ -92,7 +90,9 @@ export function StockEntryModalView({
             </div>
           </div>
           <div className="flex gap-2 justify-end">
-            <Button ghost onClick={onUnpick}>Trocar produto</Button>
+            <Button ghost onClick={onUnpick}>
+              Trocar produto
+            </Button>
             <Button primary type="submit" disabled={saving}>
               {saving ? 'Salvando…' : 'Registrar entrada'}
             </Button>

@@ -17,7 +17,13 @@ export function ButtonView({
 }: ButtonProps) {
   return (
     <button
-      className={clsx('s-btn', primary && 'is-primary', ghost && 'is-ghost', danger && 'is-danger', big && 'is-big')}
+      className={clsx(
+        's-btn',
+        primary && 'is-primary',
+        ghost && 'is-ghost',
+        danger && 'is-danger',
+        big && 'is-big',
+      )}
       style={style}
       onClick={onClick}
       disabled={disabled}

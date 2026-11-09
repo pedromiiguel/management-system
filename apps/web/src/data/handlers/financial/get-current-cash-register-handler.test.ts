@@ -5,12 +5,17 @@ import { GetCurrentCashRegisterHandler } from './get-current-cash-register-handl
 describe('GetCurrentCashRegisterHandler', () => {
   it('busca o caixa aberto via GET /cash-register/current', async () => {
     const register = { id: 'r1' };
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: register }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: register }),
+    };
     const handler = new GetCurrentCashRegisterHandler(httpClient);
 
     const result = await handler.get();
 
-    expect(httpClient.request).toHaveBeenCalledWith({ url: '/cash-register/current', method: 'GET' });
+    expect(httpClient.request).toHaveBeenCalledWith({
+      url: '/cash-register/current',
+      method: 'GET',
+    });
     expect(result).toBe(register);
   });
 });

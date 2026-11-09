@@ -14,17 +14,19 @@ export const productFormSchema = productSchema
       })
       .optional(),
   })
-  .transform(({ stockEntry, ...rest }): ProductInput => ({
-    ...rest,
-    ...(stockEntry?.quantity
-      ? {
-          stockEntry: {
-            quantity: stockEntry.quantity,
-            batch: stockEntry.batch,
-            expiresAt: stockEntry.expiresAt,
-          },
-        }
-      : {}),
-  }));
+  .transform(
+    ({ stockEntry, ...rest }): ProductInput => ({
+      ...rest,
+      ...(stockEntry?.quantity
+        ? {
+            stockEntry: {
+              quantity: stockEntry.quantity,
+              batch: stockEntry.batch,
+              expiresAt: stockEntry.expiresAt,
+            },
+          }
+        : {}),
+    }),
+  );
 
 export type ProductFormInput = z.input<typeof productFormSchema>;

@@ -5,7 +5,9 @@ import { UpdateSaleItemQuantityHandler } from './update-sale-item-quantity-handl
 describe('UpdateSaleItemQuantityHandler', () => {
   it('atualiza a quantidade de um item via PATCH /sales/:id/items/:itemId', async () => {
     const response = { sale: { id: 's1' }, warning: null };
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: response }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: response }),
+    };
     const handler = new UpdateSaleItemQuantityHandler(httpClient);
 
     const result = await handler.update('s1', 'i1', { quantity: 4 });

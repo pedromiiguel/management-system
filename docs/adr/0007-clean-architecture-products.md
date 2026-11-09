@@ -39,7 +39,7 @@ desvio do `IGetSalesTotal` na ADR 0006 (usecase que conceitualmente pertence
 a outro domínio fica onde nasceu até esse domínio migrar).
 
 O usecase por trás do `StockEntryModal` (`POST /stock/entries`) nasce em
-`domain/usecases/products` como `ICreateStockEntry` *(custom)*, com a mesma
+`domain/usecases/products` como `ICreateStockEntry` _(custom)_, com a mesma
 ressalva: pertence conceitualmente a `stock`, não a `products`. Deve se
 mover para `domain/usecases/stock` quando `stock.tsx` for migrado.
 
@@ -52,15 +52,15 @@ vira wrapper fino.
 
 Inventário completo (7 chamadas de API usadas hoje por `products.tsx`):
 
-| Chamada atual                          | Entidade     | Usecase                          | Handler                       | Factory                        |
-| ---------------------------------------- | ------------ | ----------------------------------- | -------------------------------- | ---------------------------------- |
-| `GET /products?search=&page=&all=&perPage=` | Product      | `ISearchProductCatalog` *(custom)*  | `SearchProductCatalogHandler`    | `makeSearchProductCatalog`         |
-| `GET /stock/alerts`                      | StockAlerts  | `IGetStockAlerts` *(custom)*        | `GetStockAlertsHandler`          | `makeGetStockAlerts`               |
-| `POST /products`                         | Product      | `ICreateProduct`                    | `CreateProductHandler`           | `makeCreateProduct`                |
-| `PATCH /products/:id`                    | Product      | `IUpdateProduct`                    | `UpdateProductHandler`           | `makeUpdateProduct`                |
-| `PATCH /products/:id/deactivate`         | Product      | `IDeactivateProduct` *(custom)*     | `DeactivateProductHandler`       | `makeDeactivateProduct`            |
-| `DELETE /products/:id`                   | Product      | `IDeleteProduct`                    | `DeleteProductHandler`           | `makeDeleteProduct`                |
-| `POST /stock/entries`                    | StockMovement| `ICreateStockEntry` *(custom)*      | `CreateStockEntryHandler`        | `makeCreateStockEntry`             |
+| Chamada atual                               | Entidade      | Usecase                            | Handler                       | Factory                    |
+| ------------------------------------------- | ------------- | ---------------------------------- | ----------------------------- | -------------------------- |
+| `GET /products?search=&page=&all=&perPage=` | Product       | `ISearchProductCatalog` _(custom)_ | `SearchProductCatalogHandler` | `makeSearchProductCatalog` |
+| `GET /stock/alerts`                         | StockAlerts   | `IGetStockAlerts` _(custom)_       | `GetStockAlertsHandler`       | `makeGetStockAlerts`       |
+| `POST /products`                            | Product       | `ICreateProduct`                   | `CreateProductHandler`        | `makeCreateProduct`        |
+| `PATCH /products/:id`                       | Product       | `IUpdateProduct`                   | `UpdateProductHandler`        | `makeUpdateProduct`        |
+| `PATCH /products/:id/deactivate`            | Product       | `IDeactivateProduct` _(custom)_    | `DeactivateProductHandler`    | `makeDeactivateProduct`    |
+| `DELETE /products/:id`                      | Product       | `IDeleteProduct`                   | `DeleteProductHandler`        | `makeDeleteProduct`        |
+| `POST /stock/entries`                       | StockMovement | `ICreateStockEntry` _(custom)_     | `CreateStockEntryHandler`     | `makeCreateStockEntry`     |
 
 **Desvio de nome deliberado**: `domain/usecases/sale/search-product.ts` já
 define `ISearchProduct` (busca rápida do scanner do PDV — `search(query,
@@ -100,7 +100,7 @@ Diferente do `financial` (gate cobriu todas as regras apontadas pelo ADR
 regras de maior risco de regressão silenciosa:
 
 1. **BR-04** — produto com venda registrada não pode ser excluído (`DELETE
-   /products/:id` deve falhar com `BadRequestException`; deve funcionar sem
+/products/:id` deve falhar com `BadRequestException`; deve funcionar sem
    venda).
 2. **Permissão dupla na entrada embutida** — `POST`/`PATCH /products` com
    `stockEntry` preenchido exige `PRODUCTS_WRITE` **e** `STOCK_WRITE`; só
@@ -142,9 +142,9 @@ documentado nesta ADR — não vira item separado.
 1. Supertest das duas regras de negócio (`apps/api/test/products.e2e-spec.ts`).
 2. Suíte E2E dos fluxos de UI contra `products.tsx` atual.
 3. `domain/` (`models/products.ts`, `models/stock.ts`, `usecases/products/*`)
-   + `data/handlers/products/*` (com teste unitário cada) + `infra` (endpoints)
-   + `main/factories` — código novo, morto, não conectado. As duas suítes não
-   deveriam mudar de resultado.
+   - `data/handlers/products/*` (com teste unitário cada) + `infra` (endpoints)
+   - `main/factories` — código novo, morto, não conectado. As duas suítes não
+     deveriam mudar de resultado.
 4. `presentation/flows/products/` consome as factories;
    `routes/_app/products.tsx` vira wrapper fino; `stock.tsx` troca o import
    de `StockEntryModal` para o novo caminho. As duas suítes rodam de novo —
@@ -153,11 +153,11 @@ documentado nesta ADR — não vira item separado.
 ## Consequências
 
 - 7 usecases implementados (`domain/usecases/products`), cada um com handler
-  + teste unitário (`data/handlers/products/*.test.ts`) — 9/9 testes verdes
-  (`SearchProductCatalogHandler` tem 2 casos, os outros 6 handlers têm 1 cada).
-  Suíte `apps/web` completa: 36/36 testes verdes (28 já existentes de
-  `sale`/`financial` + 8 novos de `products`). Typecheck (`tsc --noEmit`)
-  limpo.
+  - teste unitário (`data/handlers/products/*.test.ts`) — 9/9 testes verdes
+    (`SearchProductCatalogHandler` tem 2 casos, os outros 6 handlers têm 1 cada).
+    Suíte `apps/web` completa: 36/36 testes verdes (28 já existentes de
+    `sale`/`financial` + 8 novos de `products`). Typecheck (`tsc --noEmit`)
+    limpo.
 - `products.tsx` (533 linhas, 1 arquivo) virou
   `presentation/flows/products/` — `ProductsPage` (Model/ViewModel/View, sem
   abas) + 2 componentes locais MVVM (`ProductModal`, `StockEntryModal`),

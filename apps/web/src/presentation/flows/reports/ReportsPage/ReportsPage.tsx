@@ -18,5 +18,13 @@ export function ReportsPage() {
     downloadBlob(blob, `relatorio-${tab}-${from}-a-${to}.csv`);
   }
 
-  return <ReportsPageView tab={tab} from={from} to={to} onExportCsv={() => void onExportCsv()} {...rest} />;
+  return (
+    <ReportsPageView
+      tab={tab}
+      from={from}
+      to={to}
+      onExportCsv={() => void onExportCsv()}
+      {...rest}
+    />
+  );
 }

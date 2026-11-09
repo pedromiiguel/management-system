@@ -3,8 +3,18 @@ import { StockEntryModalView } from './StockEntryModal.view';
 import type { ProductPickRow, StockEntryModalProps } from './StockEntryModal.types';
 
 export function StockEntryModal({ product, onSaved, onClose }: StockEntryModalProps) {
-  const { picked, pick, unpick, registerFilter, results, showResults, register, errors, submit, saving } =
-    useStockEntryModalModel(product, onSaved);
+  const {
+    picked,
+    pick,
+    unpick,
+    registerFilter,
+    results,
+    showResults,
+    register,
+    errors,
+    submit,
+    saving,
+  } = useStockEntryModalModel(product, onSaved);
 
   const rows: ProductPickRow[] = results.map((p) => ({
     key: p.id,

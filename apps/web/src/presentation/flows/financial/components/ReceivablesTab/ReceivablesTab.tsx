@@ -17,7 +17,9 @@ export function ReceivablesTab() {
       formatDate(r.createdAt),
       r.dueDate ? formatDate(r.dueDate) : '—',
       <b key="v">{formatBRL(r.amount)}</b>,
-      <Button key="b" ghost onClick={() => setSettling(r)}>Receber</Button>,
+      <Button key="b" ghost onClick={() => setSettling(r)}>
+        Receber
+      </Button>,
     ],
   }));
 

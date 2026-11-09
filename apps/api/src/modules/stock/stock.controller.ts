@@ -22,9 +22,7 @@ export class StockController {
 
   @Post('adjustments')
   @RequirePermission(Permission.STOCK_WRITE)
-  createAdjustment(
-    @Body(new ZodValidationPipe(stockAdjustmentSchema)) body: StockAdjustmentInput,
-  ) {
+  createAdjustment(@Body(new ZodValidationPipe(stockAdjustmentSchema)) body: StockAdjustmentInput) {
     return this.stockService.createAdjustment(body);
   }
 

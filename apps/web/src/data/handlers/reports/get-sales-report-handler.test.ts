@@ -5,7 +5,9 @@ import { GetSalesReportHandler } from './get-sales-report-handler';
 describe('GetSalesReportHandler', () => {
   it('busca o relatório de vendas via GET /reports/sales', async () => {
     const report = { days: [], count: 0, total: 0, serviceFeeTotal: 0 };
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: report }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: report }),
+    };
     const handler = new GetSalesReportHandler(httpClient);
 
     const result = await handler.get('2026-07-01', '2026-07-24');

@@ -4,7 +4,11 @@ import { Chip } from '@/presentation/components/Chip';
 import { Modal } from '@/presentation/components/Modal';
 import type { CashMoveModalViewProps } from './CashMoveModal.types';
 
-const MOVEMENT_TYPES = [CashMovementType.PULL, CashMovementType.FLOAT, CashMovementType.OUTFLOW] as const;
+const MOVEMENT_TYPES = [
+  CashMovementType.PULL,
+  CashMovementType.FLOAT,
+  CashMovementType.OUTFLOW,
+] as const;
 
 export function CashMoveModalView({
   type,
@@ -48,8 +52,12 @@ export function CashMoveModalView({
         />
       </div>
       <div className="flex gap-2 justify-end mt-3.5">
-        <Button ghost onClick={onClose}>Voltar</Button>
-        <Button primary disabled={!valid || saving} onClick={onSubmit}>Registrar</Button>
+        <Button ghost onClick={onClose}>
+          Voltar
+        </Button>
+        <Button primary disabled={!valid || saving} onClick={onSubmit}>
+          Registrar
+        </Button>
       </div>
     </Modal>
   );

@@ -23,14 +23,23 @@ export function UserModalView({
         <div>
           <div className="s-label">Nome</div>
           <div className="s-input">
-            <input autoFocus data-testid="user-name" value={name} onChange={(e) => onChangeName(e.target.value)} />
+            <input
+              autoFocus
+              data-testid="user-name"
+              value={name}
+              onChange={(e) => onChangeName(e.target.value)}
+            />
           </div>
         </div>
         <div className="flex gap-2.5">
           <div className="flex-1">
             <div className="s-label">Login</div>
             <div className="s-input">
-              <input data-testid="user-login" value={login} onChange={(e) => onChangeLogin(e.target.value)} />
+              <input
+                data-testid="user-login"
+                value={login}
+                onChange={(e) => onChangeLogin(e.target.value)}
+              />
             </div>
           </div>
           <div className="flex-1">
@@ -48,7 +57,11 @@ export function UserModalView({
         <div>
           <div className="s-label">Perfil</div>
           <div className="s-input">
-            <select data-testid="user-role" value={roleId} onChange={(e) => onChangeRoleId(e.target.value)}>
+            <select
+              data-testid="user-role"
+              value={roleId}
+              onChange={(e) => onChangeRoleId(e.target.value)}
+            >
               {roles.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.name}

@@ -15,7 +15,9 @@ export function StockTab() {
       r.name,
       r.unit,
       r.minimumStock > 0 && r.currentStock <= r.minimumStock ? (
-        <b key="s" className="s-low">{r.currentStock}</b>
+        <b key="s" className="s-low">
+          {r.currentStock}
+        </b>
       ) : (
         r.currentStock
       ),

@@ -6,7 +6,9 @@ export function TableView({ cols, widths, rows, align, dense, emptyText }: Table
     <div className={clsx('s-table', dense && 'is-dense')}>
       <div className="s-tr s-th" style={{ gridTemplateColumns: widths }}>
         {cols.map((c, i) => (
-          <div key={i} style={{ textAlign: align?.[i] ?? 'left' }}>{c}</div>
+          <div key={i} style={{ textAlign: align?.[i] ?? 'left' }}>
+            {c}
+          </div>
         ))}
       </div>
       {rows.length === 0 && (
@@ -23,7 +25,9 @@ export function TableView({ cols, widths, rows, align, dense, emptyText }: Table
           onClick={row.onClick}
         >
           {row.cells.map((c, j) => (
-            <div key={j} style={{ textAlign: align?.[j] ?? 'left' }}>{c}</div>
+            <div key={j} style={{ textAlign: align?.[j] ?? 'left' }}>
+              {c}
+            </div>
           ))}
         </div>
       ))}

@@ -4,7 +4,9 @@ import { VoidSaleHandler } from './void-sale-handler';
 
 describe('VoidSaleHandler', () => {
   it('estorna a venda concluída via POST /sales/:id/void', async () => {
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: {} }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: {} }),
+    };
     const handler = new VoidSaleHandler(httpClient);
 
     await handler.void('s1');

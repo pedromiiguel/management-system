@@ -34,11 +34,15 @@ export function SalesTab({ from, to }: SalesTabProps) {
       s.withInvoice ? 'sim' : 'não',
       <b key="t">{formatBRL(s.total)}</b>,
       s.status === 'CANCELLED' ? (
-        <Tag key="a" tone="danger">cancelada</Tag>
+        <Tag key="a" tone="danger">
+          cancelada
+        </Tag>
       ) : (
         // span impede que o clique no Estornar também abra o detalhe
         <span key="a" onClick={(e) => e.stopPropagation()}>
-          <Button ghost danger onClick={() => onRequestVoid(s)}>Estornar</Button>
+          <Button ghost danger onClick={() => onRequestVoid(s)}>
+            Estornar
+          </Button>
         </span>
       ),
     ],

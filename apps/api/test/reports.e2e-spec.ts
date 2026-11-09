@@ -56,7 +56,12 @@ describe('Reports — regras de negócio (ADR 0009)', () => {
     await request(app.getHttpServer())
       .post('/api/users')
       .set('Authorization', auth(adminToken))
-      .send({ name: 'Sem estorno', login: 'sem-estorno', password: 'senha123', roleId: role.body.id })
+      .send({
+        name: 'Sem estorno',
+        login: 'sem-estorno',
+        password: 'senha123',
+        roleId: role.body.id,
+      })
       .expect(201);
 
     const login = await request(app.getHttpServer())
@@ -204,7 +209,9 @@ describe('Reports — regras de negócio (ADR 0009)', () => {
         .query({ customerId })
         .set('Authorization', auth(adminToken))
         .expect(200);
-      const receivableId = receivables.body.find((r: { saleId: string }) => r.saleId === sale.id).id;
+      const receivableId = receivables.body.find(
+        (r: { saleId: string }) => r.saleId === sale.id,
+      ).id;
 
       await request(app.getHttpServer())
         .post(`/api/receivables/${receivableId}/settle`)

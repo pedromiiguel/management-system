@@ -32,8 +32,12 @@ export function ProductsPageView({
       title="Produtos & Estoque"
       topRight={
         <>
-          <Button ghost onClick={onOpenNewEntry}>Entrada de estoque</Button>
-          <Button primary onClick={onOpenNewProduct}>+ Novo produto</Button>
+          <Button ghost onClick={onOpenNewEntry}>
+            Entrada de estoque
+          </Button>
+          <Button primary onClick={onOpenNewProduct}>
+            + Novo produto
+          </Button>
         </>
       }
     >
@@ -50,7 +54,9 @@ export function ProductsPageView({
           <Chip active={filter === 'all'} onClick={() => onChangeFilter('all')}>
             Todos · {total}
           </Chip>
-          <Chip active={filter === 'active'} onClick={() => onChangeFilter('active')}>Ativos</Chip>
+          <Chip active={filter === 'active'} onClick={() => onChangeFilter('active')}>
+            Ativos
+          </Chip>
           <Chip active={filter === 'low'} onClick={() => onChangeFilter('low')}>
             Estoque baixo · {lowCount}
           </Chip>
@@ -61,7 +67,16 @@ export function ProductsPageView({
 
         <Card pad={8} className="flex-1 min-h-0 overflow-auto">
           <Table
-            cols={['SKU', 'Código de barras', 'Produto', 'Preço venda', 'Estoque', 'Mín.', 'Situação', 'Ações']}
+            cols={[
+              'SKU',
+              'Código de barras',
+              'Produto',
+              'Preço venda',
+              'Estoque',
+              'Mín.',
+              'Situação',
+              'Ações',
+            ]}
             widths="80px 140px 1fr 110px 80px 60px 150px 60px"
             align={[null, null, null, 'right', 'center', 'center', null, 'center']}
             dense
@@ -74,9 +89,13 @@ export function ProductsPageView({
             Produtos com venda registrada não são excluídos — apenas desativados.
           </span>
           <span className="flex gap-1.5 items-center">
-            <Button ghost disabled={page <= 1} onClick={onPrevPage}>‹</Button>
+            <Button ghost disabled={page <= 1} onClick={onPrevPage}>
+              ‹
+            </Button>
             <span className="s-dim text-[13px]">página {page}</span>
-            <Button ghost disabled={!hasNextPage} onClick={onNextPage}>›</Button>
+            <Button ghost disabled={!hasNextPage} onClick={onNextPage}>
+              ›
+            </Button>
           </span>
         </div>
       </div>

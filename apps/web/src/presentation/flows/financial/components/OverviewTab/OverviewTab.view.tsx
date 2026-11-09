@@ -22,7 +22,11 @@ export function OverviewTabView({
           value={formatBRL(dashboard?.revenue.month)}
           sub={`acumulado no ano: ${formatBRL(dashboard?.revenue.year)}`}
         />
-        <StatCard label="Vendas (hoje)" value={formatBRL(dashboard?.revenue.day)} sub="receita bruta do dia" />
+        <StatCard
+          label="Vendas (hoje)"
+          value={formatBRL(dashboard?.revenue.day)}
+          sub="receita bruta do dia"
+        />
         <StatCard
           label="Resultado (mês)"
           value={formatBRL(dashboard?.result.profit)}
@@ -38,16 +42,36 @@ export function OverviewTabView({
           <BarChart values={monthTotals} labels={monthLabels} height={150} hl={5} />
           <div className="s-divider my-3.5" />
           <div className="s-card-title mb-1.5">Resultado do período</div>
-          <DreLine op="" label="Receita bruta de vendas" value={formatBRL(dashboard?.result.revenue)} />
-          <DreLine op="−" label="Custo das mercadorias vendidas (CMV)" value={formatBRL(dashboard?.result.cogs)} />
+          <DreLine
+            op=""
+            label="Receita bruta de vendas"
+            value={formatBRL(dashboard?.result.revenue)}
+          />
+          <DreLine
+            op="−"
+            label="Custo das mercadorias vendidas (CMV)"
+            value={formatBRL(dashboard?.result.cogs)}
+          />
           <DreLine
             op="="
             label="Margem bruta"
-            value={formatBRL(Number(dashboard?.result.revenue ?? 0) - Number(dashboard?.result.cogs ?? 0))}
+            value={formatBRL(
+              Number(dashboard?.result.revenue ?? 0) - Number(dashboard?.result.cogs ?? 0),
+            )}
             strong
           />
-          <DreLine op="−" label="Despesas operacionais" value={formatBRL(dashboard?.result.expenses)} />
-          <DreLine op="=" label="Resultado líquido" value={formatBRL(dashboard?.result.profit)} strong accent />
+          <DreLine
+            op="−"
+            label="Despesas operacionais"
+            value={formatBRL(dashboard?.result.expenses)}
+          />
+          <DreLine
+            op="="
+            label="Resultado líquido"
+            value={formatBRL(dashboard?.result.profit)}
+            strong
+            accent
+          />
         </Card>
         <div className="flex flex-col gap-3 min-h-0 overflow-auto">
           <Card>
@@ -73,7 +97,9 @@ export function OverviewTabView({
             {dashboard?.target?.monthly ? (
               <>
                 <div className="flex justify-between items-baseline mb-2">
-                  <span className="text-[22px] font-bold text-[color:var(--ink-900)]">{targetPct}%</span>
+                  <span className="text-[22px] font-bold text-[color:var(--ink-900)]">
+                    {targetPct}%
+                  </span>
                   <span className="s-dim text-xs">
                     {formatBRL(dashboard?.revenue.month)} / {formatBRL(dashboard.target.monthly)}
                   </span>

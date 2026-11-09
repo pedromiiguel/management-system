@@ -49,23 +49,23 @@ Consequências).
 Inventário completo de `financial.tsx` (14 chamadas de API usadas hoje pelas
 5 abas — mesmo formato da tabela do ADR 0003):
 
-| Chamada atual                       | Entidade         | Usecase                        | Handler                          | Factory                             |
-| ------------------------------------ | ---------------- | -------------------------------- | ----------------------------------- | -------------------------------------- |
-| `GET /financial/dashboard`           | FinancialDashboard | `IGetFinancialDashboard` *(custom)* | `GetFinancialDashboardHandler`      | `makeGetFinancialDashboard`         |
-| `GET /reports/sales?from&to`         | Sale (agregado)  | `IGetSalesTotal` *(custom)*       | `GetSalesTotalHandler`              | `makeGetSalesTotal`                 |
-| `GET /cash-register/current`         | CashRegister     | `IGetCurrentCashRegister` *(custom)* | `GetCurrentCashRegisterHandler`  | `makeGetCurrentCashRegister`        |
-| `GET /cash-register/history`         | CashRegister     | `ISearchCashRegisterHistory` *(custom)* | `SearchCashRegisterHistoryHandler` | `makeSearchCashRegisterHistory`  |
-| `POST /cash-register/open`           | CashRegister     | `IOpenCashRegister` *(custom)*    | `OpenCashRegisterHandler`           | `makeOpenCashRegister`              |
-| `POST /cash-register/movements`      | CashMovement     | `ICreateCashMovement`             | `CreateCashMovementHandler`         | `makeCreateCashMovement`            |
-| `POST /cash-register/close`          | CashRegister     | `ICloseCashRegister` *(custom)*   | `CloseCashRegisterHandler`          | `makeCloseCashRegister`             |
-| `GET /receivables`                   | Receivable       | `ISearchReceivable`               | `SearchReceivableHandler`           | `makeSearchReceivable`              |
-| `POST /receivables/:id/settle`       | Receivable       | `ISettleReceivable` *(custom)*    | `SettleReceivableHandler`           | `makeSettleReceivable`              |
-| `GET /payables`                      | Payable          | `ISearchPayable`                  | `SearchPayableHandler`              | `makeSearchPayable`                 |
-| `POST /payables`                     | Payable          | `ICreatePayable`                  | `CreatePayableHandler`              | `makeCreatePayable`                 |
-| `POST /payables/:id/pay`             | Payable          | `IPayPayable` *(custom)*          | `PayPayableHandler`                 | `makePayPayable`                    |
-| `GET /financial/cash-flow`           | CashMovement (agregado) | `IGetCashFlow` *(custom)*  | `GetCashFlowHandler`                | `makeGetCashFlow`                   |
-| `POST /financial/entries`            | CashMovement     | `ICreateFinancialEntry`           | `CreateFinancialEntryHandler`       | `makeCreateFinancialEntry`          |
-| `GET /financial/categories`          | FinancialCategory | `ISearchFinancialCategory`       | `SearchFinancialCategoryHandler`    | `makeSearchFinancialCategory`       |
+| Chamada atual                   | Entidade                | Usecase                                 | Handler                            | Factory                         |
+| ------------------------------- | ----------------------- | --------------------------------------- | ---------------------------------- | ------------------------------- |
+| `GET /financial/dashboard`      | FinancialDashboard      | `IGetFinancialDashboard` _(custom)_     | `GetFinancialDashboardHandler`     | `makeGetFinancialDashboard`     |
+| `GET /reports/sales?from&to`    | Sale (agregado)         | `IGetSalesTotal` _(custom)_             | `GetSalesTotalHandler`             | `makeGetSalesTotal`             |
+| `GET /cash-register/current`    | CashRegister            | `IGetCurrentCashRegister` _(custom)_    | `GetCurrentCashRegisterHandler`    | `makeGetCurrentCashRegister`    |
+| `GET /cash-register/history`    | CashRegister            | `ISearchCashRegisterHistory` _(custom)_ | `SearchCashRegisterHistoryHandler` | `makeSearchCashRegisterHistory` |
+| `POST /cash-register/open`      | CashRegister            | `IOpenCashRegister` _(custom)_          | `OpenCashRegisterHandler`          | `makeOpenCashRegister`          |
+| `POST /cash-register/movements` | CashMovement            | `ICreateCashMovement`                   | `CreateCashMovementHandler`        | `makeCreateCashMovement`        |
+| `POST /cash-register/close`     | CashRegister            | `ICloseCashRegister` _(custom)_         | `CloseCashRegisterHandler`         | `makeCloseCashRegister`         |
+| `GET /receivables`              | Receivable              | `ISearchReceivable`                     | `SearchReceivableHandler`          | `makeSearchReceivable`          |
+| `POST /receivables/:id/settle`  | Receivable              | `ISettleReceivable` _(custom)_          | `SettleReceivableHandler`          | `makeSettleReceivable`          |
+| `GET /payables`                 | Payable                 | `ISearchPayable`                        | `SearchPayableHandler`             | `makeSearchPayable`             |
+| `POST /payables`                | Payable                 | `ICreatePayable`                        | `CreatePayableHandler`             | `makeCreatePayable`             |
+| `POST /payables/:id/pay`        | Payable                 | `IPayPayable` _(custom)_                | `PayPayableHandler`                | `makePayPayable`                |
+| `GET /financial/cash-flow`      | CashMovement (agregado) | `IGetCashFlow` _(custom)_               | `GetCashFlowHandler`               | `makeGetCashFlow`               |
+| `POST /financial/entries`       | CashMovement            | `ICreateFinancialEntry`                 | `CreateFinancialEntryHandler`      | `makeCreateFinancialEntry`      |
+| `GET /financial/categories`     | FinancialCategory       | `ISearchFinancialCategory`              | `SearchFinancialCategoryHandler`   | `makeSearchFinancialCategory`   |
 
 Nomes seguem o verbo de negócio, não o HTTP — mesma regra do ADR 0003 (ex.
 `POST .../pay` é `PayPayable`, não `PostPayable`). `POST /financial/categories`

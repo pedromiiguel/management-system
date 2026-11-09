@@ -15,8 +15,8 @@ ADR 0003:
    tinha sido identificado na revisão de código como divergência consciente
    (ADR 0003, "3º desvio"), mas ficou registrado como aceito, não corrigido.
 2. Campos com objeto inline dentro dos tipos (`Sale.customer: { id, name } |
-   null`, `Sale.operator: { id, name }`, `SaleItem.product: { name, sku,
-   ean, unit }`) deveriam virar tipos nomeados em vez de shapes anônimos
+null`, `Sale.operator: { id, name }`, `SaleItem.product: { name, sku,
+ean, unit }`) deveriam virar tipos nomeados em vez de shapes anônimos
    repetidos.
 
 ## Decisão

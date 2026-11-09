@@ -22,7 +22,10 @@ export class CustomersController {
 
   @Patch(':id')
   @RequirePermission(Permission.CUSTOMERS_WRITE)
-  update(@Param('id') id: string, @Body(new ZodValidationPipe(customerSchema)) body: CustomerInput) {
+  update(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(customerSchema)) body: CustomerInput,
+  ) {
     return this.customersService.update(id, body);
   }
 

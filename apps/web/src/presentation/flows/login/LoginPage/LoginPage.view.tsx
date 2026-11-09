@@ -20,12 +20,19 @@ export function LoginPageView({
           <div className="text-[25px] font-extrabold text-[color:var(--ink-900)] tracking-[-0.01em]">
             Bem-vindo de volta
           </div>
-          <div className="s-dim text-[13.5px] mt-[5px] mb-6">Entre com sua conta para abrir o caixa.</div>
+          <div className="s-dim text-[13.5px] mt-[5px] mb-6">
+            Entre com sua conta para abrir o caixa.
+          </div>
           <div className="flex flex-col gap-3.5">
             <div>
               <div className="s-label">Usuário</div>
               <div className="s-input is-big">
-                <input placeholder="seu login" aria-label="Usuário" autoFocus {...register('login')} />
+                <input
+                  placeholder="seu login"
+                  aria-label="Usuário"
+                  autoFocus
+                  {...register('login')}
+                />
               </div>
               {errors.login ? <div className="s-error">{errors.login.message}</div> : null}
             </div>

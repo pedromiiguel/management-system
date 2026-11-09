@@ -73,7 +73,9 @@ export function ReportsPageView({
         )}
 
         {tab === 'sales' && <SalesTab from={from} to={to} />}
-        {(tab === 'best' || tab === 'margin') && <ProductsTab from={from} to={to} margin={tab === 'margin'} />}
+        {(tab === 'best' || tab === 'margin') && (
+          <ProductsTab from={from} to={to} margin={tab === 'margin'} />
+        )}
         {tab === 'stock' && <StockTab />}
       </div>
     </Screen>

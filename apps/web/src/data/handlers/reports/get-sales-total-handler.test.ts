@@ -5,7 +5,9 @@ import { GetSalesTotalHandler } from './get-sales-total-handler';
 describe('GetSalesTotalHandler', () => {
   it('busca o total de vendas do período via GET /reports/sales', async () => {
     const total = { total: 150 };
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: total }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: total }),
+    };
     const handler = new GetSalesTotalHandler(httpClient);
 
     const result = await handler.get('2026-07-01', '2026-07-31');

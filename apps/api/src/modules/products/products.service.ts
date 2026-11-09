@@ -74,7 +74,10 @@ export class ProductsService {
   update(id: string, input: UpdateProductInput) {
     const { stockEntry, ...productInput } = input;
     return this.prisma.$transaction(async (tx) => {
-      const product = await tx.product.update({ where: { id }, data: this.normalize(productInput) });
+      const product = await tx.product.update({
+        where: { id },
+        data: this.normalize(productInput),
+      });
       if (stockEntry) {
         await this.applyStockEntry(tx, product.id, stockEntry, productInput.purchasePrice);
       }

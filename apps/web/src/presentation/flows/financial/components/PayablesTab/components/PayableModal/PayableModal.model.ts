@@ -17,7 +17,8 @@ export function usePayableModalModel(onDone: () => void) {
   const categories = allCategories.filter((c) => c.kind === 'EXPENSE');
 
   const amount = parseMoney(raw);
-  const valid = description.trim().length > 0 && Number.isFinite(amount) && amount > 0 && dueDate.length > 0;
+  const valid =
+    description.trim().length > 0 && Number.isFinite(amount) && amount > 0 && dueDate.length > 0;
 
   const save = useCreatePayableMutation();
 

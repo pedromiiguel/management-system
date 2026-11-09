@@ -29,11 +29,19 @@ export function SaleDetailModalView({
         dense
         rows={sale.items.map((i) => ({
           key: i.id,
-          cells: [i.product.name, i.quantity, formatBRL(i.unitPrice), formatBRL(i.unitPrice * i.quantity)],
+          cells: [
+            i.product.name,
+            i.quantity,
+            formatBRL(i.unitPrice),
+            formatBRL(i.unitPrice * i.quantity),
+          ],
         }))}
       />
       <div className="s-divider" />
-      <div className="s-kv"><span>Subtotal</span><b>{formatBRL(sale.subtotal)}</b></div>
+      <div className="s-kv">
+        <span>Subtotal</span>
+        <b>{formatBRL(sale.subtotal)}</b>
+      </div>
       {discount > 0.005 && (
         <div className="s-kv">
           <span>Desconto{sale.discountType === 'PERCENT' ? ` (${sale.discountValue}%)` : ''}</span>
@@ -41,26 +49,47 @@ export function SaleDetailModalView({
         </div>
       )}
       {sale.serviceFee && sale.serviceFee > 0 && (
-        <div className="s-kv"><span>Taxa de serviço (10%)</span><b>{formatBRL(sale.serviceFee)}</b></div>
+        <div className="s-kv">
+          <span>Taxa de serviço (10%)</span>
+          <b>{formatBRL(sale.serviceFee)}</b>
+        </div>
       )}
-      <div className="s-kv"><span>Total</span><b className="text-base">{formatBRL(sale.total)}</b></div>
+      <div className="s-kv">
+        <span>Total</span>
+        <b className="text-base">{formatBRL(sale.total)}</b>
+      </div>
       <div className="s-kv">
         <span>Pagamento</span>
         <b>{paymentLabel}</b>
       </div>
       {sale.change !== null && (
         <>
-          <div className="s-kv"><span>Recebido</span><b>{formatBRL(sale.amountPaid)}</b></div>
-          <div className="s-kv"><span>Troco</span><b>{formatBRL(sale.change)}</b></div>
+          <div className="s-kv">
+            <span>Recebido</span>
+            <b>{formatBRL(sale.amountPaid)}</b>
+          </div>
+          <div className="s-kv">
+            <span>Troco</span>
+            <b>{formatBRL(sale.change)}</b>
+          </div>
         </>
       )}
       {sale.customer && (
-        <div className="s-kv"><span>Cliente</span><b>{sale.customer.name}</b></div>
+        <div className="s-kv">
+          <span>Cliente</span>
+          <b>{sale.customer.name}</b>
+        </div>
       )}
       {!cancelled && <CupomReceipt sale={sale} printOnly />}
       <div className="flex gap-2 justify-end mt-4">
-        {!cancelled && <Button ghost onClick={onPrint}>Imprimir cupom</Button>}
-        <Button primary onClick={onClose}>Fechar</Button>
+        {!cancelled && (
+          <Button ghost onClick={onPrint}>
+            Imprimir cupom
+          </Button>
+        )}
+        <Button primary onClick={onClose}>
+          Fechar
+        </Button>
       </div>
     </Modal>
   );

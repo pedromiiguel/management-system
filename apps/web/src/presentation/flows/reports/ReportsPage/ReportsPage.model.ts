@@ -34,7 +34,8 @@ export function useReportsPageModel() {
   const exportSalesCsv = useExportSalesReportCsvMutation();
   const exportProductsCsv = useExportProductPerformanceCsvMutation();
   const exportStockCsv = useExportStockPositionCsvMutation();
-  const isExportingCsv = exportSalesCsv.isPending || exportProductsCsv.isPending || exportStockCsv.isPending;
+  const isExportingCsv =
+    exportSalesCsv.isPending || exportProductsCsv.isPending || exportStockCsv.isPending;
 
   // Devolve só o blob — o disparo do download (createObjectURL + <a>) é
   // mecânica de DOM e fica no ViewModel da página (ver Decisão 5 da ADR 0009).
@@ -44,7 +45,18 @@ export function useReportsPageModel() {
     return exportProductsCsv.mutateAsync({ from, to });
   }
 
-  return { tab, onChangeTab: setTab, from, onChangeFrom: setFrom, to, onChangeTo: setTo, chip, onApplyChip: applyChip, exportCsv, isExportingCsv };
+  return {
+    tab,
+    onChangeTab: setTab,
+    from,
+    onChangeFrom: setFrom,
+    to,
+    onChangeTo: setTo,
+    chip,
+    onApplyChip: applyChip,
+    exportCsv,
+    isExportingCsv,
+  };
 }
 
 export type ReportsPageModel = ReturnType<typeof useReportsPageModel>;

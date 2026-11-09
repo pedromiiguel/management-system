@@ -20,15 +20,21 @@ import {
 } from '@/main/factories/handlers/financial';
 
 export function useOpenCashRegisterMutation() {
-  return useMutation({ mutationFn: (input: OpenRegisterInput) => makeOpenCashRegister().open(input) });
+  return useMutation({
+    mutationFn: (input: OpenRegisterInput) => makeOpenCashRegister().open(input),
+  });
 }
 
 export function useCreateCashMovementMutation() {
-  return useMutation({ mutationFn: (input: CashMovementInput) => makeCreateCashMovement().create(input) });
+  return useMutation({
+    mutationFn: (input: CashMovementInput) => makeCreateCashMovement().create(input),
+  });
 }
 
 export function useCloseCashRegisterMutation() {
-  return useMutation({ mutationFn: (input: CloseRegisterInput) => makeCloseCashRegister().close(input) });
+  return useMutation({
+    mutationFn: (input: CloseRegisterInput) => makeCloseCashRegister().close(input),
+  });
 }
 
 export function useSettleReceivableMutation() {
@@ -47,7 +53,9 @@ export function usePayPayableMutation() {
 }
 
 export function useCreateFinancialEntryMutation() {
-  return useMutation({ mutationFn: (input: ManualEntryInput) => makeCreateFinancialEntry().create(input) });
+  return useMutation({
+    mutationFn: (input: ManualEntryInput) => makeCreateFinancialEntry().create(input),
+  });
 }
 
 export function useCreateFinancialCategoryMutation() {

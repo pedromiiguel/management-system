@@ -4,7 +4,8 @@ import { RoleModalView } from './RoleModal.view';
 import type { PermissionOption, RoleModalProps } from './RoleModal.types';
 
 export function RoleModal({ onDone, onClose }: RoleModalProps) {
-  const { name, setName, permissions, togglePermission, valid, saving, submit } = useRoleModalModel(onDone);
+  const { name, setName, permissions, togglePermission, valid, saving, submit } =
+    useRoleModalModel(onDone);
 
   const permissionOptions: PermissionOption[] = ALL_PERMISSIONS.map((permission) => ({
     permission,

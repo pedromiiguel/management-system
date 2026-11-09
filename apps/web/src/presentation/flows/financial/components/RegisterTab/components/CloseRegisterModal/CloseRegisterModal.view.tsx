@@ -32,13 +32,23 @@ export function CloseRegisterModalView({
       {difference !== null ? (
         <div className="s-kv is-troco mt-2">
           <span>Diferença</span>
-          <b className={difference === 0 ? 'text-[color:var(--ok)]' : difference < 0 ? 'text-[color:var(--danger)]' : undefined}>
+          <b
+            className={
+              difference === 0
+                ? 'text-[color:var(--ok)]'
+                : difference < 0
+                  ? 'text-[color:var(--danger)]'
+                  : undefined
+            }
+          >
             {formatBRL(difference)}
           </b>
         </div>
       ) : null}
       <div className="flex gap-2 justify-end mt-3.5">
-        <Button ghost onClick={onClose}>Voltar</Button>
+        <Button ghost onClick={onClose}>
+          Voltar
+        </Button>
         <Button primary disabled={!valid || saving} onClick={onSubmit}>
           Fechar caixa
         </Button>

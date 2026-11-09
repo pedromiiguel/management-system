@@ -24,7 +24,11 @@ export function ProductModalView({
   onClose,
 }: ProductModalViewProps) {
   return (
-    <Modal title={product ? `Editar — ${product.name}` : 'Novo produto'} onClose={onClose} width={520}>
+    <Modal
+      title={product ? `Editar — ${product.name}` : 'Novo produto'}
+      onClose={onClose}
+      width={520}
+    >
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <Field label="Nome" error={errors.name?.message}>
           <input autoFocus data-testid="product-name" {...register('name')} />
@@ -105,7 +109,9 @@ export function ProductModalView({
             <span />
           )}
           <div className="flex gap-2">
-            <Button ghost onClick={onClose}>Voltar</Button>
+            <Button ghost onClick={onClose}>
+              Voltar
+            </Button>
             <Button primary type="submit" disabled={saving}>
               {saving ? 'Salvando…' : 'Salvar'}
             </Button>

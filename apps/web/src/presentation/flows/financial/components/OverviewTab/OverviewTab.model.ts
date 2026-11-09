@@ -3,7 +3,20 @@ import { toDateInput } from '@/lib/format';
 import { useFinancialDashboardQuery } from '@/main/factories/queries/financial';
 import { makeGetSalesTotal } from '@/main/factories/handlers/reports';
 
-const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+const MONTH_LABELS = [
+  'Jan',
+  'Fev',
+  'Mar',
+  'Abr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Set',
+  'Out',
+  'Nov',
+  'Dez',
+];
 
 export function useOverviewTabModel() {
   const { data: dashboard } = useFinancialDashboardQuery();
@@ -24,7 +37,10 @@ export function useOverviewTabModel() {
   const monthTotals = monthQueries.map((q) => Number(q.data?.total ?? 0));
   const monthLabels = months.map((m) => MONTH_LABELS[m.from.getMonth()]!);
 
-  const totalByMethod = (dashboard?.byMethodMonth ?? []).reduce((acc, m) => acc + Number(m.total), 0);
+  const totalByMethod = (dashboard?.byMethodMonth ?? []).reduce(
+    (acc, m) => acc + Number(m.total),
+    0,
+  );
   const target = dashboard?.target;
   const targetPct = target?.progress ? Math.round(Number(target.progress) * 100) : null;
 

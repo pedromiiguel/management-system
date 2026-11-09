@@ -1,4 +1,8 @@
-import { CASH_MOVEMENT_LABELS, type CashMovementType, PAYMENT_METHOD_LABELS } from '@beverage/shared';
+import {
+  CASH_MOVEMENT_LABELS,
+  type CashMovementType,
+  PAYMENT_METHOD_LABELS,
+} from '@beverage/shared';
 import { Tag } from '@/presentation/components/Tag';
 import { formatBRL, formatDateTime } from '@/lib/format';
 import { useRegisterTabModel } from './RegisterTab.model';
@@ -33,7 +37,9 @@ export function RegisterTab() {
       formatBRL(r.expectedBalance),
       formatBRL(r.countedBalance),
       Number(r.difference) === 0 ? (
-        <Tag key="d" tone="ok">R$ 0,00</Tag>
+        <Tag key="d" tone="ok">
+          R$ 0,00
+        </Tag>
       ) : (
         <Tag key="d" tone={Number(r.difference) > 0 ? 'accent' : 'danger'}>
           {formatBRL(r.difference)}

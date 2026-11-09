@@ -11,6 +11,7 @@ Management system for a beverage distributor / bar (Costa's Espetos): product ca
 ## Monorepo layout
 
 npm **workspaces** (not turbo/pnpm/nx), Node >=22. Three workspaces:
+
 - `apps/api` — `@beverage/api`, NestJS 11 + Prisma 6 + PostgreSQL
 - `apps/web` — `@beverage/web`, React 19 + Vite 8 + TanStack Router/Query + Tailwind 4
 - `packages/shared` — `@beverage/shared`, Zod schemas, enums, and the permission catalog shared by both apps
@@ -45,10 +46,11 @@ API-only workflows (from `apps/api`): `npm run db:migrate:dev` (create/apply a d
 ### Auth & authorization (the backbone — understand this first)
 
 Two **global** `APP_GUARD`s run on every request, registered in [app.module.ts](apps/api/src/app.module.ts):
+
 1. `JwtAuthGuard` — validates the Bearer token. Opt a route out with `@Public()`.
 2. `PermissionsGuard` — enforces the permission declared by `@RequirePermission(Permission.X)` on the handler.
 
-Authorization is **permission-based, not role-based**. The `Permission` catalog lives in [packages/shared/src/permissions.ts](packages/shared/src/permissions.ts) (`products.read`, `sales.operate`, `sales.void`, …). A `Role` is just a configurable *set* of permissions stored in the DB — new roles (Caixa, Estoquista, Financeiro) can be created without code changes. The seed creates a system `Administrador` role holding `ALL_PERMISSIONS`. When adding a feature, add its permission to `permissions.ts` (with a pt-BR label) and gate the controller with `@RequirePermission`.
+Authorization is **permission-based, not role-based**. The `Permission` catalog lives in [packages/shared/src/permissions.ts](packages/shared/src/permissions.ts) (`products.read`, `sales.operate`, `sales.void`, …). A `Role` is just a configurable _set_ of permissions stored in the DB — new roles (Caixa, Estoquista, Financeiro) can be created without code changes. The seed creates a system `Administrador` role holding `ALL_PERMISSIONS`. When adding a feature, add its permission to `permissions.ts` (with a pt-BR label) and gate the controller with `@RequirePermission`.
 
 Passwords hashed with argon2; JWT via `@nestjs/jwt`.
 

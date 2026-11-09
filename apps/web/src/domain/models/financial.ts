@@ -75,7 +75,11 @@ export interface Payable {
   category: FinancialCategoryRef | null;
 }
 
-export type DashboardRevenueByMethod = { paymentMethod: PaymentMethod; total: number; count: number };
+export type DashboardRevenueByMethod = {
+  paymentMethod: PaymentMethod;
+  total: number;
+  count: number;
+};
 
 export interface Dashboard {
   revenue: { day: number; month: number; year: number };

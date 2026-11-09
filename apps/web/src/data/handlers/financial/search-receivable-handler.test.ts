@@ -5,7 +5,9 @@ import { SearchReceivableHandler } from './search-receivable-handler';
 describe('SearchReceivableHandler', () => {
   it('busca o fiado em aberto via GET /receivables', async () => {
     const receivables = [{ id: 'r1' }];
-    const httpClient: IHttpClient = { request: vi.fn().mockResolvedValue({ statusCode: 200, body: receivables }) };
+    const httpClient: IHttpClient = {
+      request: vi.fn().mockResolvedValue({ statusCode: 200, body: receivables }),
+    };
     const handler = new SearchReceivableHandler(httpClient);
 
     const result = await handler.search();

@@ -21,8 +21,12 @@ export function ManualEntryModalView({
   return (
     <Modal title="Lançamento avulso (FR-35)" onClose={onClose} width={420}>
       <div className="flex gap-2 mb-3">
-        <Chip active={kind === 'EXPENSE'} onClick={() => onChangeKind('EXPENSE')}>Despesa</Chip>
-        <Chip active={kind === 'INCOME'} onClick={() => onChangeKind('INCOME')}>Receita</Chip>
+        <Chip active={kind === 'EXPENSE'} onClick={() => onChangeKind('EXPENSE')}>
+          Despesa
+        </Chip>
+        <Chip active={kind === 'INCOME'} onClick={() => onChangeKind('INCOME')}>
+          Receita
+        </Chip>
       </div>
       <div className="s-label">Valor (R$)</div>
       <div className="s-input mb-2.5">
@@ -47,13 +51,19 @@ export function ManualEntryModalView({
         <select value={categoryId} onChange={(e) => onChangeCategoryId(e.target.value)}>
           <option value="">—</option>
           {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
           ))}
         </select>
       </div>
       <div className="flex gap-2 justify-end mt-3.5">
-        <Button ghost onClick={onClose}>Voltar</Button>
-        <Button primary disabled={!valid || saving} onClick={onSubmit}>Registrar</Button>
+        <Button ghost onClick={onClose}>
+          Voltar
+        </Button>
+        <Button primary disabled={!valid || saving} onClick={onSubmit}>
+          Registrar
+        </Button>
       </div>
     </Modal>
   );

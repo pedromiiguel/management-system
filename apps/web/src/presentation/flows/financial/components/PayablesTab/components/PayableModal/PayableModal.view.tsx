@@ -36,7 +36,9 @@ export function PayableModalView({
         <div className="flex gap-2.5">
           <div className="flex-1">
             <div className="s-label">Fornecedor — opcional</div>
-            <div className="s-input"><input value={supplier} onChange={(e) => onChangeSupplier(e.target.value)} /></div>
+            <div className="s-input">
+              <input value={supplier} onChange={(e) => onChangeSupplier(e.target.value)} />
+            </div>
           </div>
           <div className="w-[130px]">
             <div className="s-label">Valor (R$)</div>
@@ -54,7 +56,11 @@ export function PayableModalView({
           <div className="flex-1">
             <div className="s-label">Vencimento</div>
             <div className="s-input">
-              <input type="date" value={dueDate} onChange={(e) => onChangeDueDate(e.target.value)} />
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => onChangeDueDate(e.target.value)}
+              />
             </div>
           </div>
           <div className="flex-1">
@@ -63,15 +69,21 @@ export function PayableModalView({
               <select value={categoryId} onChange={(e) => onChangeCategoryId(e.target.value)}>
                 <option value="">—</option>
                 {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
         </div>
         <div className="flex gap-2 justify-end">
-          <Button ghost onClick={onClose}>Voltar</Button>
-          <Button primary disabled={!valid || saving} onClick={onSubmit}>Salvar</Button>
+          <Button ghost onClick={onClose}>
+            Voltar
+          </Button>
+          <Button primary disabled={!valid || saving} onClick={onSubmit}>
+            Salvar
+          </Button>
         </div>
       </div>
     </Modal>
