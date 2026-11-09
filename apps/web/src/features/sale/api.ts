@@ -10,7 +10,6 @@ import type {
   SaleStatus,
 } from '@beverage/shared';
 import { http, type Paginated } from '@/lib/http';
-import { endOfDay } from '@/lib/format';
 import { rootKeys, useInvalidate, type Resource } from '@/lib/query-keys';
 import type { Product } from '@/features/products/api';
 
@@ -95,7 +94,7 @@ export const SALE_SETTLEMENT_EFFECTS: Resource[] = [
 export const salesHistoryQuery = (from: string, to: string) =>
   queryOptions({
     queryKey: [...rootKeys.sales, 'history', from, to],
-    queryFn: () => http.get<Paginated<Sale>>('/sales/history', { from, to: endOfDay(to) }),
+    queryFn: () => http.get<Paginated<Sale>>('/sales/history', { from, to }),
   });
 
 /** Estornar: cancela uma venda concluída, devolvendo estoque e valores. */

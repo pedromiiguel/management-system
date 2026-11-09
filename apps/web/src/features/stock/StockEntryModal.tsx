@@ -91,7 +91,8 @@ function EntryForm({
             type="date"
             data-testid="entry-expires-at"
             {...register('expiresAt', {
-              setValueAs: (v: string) => (v ? new Date(v) : undefined),
+              // AAAA-MM-DD vai como está: data sem hora (ver lib/format).
+              setValueAs: (v: string) => v || undefined,
             })}
           />
         </Field>

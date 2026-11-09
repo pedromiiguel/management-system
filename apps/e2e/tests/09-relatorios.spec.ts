@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { storeDateKey } from '@beverage/shared';
 import { resetDatabase } from './support/db';
 import { openReportsTab } from './support/reports';
 import { completeKnownSale } from './support/sale';
@@ -31,15 +32,21 @@ test.describe('Relatórios — navegação e filtro de período', () => {
   test('chips de período (hoje/7 dias/mês) atualizam os campos de data', async ({ page }) => {
     await openReportsTab(page, 'Vendas por período');
     const dateInputs = page.locator('input[type="date"]');
-    const today = new Date().toISOString().slice(0, 10);
+    const today = storeDateKey(new Date());
 
     await page.getByRole('button', { name: 'Hoje', exact: true }).click();
     await expect(dateInputs.nth(0)).toHaveValue(today);
     await expect(dateInputs.nth(1)).toHaveValue(today);
 
-    await page.getByRole('button', { name: '7 dias', exact: true }).click();
+    const week = page.getByRole('button', { name: '7 dias', exact: true });
+    await week.click();
     await expect(dateInputs.nth(1)).toHaveValue(today);
     await expect(dateInputs.nth(0)).not.toHaveValue(today);
+    await expect(week).toHaveClass(/is-active/);
+
+    // Editar uma data à mão desmarca o atalho.
+    await dateInputs.nth(0).fill('2020-01-01');
+    await expect(week).not.toHaveClass(/is-active/);
   });
 
   test('posição de estoque não mostra filtro de período, só exportar CSV', async ({ page }) => {

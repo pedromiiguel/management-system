@@ -14,6 +14,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
 import { Modal, ModalActions } from '@/components/Modal';
+import { PeriodPicker } from '@/components/PeriodPicker';
 import { StatCard } from '@/components/StatCard';
 import { Table } from '@/components/Table';
 import { toast } from '@/components/Toast';
@@ -28,26 +29,7 @@ export function EntriesTab() {
   return (
     <>
       <div className="flex gap-2.5 items-end">
-        <div>
-          <div className="s-label">De</div>
-          <div className="s-input">
-            <input
-              type="date"
-              value={period.from}
-              onChange={(e) => setPeriod({ ...period, from: e.target.value })}
-            />
-          </div>
-        </div>
-        <div>
-          <div className="s-label">Até</div>
-          <div className="s-input">
-            <input
-              type="date"
-              value={period.to}
-              onChange={(e) => setPeriod({ ...period, to: e.target.value })}
-            />
-          </div>
-        </div>
+        <PeriodPicker value={period} onChange={setPeriod} />
         <span className="flex-1" />
         <Button primary onClick={() => setCreating(true)}>
           + Lançamento avulso

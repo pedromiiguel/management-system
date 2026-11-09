@@ -1,16 +1,14 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import { Button } from '@/components/Button';
-import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { monthToDate, toDateInput } from '@/lib/format';
+import { PeriodPicker, type Period } from '@/components/PeriodPicker';
+import { monthToDate } from '@/lib/format';
 import { reportCsv } from './api';
 import { ProductsTab } from './ProductsTab';
 import { SalesTab } from './SalesTab';
 import { StockTab } from './StockTab';
-
-type Period = { from: string; to: string };
 
 /** Cada aba: o que mostra, se depende do período e de onde vem o CSV. */
 const TABS: {
@@ -50,24 +48,6 @@ const TABS: {
   },
 ];
 
-const PRESETS: { id: string; label: string; period: () => Period }[] = [
-  {
-    id: 'today',
-    label: 'Hoje',
-    period: () => ({ from: toDateInput(new Date()), to: toDateInput(new Date()) }),
-  },
-  {
-    id: 'week',
-    label: '7 dias',
-    period: () => {
-      const start = new Date();
-      start.setDate(start.getDate() - 6);
-      return { from: toDateInput(start), to: toDateInput(new Date()) };
-    },
-  },
-  { id: 'month', label: 'Mês atual', period: () => monthToDate() },
-];
-
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -79,7 +59,6 @@ function downloadBlob(blob: Blob, filename: string) {
 
 export function ReportsPage() {
   const [tabId, setTabId] = useState('sales');
-  const [preset, setPreset] = useState('month');
   const [period, setPeriod] = useState(monthToDate);
   const tab = TABS.find((t) => t.id === tabId)!;
 
@@ -101,38 +80,7 @@ export function ReportsPage() {
         <SegmentedControl items={TABS} active={tab.id} onChange={setTabId} />
         {tab.usesPeriod ? (
           <div className="flex gap-2.5 items-end">
-            <div>
-              <div className="s-label">De</div>
-              <div className="s-input w-[130px]">
-                <input
-                  type="date"
-                  value={period.from}
-                  onChange={(e) => setPeriod({ ...period, from: e.target.value })}
-                />
-              </div>
-            </div>
-            <div>
-              <div className="s-label">Até</div>
-              <div className="s-input w-[130px]">
-                <input
-                  type="date"
-                  value={period.to}
-                  onChange={(e) => setPeriod({ ...period, to: e.target.value })}
-                />
-              </div>
-            </div>
-            {PRESETS.map((p) => (
-              <Chip
-                key={p.id}
-                active={preset === p.id}
-                onClick={() => {
-                  setPreset(p.id);
-                  setPeriod(p.period());
-                }}
-              >
-                {p.label}
-              </Chip>
-            ))}
+            <PeriodPicker value={period} onChange={setPeriod} />
             <span className="flex-1" />
             {exportButton}
             <Button ghost onClick={() => window.print()}>

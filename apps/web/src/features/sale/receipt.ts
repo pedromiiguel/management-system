@@ -3,6 +3,7 @@ import {
   PAYMENT_METHOD_LABELS,
   saleCode,
   SERVICE_FEE_PERCENT,
+  STORE_TIME_ZONE,
 } from '@beverage/shared';
 import { formatBRLText as brl, formatDecimal } from '@/lib/format';
 import type { Sale } from './api';
@@ -81,6 +82,7 @@ export const STORE: { name: string; cnpj?: string } = {
 
 export function buildCupom(sale: Sale): string {
   const emittedAt = new Date(sale.completedAt ?? Date.now()).toLocaleString('pt-BR', {
+    timeZone: STORE_TIME_ZONE,
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

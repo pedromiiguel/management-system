@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { dateOnlyKey, daysBetweenKeys } from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
@@ -10,7 +11,7 @@ import { Screen } from '@/components/Screen';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
 import { toast } from '@/components/Toast';
-import { formatBRL } from '@/lib/format';
+import { formatBRL, todayKey } from '@/lib/format';
 import { stockAlertsQuery, type StockAlerts } from '@/features/stock/api';
 import { StockEntryModal } from '@/features/stock/StockEntryModal';
 import { CATALOG_PAGE_SIZE, catalogQuery, useDeleteProduct, type Product } from './api';
@@ -25,7 +26,7 @@ function expiryLabels(alerts: StockAlerts | undefined): Map<string, string> {
   const labels = new Map<string, string>();
   for (const batch of alerts?.expiring ?? []) {
     if (batch.expiresAt && !labels.has(batch.product.id)) {
-      const days = Math.ceil((new Date(batch.expiresAt).getTime() - Date.now()) / 86_400_000);
+      const days = daysBetweenKeys(todayKey(), dateOnlyKey(batch.expiresAt));
       labels.set(batch.product.id, days <= 0 ? 'vencido' : `vence em ${days}d`);
     }
   }

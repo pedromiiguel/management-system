@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { STORE_TIME_ZONE } from '@beverage/shared';
 import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
@@ -21,7 +22,11 @@ type Tab = (typeof TABS)[number]['id'];
 export function FinancialPage() {
   const [tab, setTab] = useState<Tab>('overview');
   const { Component } = TABS.find((t) => t.id === tab)!;
-  const monthLabel = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const monthLabel = new Date().toLocaleDateString('pt-BR', {
+    timeZone: STORE_TIME_ZONE,
+    month: 'long',
+    year: 'numeric',
+  });
 
   return (
     <Screen title="Financeiro" topRight={<Chip active>{monthLabel}</Chip>}>

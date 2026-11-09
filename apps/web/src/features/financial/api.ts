@@ -15,7 +15,6 @@ import type {
   SettleReceivableInput,
 } from '@beverage/shared';
 import { http } from '@/lib/http';
-import { endOfDay } from '@/lib/format';
 import { rootKeys, useInvalidate } from '@/lib/query-keys';
 import type { Customer, Sale } from '@/features/sale/api';
 
@@ -114,7 +113,7 @@ export const dashboardQuery = () =>
 export const cashFlowQuery = (from: string, to: string) =>
   queryOptions({
     queryKey: [...rootKeys.financial, 'cash-flow', from, to],
-    queryFn: () => http.get<CashFlow>('/financial/cash-flow', { from, to: endOfDay(to) }),
+    queryFn: () => http.get<CashFlow>('/financial/cash-flow', { from, to }),
   });
 
 export const categoriesQuery = () =>

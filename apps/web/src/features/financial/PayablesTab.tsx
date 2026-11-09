@@ -3,7 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { FinancialCategoryKind, payableSchema, type PayableInput } from '@beverage/shared';
+import {
+  dateOnlyKey,
+  FinancialCategoryKind,
+  payableSchema,
+  type PayableInput,
+} from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Field } from '@/components/Field';
@@ -11,13 +16,14 @@ import { Modal } from '@/components/Modal';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
 import { toast } from '@/components/Toast';
-import { formatBRL, formatDate, moneyText, optionalText, toDateInput } from '@/lib/format';
+import { formatBRL, formatDateOnly, moneyText, optionalText, todayKey } from '@/lib/format';
 import { categoriesQuery, payablesQuery, useCreatePayable, usePayPayable } from './api';
 
 export function PayablesTab() {
   const [creating, setCreating] = useState(false);
   const { data: payables = [] } = useQuery(payablesQuery());
   const pay = usePayPayable();
+  const today = todayKey();
 
   return (
     <Card pad={8} className="flex-1 min-h-0 overflow-auto">
@@ -39,10 +45,10 @@ export function PayablesTab() {
             p.description,
             p.supplier ?? '—',
             p.category?.name ?? '—',
-            new Date(p.dueDate) < new Date() ? (
-              <Tag tone="danger">{formatDate(p.dueDate)}</Tag>
+            dateOnlyKey(p.dueDate) < today ? (
+              <Tag tone="danger">{formatDateOnly(p.dueDate)}</Tag>
             ) : (
-              formatDate(p.dueDate)
+              formatDateOnly(p.dueDate)
             ),
             <b>{formatBRL(p.amount)}</b>,
             <Button
@@ -86,7 +92,7 @@ function PayableModal({ onClose }: { onClose: () => void }) {
       description: '',
       supplier: '',
       amount: '',
-      dueDate: toDateInput(new Date()),
+      dueDate: todayKey(),
       categoryId: '',
     },
   });

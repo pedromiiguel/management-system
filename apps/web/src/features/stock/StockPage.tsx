@@ -10,7 +10,7 @@ import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
-import { formatDate, formatDateTime } from '@/lib/format';
+import { formatDateOnly, formatDateTime } from '@/lib/format';
 import { AdjustModal } from './AdjustModal';
 import { stockAlertsQuery, stockMovementsQuery } from './api';
 import { StockEntryModal } from './StockEntryModal';
@@ -95,7 +95,7 @@ export function StockPage() {
                 cells: [
                   b.product.name,
                   b.batch ?? '—',
-                  <Tag tone="warn">{formatDate(b.expiresAt)}</Tag>,
+                  <Tag tone="warn">{formatDateOnly(b.expiresAt)}</Tag>,
                   b.quantity,
                 ],
               }))}

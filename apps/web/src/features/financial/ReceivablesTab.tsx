@@ -12,7 +12,7 @@ import { Modal } from '@/components/Modal';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
 import { toast } from '@/components/Toast';
-import { formatBRL, formatDate } from '@/lib/format';
+import { formatBRL, formatDate, formatDateOnly } from '@/lib/format';
 import { receivablesQuery, useSettleReceivable, type Receivable } from './api';
 
 const SETTLE_METHODS: SettleReceivableInput['paymentMethod'][] = [
@@ -57,7 +57,7 @@ export function ReceivablesTab() {
             r.customer.name,
             r.sale ? `#${saleCode(r.sale.id)}` : '—',
             formatDate(r.createdAt),
-            formatDate(r.dueDate),
+            formatDateOnly(r.dueDate),
             <b key="v">{formatBRL(r.amount)}</b>,
             <Button key="b" ghost onClick={() => setSettling(r)}>
               Receber

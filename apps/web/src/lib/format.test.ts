@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { endOfDay, maskBRL, moneyText, parseMoney } from './format';
+import {
+  formatDateOnly,
+  formatDateTime,
+  maskBRL,
+  monthToDate,
+  moneyText,
+  parseMoney,
+} from './format';
 
 describe('parseMoney', () => {
   it.each([
@@ -40,6 +47,16 @@ describe('moneyText', () => {
   });
 });
 
-it('endOfDay appends the last second of the day', () => {
-  expect(endOfDay('2026-01-31')).toBe('2026-01-31T23:59:59');
+describe('datas (regra do dia da loja)', () => {
+  it('data sem hora não desloca pelo fuso', () => {
+    expect(formatDateOnly('2026-11-09T00:00:00.000Z')).toBe('09/11/2026');
+  });
+
+  it('instante é mostrado no fuso da loja', () => {
+    expect(formatDateTime('2026-11-10T01:30:00Z')).toBe('09/11, 22:30');
+  });
+
+  it('mês até hoje parte do dia 1º', () => {
+    expect(monthToDate('2026-11-09')).toEqual({ from: '2026-11-01', to: '2026-11-09' });
+  });
 });
