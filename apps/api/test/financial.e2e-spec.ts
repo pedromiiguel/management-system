@@ -197,7 +197,7 @@ describe('Financial', () => {
       expect(flow.body.outflows).toBe(15);
     });
 
-    it('lista as categorias financeiras do seed base', async () => {
+    it('lista as categorias do sistema, criadas pela migração', async () => {
       const res = await admin().get('/api/financial/categories').expect(200);
       expect(res.body.length).toBeGreaterThanOrEqual(8);
       expect(

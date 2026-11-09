@@ -1,21 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import * as argon2 from 'argon2';
-import {
-  ALL_PERMISSIONS,
-  DEFAULT_SETTINGS,
-  FinancialCategoryKind,
-  SETTING_KEYS,
-  SystemCategory,
-} from '@beverage/shared';
+import { ALL_PERMISSIONS, FinancialCategoryKind } from '@beverage/shared';
 import { ADMIN, SEED_IDS } from './seed-data';
 
-const CATEGORIES: { name: string; kind: FinancialCategoryKind; code?: SystemCategory }[] = [
-  { name: 'Vendas', kind: FinancialCategoryKind.INCOME, code: SystemCategory.SALES },
-  {
-    name: 'Recebimento de fiado',
-    kind: FinancialCategoryKind.INCOME,
-    code: SystemCategory.RECEIVABLE_SETTLEMENT,
-  },
+/**
+ * Categorias sugeridas, editáveis pelo usuário. As categorias do sistema
+ * (Vendas, Recebimento de fiado — `SystemCategory`) vêm da migração
+ * 20261109120100, não daqui: o banco nunca fica sem elas, com ou sem seed.
+ */
+const CATEGORIES: { name: string; kind: FinancialCategoryKind }[] = [
   { name: 'Outras receitas', kind: FinancialCategoryKind.INCOME },
   { name: 'Fornecedores', kind: FinancialCategoryKind.EXPENSE },
   { name: 'Aluguel', kind: FinancialCategoryKind.EXPENSE },
@@ -26,7 +19,8 @@ const CATEGORIES: { name: string; kind: FinancialCategoryKind; code?: SystemCate
 
 /**
  * Dados base de qualquer instalação (inclusive produção). Idempotente: nunca
- * sobrescreve o que já existe.
+ * sobrescreve o que já existe. Configurações não são semeadas: sem linha no
+ * banco, `SettingsService` usa `DEFAULT_SETTINGS`.
  */
 export async function seedBase(db: PrismaClient) {
   // O papel de sistema recebe o catálogo inteiro em runtime; a lista gravada é só informativa.
@@ -54,21 +48,7 @@ export async function seedBase(db: PrismaClient) {
   });
 
   for (const c of CATEGORIES) {
-    const existing = await db.financialCategory.findFirst({
-      where: c.code ? { OR: [{ code: c.code }, { name: c.name }] } : { name: c.name },
-    });
-    if (!existing) {
-      await db.financialCategory.create({
-        data: { name: c.name, kind: c.kind, code: c.code, system: !!c.code },
-      });
-    }
-  }
-
-  for (const key of SETTING_KEYS) {
-    await db.setting.upsert({
-      where: { key },
-      update: {},
-      create: { key, value: JSON.stringify(DEFAULT_SETTINGS[key]) },
-    });
+    const existing = await db.financialCategory.findFirst({ where: { name: c.name } });
+    if (!existing) await db.financialCategory.create({ data: c });
   }
 }

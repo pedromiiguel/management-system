@@ -85,7 +85,7 @@ test.describe('Configurações — Categorias financeiras', () => {
   test.beforeAll(() => resetDatabase());
   test.beforeEach(async ({ page }) => openSettingsTab(page, 'Categorias financeiras'));
 
-  test('lista as categorias padrão do seed com a origem "sistema"', async ({ page }) => {
+  test('lista as categorias do sistema (migração) com a origem "sistema"', async ({ page }) => {
     const row = page.locator('.s-tr').filter({ hasText: 'Vendas' });
     await expect(row.getByText('sistema')).toBeVisible();
   });

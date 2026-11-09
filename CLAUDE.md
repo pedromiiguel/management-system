@@ -34,7 +34,7 @@ npm test               # api jest (unit) + shared vitest + web vitest — no sha
 npm run test:e2e:api   # api e2e (jest --runInBand, real Postgres)
 npm run test:e2e       # Playwright (apps/e2e); starts/reuses dev:api + dev:web on 3000/5173
 npm run db:migrate     # prisma migrate deploy
-npm run db:seed        # base seed only (admin, system role/categories, default settings) — idempotent
+npm run db:seed        # base seed only (admin + system role, suggested categories) — idempotent
 npm run db:seed:fixtures  # base + example data (products, customer, open register, fiado)
 npm run db:reset       # migrate reset + seed with fixtures (used by Playwright)
 ```
@@ -69,10 +69,10 @@ One NestJS module per domain under `apps/api/src/modules/` (auth, products, stoc
 **Ledgers own their tables** — other services call them inside their own transaction (`tx`), never write those tables directly:
 
 - `StockLedger` (`stock/stock-ledger.ts`) — only writer of `product.currentStock`, `stock_movement`, `product_batch`, `stock_movement_batch`: `entry`, `adjust`, `exitForSale` (FEFO), `returnForVoid` (back to the same batches), `checkAvailability` (the one "insufficient stock × `stockPolicy`" decision), `deleteProductRows`.
-- `CashLedger` (`cash-register/cash-ledger.ts`) — only writer of `cash_movement` and owner of "the open register": sale receipts, void refunds (always to the register open now), drawer movements, expenses. System financial categories are found by stable `code` (`SystemCategory`), not name.
+- `CashLedger` (`cash-register/cash-ledger.ts`) — only writer of `cash_movement` and owner of "the open register": sale receipts, void refunds (always to the register open now), drawer movements, expenses. System financial categories are found by stable `code` (`SystemCategory`), not name; they are created by a migration (not the seed), so every database has them.
 - `ReceivablesService` owns fiado (`createForSale` / `cancelForSale` / `openBalances`); `SalesQuery` (`sales/sales-query.ts`) owns "completed sale in period" and the single revenue definition used by dashboard and reports.
 
-`SettingsService` is the source of runtime-configurable behavior: keys, types and defaults come from `settingsSchema` / `DEFAULT_SETTINGS` in shared, and each DB value is validated on read (falls back to default). E.g. `stockPolicy` (BLOCK vs WARN) is read at sale time.
+`SettingsService` is the source of runtime-configurable behavior: keys, types and defaults come from `settingsSchema` / `DEFAULT_SETTINGS` in shared, and each DB value is validated on read (falls back to default). Setting rows are not seeded — a missing row means the default; a row is written only when someone saves that setting. E.g. `stockPolicy` (BLOCK vs WARN) is read at sale time.
 
 ### Money / Decimal
 

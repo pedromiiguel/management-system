@@ -4,7 +4,7 @@ import { seedFixtures } from './seed/fixtures';
 import { ADMIN } from './seed/seed-data';
 
 /**
- * `prisma db seed` → só os dados base (papel/admin, categorias, configurações).
+ * `prisma db seed` → só os dados base (papel/admin e categorias sugeridas).
  * `prisma db seed -- --fixtures` → também os dados de exemplo/teste.
  */
 async function main() {
