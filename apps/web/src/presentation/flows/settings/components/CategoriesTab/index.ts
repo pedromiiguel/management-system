@@ -1,1 +1,0 @@
-export { CategoriesTab } from './CategoriesTab';

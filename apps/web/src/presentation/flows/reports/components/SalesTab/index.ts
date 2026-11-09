@@ -1,1 +1,0 @@
-export { SalesTab } from './SalesTab';

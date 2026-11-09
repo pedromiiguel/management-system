@@ -1,14 +1,12 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
-import { isAuthenticated } from '../lib/auth';
-import { LoginPage } from '../presentation/flows/login/LoginPage';
-
-const loginSearchSchema = z.object({ redirect: z.string().optional() });
+import { LoginPage } from '@/features/auth/LoginPage';
+import { getSession, HOME_PATH } from '@/lib/session';
 
 export const Route = createFileRoute('/login')({
-  validateSearch: loginSearchSchema,
+  validateSearch: z.object({ redirect: z.string().optional() }),
   beforeLoad: () => {
-    if (isAuthenticated()) throw redirect({ to: '/sale' });
+    if (getSession()) throw redirect({ to: HOME_PATH });
   },
   component: LoginPage,
 });
