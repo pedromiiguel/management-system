@@ -24,6 +24,8 @@ export function effectivePermissions(role: {
 @Injectable()
 export class SessionService {
   private readonly cache = new Map<string, { user: AuthUser | null; expiresAt: number }>();
+  /** Muda a cada `invalidate()`: leitura iniciada antes dele não entra no cache. */
+  private generation = 0;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -32,17 +34,21 @@ export class SessionService {
     const cached = this.cache.get(userId);
     if (cached && cached.expiresAt > Date.now()) return cached.user;
 
+    const generation = this.generation;
     const row = await this.prisma.user.findUnique({
       where: { id: userId },
       include: { role: true },
     });
     const user = row?.active ? toAuthUser(row) : null;
-    this.cache.set(userId, { user, expiresAt: Date.now() + CACHE_TTL_MS });
+    if (generation === this.generation) {
+      this.cache.set(userId, { user, expiresAt: Date.now() + CACHE_TTL_MS });
+    }
     return user;
   }
 
   /** Chamado por quem altera usuários ou papéis. */
   invalidate() {
+    this.generation += 1;
     this.cache.clear();
   }
 }
