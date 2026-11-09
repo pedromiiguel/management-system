@@ -12,6 +12,8 @@ interface SalesTotals {
 
 export interface SalesReport extends SalesTotals {
   days: (SalesTotals & { day: string })[];
+  /** Vendas estornadas no período. */
+  voidedCount: number;
 }
 
 export interface ProductPerformance {

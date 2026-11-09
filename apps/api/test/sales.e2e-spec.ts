@@ -314,7 +314,7 @@ describe('Sales', () => {
         .expect(200);
       const dashboard = await admin().get('/api/financial/dashboard').expect(200);
 
-      expect(report.body).toMatchObject({ count: 1, revenue: 20, serviceFee: 2 });
+      expect(report.body).toMatchObject({ count: 1, revenue: 20, serviceFee: 2, voidedCount: 1 });
       expect(report.body.days).toEqual([{ day: today, count: 1, revenue: 20, serviceFee: 2 }]);
       expect(dashboard.body.revenue.day).toBe(20);
       expect(dashboard.body.revenue.month).toBe(20);

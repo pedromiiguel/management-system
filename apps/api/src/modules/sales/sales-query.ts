@@ -44,6 +44,13 @@ export class SalesQuery {
     return splitTotal(agg._sum.total, agg._sum.serviceFee, agg._count);
   }
 
+  /** Vendas estornadas no período (pelo instante do estorno). */
+  voidedCount(period: Period): Promise<number> {
+    return this.prisma.sale.count({
+      where: { status: SaleStatus.VOIDED, voidedAt: { gte: period.from, lte: period.to } },
+    });
+  }
+
   /** Quanto foi cobrado por forma de pagamento: `total` bruto, com a Taxa de serviço. */
   async chargedByMethod(period: Period) {
     const groups = await this.prisma.sale.groupBy({

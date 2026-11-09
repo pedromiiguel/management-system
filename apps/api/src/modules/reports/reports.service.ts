@@ -12,13 +12,18 @@ export class ReportsService {
 
   /**
    * FR-37: vendas por período, agrupadas pelo dia da loja: receita (sem Taxa
-   * de serviço — ver SalesQuery) e a taxa, à parte, por dia e no período.
+   * de serviço — ver SalesQuery) e a taxa, à parte, por dia e no período;
+   * e quantas vendas foram estornadas no período.
    */
   async salesByPeriod(period: Period) {
-    const byDay = await this.sales.totalsBy(period, storeDateKey);
+    const [byDay, voidedCount] = await Promise.all([
+      this.sales.totalsBy(period, storeDateKey),
+      this.sales.voidedCount(period),
+    ]);
     const days = byDay.map(({ key, ...totals }) => ({ day: key, ...totals }));
     return {
       days,
+      voidedCount,
       count: days.reduce((acc, d) => acc + d.count, 0),
       revenue: days.reduce((acc, d) => acc.add(d.revenue), new Decimal(0)),
       serviceFee: days.reduce((acc, d) => acc.add(d.serviceFee), new Decimal(0)),

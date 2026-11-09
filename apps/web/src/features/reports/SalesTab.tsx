@@ -11,6 +11,7 @@ import { BarChart } from '@/components/BarChart';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Modal } from '@/components/Modal';
+import { Pager } from '@/components/Pager';
 import { StatCard } from '@/components/StatCard';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
@@ -22,14 +23,14 @@ import { salesReportQuery } from './api';
 
 export function SalesTab({ from, to }: { from: string; to: string }) {
   const { data: report } = useQuery(salesReportQuery(from, to));
-  const { data: history } = useQuery(salesHistoryQuery(from, to));
+  const [page, setPage] = useState(1);
+  const { data: history } = useQuery(salesHistoryQuery(from, to, page));
   const sales = history?.items ?? [];
   const days = report?.days ?? [];
   const [detail, setDetail] = useState<Sale | null>(null);
   const [voiding, setVoiding] = useState<Sale | null>(null);
   const voidSale = useVoidSale();
 
-  const voided = sales.filter((s) => s.status === SaleStatus.VOIDED).length;
   const ticket = report && report.count > 0 ? report.revenue / report.count : 0;
 
   const confirmVoid = (sale: Sale) =>
@@ -55,7 +56,11 @@ export function SalesTab({ from, to }: { from: string; to: string }) {
         />
         <StatCard label="Nº de vendas" value={report?.count ?? 0} />
         <StatCard label="Ticket médio" value={formatBRL(ticket)} />
-        <StatCard label="Estornadas" value={voided} sub="itens devolvidos ao estoque" />
+        <StatCard
+          label="Estornadas"
+          value={report?.voidedCount ?? 0}
+          sub="itens devolvidos ao estoque"
+        />
       </div>
       <Card>
         <div className="s-card-title">
@@ -102,6 +107,11 @@ export function SalesTab({ from, to }: { from: string; to: string }) {
           }))}
         />
       </Card>
+      {history && (
+        <div className="flex justify-end">
+          <Pager page={page} total={history.total} perPage={history.perPage} onChange={setPage} />
+        </div>
+      )}
       {detail && <SaleDetailModal sale={detail} onClose={() => setDetail(null)} />}
       {voiding && (
         <Modal title={`Estornar venda #${saleCode(voiding.id)}?`} onClose={() => setVoiding(null)}>

@@ -7,6 +7,7 @@ import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
 import { Confirm } from '@/components/Confirm';
 import { IconButton } from '@/components/IconButton';
+import { Pager } from '@/components/Pager';
 import { Screen } from '@/components/Screen';
 import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
@@ -163,19 +164,7 @@ export function ProductsPage() {
           <span className="s-dim text-[12.5px]">
             Produtos com venda registrada não são excluídos — apenas desativados.
           </span>
-          <span className="flex gap-1.5 items-center">
-            <Button ghost disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-              ‹
-            </Button>
-            <span className="s-dim text-[13px]">página {page}</span>
-            <Button
-              ghost
-              disabled={total <= page * CATALOG_PAGE_SIZE}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              ›
-            </Button>
-          </span>
+          <Pager page={page} total={total} perPage={CATALOG_PAGE_SIZE} onChange={setPage} />
         </div>
       </div>
 

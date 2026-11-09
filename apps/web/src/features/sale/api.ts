@@ -91,10 +91,10 @@ export const SALE_SETTLEMENT_EFFECTS: Resource[] = [
   'receivables',
 ];
 
-export const salesHistoryQuery = (from: string, to: string) =>
+export const salesHistoryQuery = (from: string, to: string, page: number) =>
   queryOptions({
-    queryKey: [...rootKeys.sales, 'history', from, to],
-    queryFn: () => http.get<Paginated<Sale>>('/sales/history', { from, to }),
+    queryKey: [...rootKeys.sales, 'history', from, to, page],
+    queryFn: () => http.get<Paginated<Sale>>('/sales/history', { from, to, page }),
   });
 
 /** Estornar: cancela uma venda concluída, devolvendo estoque e valores. */

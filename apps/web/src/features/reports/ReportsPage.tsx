@@ -22,7 +22,8 @@ const TABS: {
     id: 'sales',
     label: 'Vendas por período',
     usesPeriod: true,
-    render: (p) => <SalesTab from={p.from} to={p.to} />,
+    // key: período novo volta o histórico à página 1
+    render: (p) => <SalesTab key={`${p.from}|${p.to}`} from={p.from} to={p.to} />,
     csv: (p) => reportCsv.sales(p.from, p.to),
   },
   {
