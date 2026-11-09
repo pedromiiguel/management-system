@@ -1,78 +1,48 @@
-import { PaymentMethod } from '@beverage/shared';
+import { DiscountType } from '@beverage/shared';
 import { describe, expect, it } from 'vitest';
 import { makeItem, makeSale } from './fixtures';
-import { discountAmount, parseScan, previewCheckout, saleCode, SERVICE_FEE_LABEL } from './sale';
+import { parseScan, salePricing } from './sale';
 
-const twoItems = makeSale({
-  subtotal: 37,
-  total: 37,
-  items: [
-    makeItem({ id: 'a', quantity: 3, unitPrice: 9 }),
-    makeItem({ id: 'b', quantity: 2, unitPrice: 5 }),
-  ],
-});
+const items = [
+  makeItem({ id: 'a', quantity: 3, unitPrice: 9 }),
+  makeItem({ id: 'b', quantity: 2, unitPrice: 5 }),
+];
 
-describe('previewCheckout', () => {
-  it('sums items and counts units and products', () => {
-    const preview = previewCheckout(twoItems, {
-      serviceFee: false,
-      payment: PaymentMethod.PIX,
-      received: NaN,
-    });
-    expect(preview).toEqual({ fee: 0, total: 37, change: null, itemCount: 5, productCount: 2 });
-  });
-
-  it('adds the service fee over the item subtotal, rounded to cents', () => {
+describe('salePricing', () => {
+  it('reads discount and service fee from the sale as the server stores it', () => {
     const sale = makeSale({
-      subtotal: 33.33,
-      total: 33.33,
+      items,
+      discountType: DiscountType.PERCENT,
+      discountValue: 10,
+      serviceFee: 3.7,
+    });
+    expect(salePricing(sale)).toEqual({
+      subtotal: 37,
+      discount: 3.7,
+      serviceFee: 3.7,
+      total: 37,
+      change: null,
+    });
+  });
+
+  it('treats a null serviceFee as "fee off" and an amount discount as reais', () => {
+    const sale = makeSale({ items, discountType: DiscountType.AMOUNT, discountValue: 7 });
+    expect(salePricing(sale)).toMatchObject({ discount: 7, serviceFee: null, total: 30 });
+  });
+
+  it('computes the change of a received amount against the amount due', () => {
+    const sale = makeSale({ items, serviceFee: 3.7 });
+    expect(salePricing(sale, 50).change).toBe(9.3);
+    expect(salePricing(sale, 20).change).toBe(-20.7);
+  });
+
+  it('agrees with the total the server persisted (one pricing rule)', () => {
+    const sale = makeSale({
       items: [makeItem({ quantity: 1, unitPrice: 33.33 })],
+      serviceFee: 3.33,
+      total: 36.66,
     });
-    const preview = previewCheckout(sale, {
-      serviceFee: true,
-      payment: PaymentMethod.CARD,
-      received: 0,
-    });
-    expect(preview.fee).toBe(3.33);
-    expect(preview.total).toBeCloseTo(36.66, 2);
-  });
-
-  it('keeps the discount from the server total and charges the fee on the gross subtotal', () => {
-    const discounted = { ...twoItems, total: 30 };
-    const preview = previewCheckout(discounted, {
-      serviceFee: true,
-      payment: PaymentMethod.CARD,
-      received: 0,
-    });
-    expect(preview.fee).toBe(3.7);
-    expect(preview.total).toBeCloseTo(33.7, 2);
-  });
-
-  it('computes change only for cash', () => {
-    const cash = previewCheckout(twoItems, {
-      serviceFee: false,
-      payment: PaymentMethod.CASH,
-      received: 50,
-    });
-    expect(cash.change).toBe(13);
-    const short = previewCheckout(twoItems, {
-      serviceFee: false,
-      payment: PaymentMethod.CASH,
-      received: 20,
-    });
-    expect(short.change).toBe(-17);
-    const invalid = previewCheckout(twoItems, {
-      serviceFee: false,
-      payment: PaymentMethod.CASH,
-      received: NaN,
-    });
-    expect(invalid.change).toBeNull();
-  });
-
-  it('handles no sale yet', () => {
-    expect(
-      previewCheckout(null, { serviceFee: true, payment: PaymentMethod.CASH, received: 0 }),
-    ).toEqual({ fee: 0, total: 0, change: 0, itemCount: 0, productCount: 0 });
+    expect(salePricing(sale).total).toBe(sale.total);
   });
 });
 
@@ -87,20 +57,5 @@ describe('parseScan', () => {
 
   it('ignores blank input', () => {
     expect(parseScan('   ')).toBeNull();
-  });
-});
-
-describe('sale helpers', () => {
-  it('saleCode is the last 6 chars upper-cased', () => {
-    expect(saleCode('cm0000000000000000abc123')).toBe('ABC123');
-  });
-
-  it('discountAmount is what the subtotal lost, ignoring the service fee', () => {
-    expect(discountAmount({ subtotal: 100, total: 99, serviceFee: 9 })).toBe(10);
-    expect(discountAmount({ subtotal: 50, total: 50, serviceFee: null })).toBe(0);
-  });
-
-  it('SERVICE_FEE_LABEL comes from the shared rate', () => {
-    expect(SERVICE_FEE_LABEL).toBe('10%');
   });
 });

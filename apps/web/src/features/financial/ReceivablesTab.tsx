@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { PAYMENT_METHOD_LABELS, PaymentMethod, type SettleReceivableInput } from '@beverage/shared';
+import {
+  PAYMENT_METHOD_LABELS,
+  PaymentMethod,
+  saleCode,
+  type SettleReceivableInput,
+} from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Modal } from '@/components/Modal';
@@ -8,7 +13,6 @@ import { Table } from '@/components/Table';
 import { Tag } from '@/components/Tag';
 import { toast } from '@/components/Toast';
 import { formatBRL, formatDate } from '@/lib/format';
-import { saleCode } from '@/features/sale/sale';
 import { receivablesQuery, useSettleReceivable, type Receivable } from './api';
 
 const SETTLE_METHODS: SettleReceivableInput['paymentMethod'][] = [

@@ -1,7 +1,12 @@
-import { PAYMENT_METHOD_LABELS } from '@beverage/shared';
+import {
+  DiscountType,
+  PAYMENT_METHOD_LABELS,
+  saleCode,
+  SERVICE_FEE_PERCENT,
+} from '@beverage/shared';
 import { formatDecimal } from '@/lib/format';
 import type { Sale } from './api';
-import { discountAmount, saleCode, SERVICE_FEE_LABEL } from './sale';
+import { salePricing } from './sale';
 
 /**
  * Cupom não-fiscal (FR-23): texto puro de 40 colunas para impressora térmica
@@ -113,15 +118,17 @@ export function buildCupom(sale: Sale): string {
 
   lines.push('-'.repeat(WIDTH), kv('SUBTOTAL', brl(sale.subtotal)));
 
-  const discount = discountAmount(sale);
-  if (discount > 0.005) {
+  const { discount } = salePricing(sale);
+  if (discount > 0) {
     const label =
-      sale.discountType === 'PERCENT' ? `DESCONTO (${sale.discountValue}%)` : 'DESCONTO';
+      sale.discountType === DiscountType.PERCENT ? `DESCONTO (${sale.discountValue}%)` : 'DESCONTO';
     lines.push(kv(label, `-${brl(discount)}`));
   }
 
-  const serviceFee = sale.serviceFee ?? 0;
-  if (serviceFee > 0) lines.push(kv(`TAXA DE SERVICO (${SERVICE_FEE_LABEL})`, brl(serviceFee)));
+  // Sem acento: a impressora térmica pode não ter "Ç" na tabela de caracteres padrão.
+  if (sale.serviceFee) {
+    lines.push(kv(`TAXA DE SERVICO (${SERVICE_FEE_PERCENT}%)`, brl(sale.serviceFee)));
+  }
 
   lines.push(kv('TOTAL GERAL', brl(sale.total)), '-'.repeat(WIDTH));
 

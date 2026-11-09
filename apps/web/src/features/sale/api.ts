@@ -5,6 +5,7 @@ import type {
   CompleteSaleInput,
   CustomerInput,
   DiscountInput,
+  DiscountType,
   PaymentMethod,
   SaleStatus,
 } from '@beverage/shared';
@@ -34,17 +35,20 @@ export interface Sale {
   id: string;
   status: SaleStatus;
   subtotal: number;
+  /** Valor devido — já inclui a Taxa de serviço quando ligada. */
   total: number;
-  discountType: DiscountInput['type'] | null;
+  discountType: DiscountType | null;
   discountValue: number | null;
   paymentMethod: PaymentMethod | null;
   amountPaid: number | null;
   change: number | null;
+  /** Taxa de serviço; null = desligada. */
   serviceFee: number | null;
   withInvoice: boolean;
   openedAt: string;
   completedAt: string | null;
   cancelledAt: string | null;
+  voidedAt: string | null;
   items: SaleItem[];
   customer: Pick<Customer, 'id' | 'name'> | null;
   operator: { id: string; name: string };
@@ -64,6 +68,8 @@ export const saleApi = {
     http.delete<Sale>(`/sales/${saleId}/items/${itemId}`),
   setDiscount: (saleId: string, discount: DiscountInput | null) =>
     http.put<Sale>(`/sales/${saleId}/discount`, discount),
+  setServiceFee: (saleId: string, enabled: boolean) =>
+    http.put<Sale>(`/sales/${saleId}/service-fee`, { enabled }),
   cancel: (saleId: string) => http.post<unknown>(`/sales/${saleId}/cancel`),
   complete: (saleId: string, input: CompleteSaleInput) =>
     http.post<Sale>(`/sales/${saleId}/complete`, input),

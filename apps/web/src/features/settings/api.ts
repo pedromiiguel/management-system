@@ -1,15 +1,7 @@
 import { queryOptions, useMutation } from '@tanstack/react-query';
-import type { PaymentMethod, SettingsInput, StockPolicy } from '@beverage/shared';
+import type { AppSettings, SettingsInput } from '@beverage/shared';
 import { http } from '@/lib/http';
 import { rootKeys, useInvalidate } from '@/lib/query-keys';
-
-export interface AppSettings {
-  stockPolicy: StockPolicy;
-  revenueTargetMonthly: number | null;
-  enabledPaymentMethods: PaymentMethod[];
-  defaultMinimumStock: number;
-  expiryAlertDays: number;
-}
 
 export const settingsQuery = () =>
   queryOptions({

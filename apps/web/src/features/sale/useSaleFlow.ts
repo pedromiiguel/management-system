@@ -120,6 +120,10 @@ export function useSaleFlow({ onSettled }: { onSettled: () => void }) {
     setDiscount: (discount: DiscountInput | null) =>
       perform(async () => current(await saleApi.setDiscount(current().id, discount))),
 
+    /** Taxa de serviço: liga/desliga na própria Venda — o total já volta com ela. */
+    setServiceFee: (enabled: boolean) =>
+      perform(async () => current(await saleApi.setServiceFee(current().id, enabled))),
+
     /** Cancelar (venda em andamento): descarta e já abre a próxima. */
     cancel: () =>
       perform(async () => {

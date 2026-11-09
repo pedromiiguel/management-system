@@ -1,5 +1,5 @@
 import { queryOptions, useMutation } from '@tanstack/react-query';
-import type { CreateUserInput, Permission, RoleInput } from '@beverage/shared';
+import type { CreateUserInput, Permission, RoleInput, UpdateRoleInput } from '@beverage/shared';
 import { http } from '@/lib/http';
 import { rootKeys, useInvalidate } from '@/lib/query-keys';
 
@@ -51,7 +51,7 @@ export function useCreateRole() {
 export function useUpdateRole() {
   const onSuccess = useInvalidate('roles', 'users');
   return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: RoleInput }) =>
+    mutationFn: ({ id, input }: { id: string; input: UpdateRoleInput }) =>
       http.patch<Role>(`/users/roles/${id}`, input),
     onSuccess,
   });

@@ -42,7 +42,6 @@ export function AccessTab() {
     updateRole.mutate({
       id: role.id,
       input: {
-        name: role.name,
         permissions: on
           ? [...role.permissions, permission]
           : role.permissions.filter((p) => p !== permission),

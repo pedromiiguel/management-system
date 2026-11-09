@@ -1,4 +1,11 @@
-import { PAYMENT_METHOD_LABELS, SaleStatus } from '@beverage/shared';
+import {
+  DiscountType,
+  PAYMENT_METHOD_LABELS,
+  SALE_STATUS_LABELS,
+  saleCode,
+  SaleStatus,
+  SERVICE_FEE_LABEL,
+} from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { Table } from '@/components/Table';
@@ -6,17 +13,19 @@ import { Tag } from '@/components/Tag';
 import { formatBRL, formatDateTime } from '@/lib/format';
 import type { Sale } from '@/features/sale/api';
 import { CupomReceipt } from '@/features/sale/CupomReceipt';
-import { discountAmount, saleCode, SERVICE_FEE_LABEL } from '@/features/sale/sale';
+import { salePricing } from '@/features/sale/sale';
 
-/** Venda estornada é só consulta: não reimprime cupom. */
+/** Só Venda concluída tem Cupom; estornada ou cancelada é só consulta. */
 export function SaleDetailModal({ sale, onClose }: { sale: Sale; onClose: () => void }) {
-  const cancelled = sale.status === SaleStatus.CANCELLED;
-  const discount = discountAmount(sale);
+  const hasCupom = sale.status === SaleStatus.COMPLETED;
+  const { discount } = salePricing(sale);
 
   return (
     <Modal title={`Venda #${saleCode(sale.id)}`} onClose={onClose} width={480}>
       <div className="flex gap-2 items-center mb-2.5">
-        {cancelled ? <Tag tone="danger">estornada</Tag> : <Tag tone="accent">concluída</Tag>}
+        <Tag tone={hasCupom ? 'accent' : 'danger'}>
+          {SALE_STATUS_LABELS[sale.status].toLowerCase()}
+        </Tag>
         <span className="s-dim text-[12.5px]">
           {formatDateTime(sale.completedAt ?? sale.cancelledAt)} · Operador: {sale.operator.name}
         </span>
@@ -41,18 +50,18 @@ export function SaleDetailModal({ sale, onClose }: { sale: Sale; onClose: () => 
         <span>Subtotal</span>
         <b>{formatBRL(sale.subtotal)}</b>
       </div>
-      {discount > 0.005 && (
+      {discount > 0 && (
         <div className="s-kv">
           <span>
             Desconto
-            {sale.discountType === 'PERCENT' ? ` (${sale.discountValue}%)` : ''}
+            {sale.discountType === DiscountType.PERCENT ? ` (${sale.discountValue}%)` : ''}
           </span>
           <b>-{formatBRL(discount)}</b>
         </div>
       )}
-      {!!sale.serviceFee && sale.serviceFee > 0 && (
+      {!!sale.serviceFee && (
         <div className="s-kv">
-          <span>Taxa de serviço ({SERVICE_FEE_LABEL})</span>
+          <span>{SERVICE_FEE_LABEL}</span>
           <b>{formatBRL(sale.serviceFee)}</b>
         </div>
       )}
@@ -82,9 +91,9 @@ export function SaleDetailModal({ sale, onClose }: { sale: Sale; onClose: () => 
           <b>{sale.customer.name}</b>
         </div>
       )}
-      {!cancelled && <CupomReceipt sale={sale} printOnly />}
+      {hasCupom && <CupomReceipt sale={sale} printOnly />}
       <div className="flex gap-2 justify-end mt-4">
-        {!cancelled && (
+        {hasCupom && (
           <Button ghost onClick={() => window.print()}>
             Imprimir cupom
           </Button>

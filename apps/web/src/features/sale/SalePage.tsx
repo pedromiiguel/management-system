@@ -1,6 +1,12 @@
 import { useHotkey } from '@tanstack/react-hotkeys';
 import { useEffect, useReducer, useRef, useState } from 'react';
-import { PaymentMethod, type CompleteSaleInput, type DiscountInput } from '@beverage/shared';
+import {
+  DiscountType,
+  PaymentMethod,
+  saleCode,
+  type CompleteSaleInput,
+  type DiscountInput,
+} from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Confirm } from '@/components/Confirm';
 import { Modal } from '@/components/Modal';
@@ -16,7 +22,7 @@ import { CustomerModal } from './CustomerModal';
 import { DiscountModal } from './DiscountModal';
 import { SALE_HOTKEYS, SaleHotkeyStrip } from './hotkeys';
 import { ReceiptModal } from './ReceiptModal';
-import { parseScan, previewCheckout, saleCode } from './sale';
+import { parseScan, salePricing } from './sale';
 import { SaleItemsCard } from './SaleItemsCard';
 import { ScanBox } from './ScanBox';
 import { SearchModal } from './SearchModal';
@@ -41,7 +47,6 @@ export function SalePage() {
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const [payment, setPayment] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [withInvoice, setWithInvoice] = useState(true);
-  const [serviceFee, setServiceFee] = useState(false);
   const [received, setReceived] = useState('');
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [modal, setModal] = useState<ModalState>({ kind: 'none' });
@@ -60,13 +65,17 @@ export function SalePage() {
 
   const sale = flow.sale;
   const items = sale?.items ?? [];
-  const checkout = previewCheckout(sale, { serviceFee, payment, received: parseMoney(received) });
+  // Total e Taxa de serviço vêm da Venda; só o troco depende do valor ainda não enviado.
+  const amountPaid = parseMoney(received);
+  const change =
+    sale && payment === PaymentMethod.CASH && Number.isFinite(amountPaid)
+      ? salePricing(sale, amountPaid).change
+      : null;
   const selected = items.find((item) => item.id === selectedId) ?? items.at(-1) ?? null;
 
   function resetCheckout() {
     setPayment(PaymentMethod.CASH);
     setWithInvoice(true);
-    setServiceFee(false);
     setReceived('');
     setCustomer(null);
     setSelectedId(null);
@@ -129,8 +138,7 @@ export function SalePage() {
       return null;
     }
     const amountPaid = parseMoney(received);
-    const { total } = previewCheckout(current, { serviceFee, payment, received: amountPaid });
-    if (payment === PaymentMethod.CASH && !(amountPaid >= total)) {
+    if (payment === PaymentMethod.CASH && !(amountPaid >= current.total)) {
       toast('Informe o valor recebido (maior ou igual ao total)', 'warn');
       return null;
     }
@@ -141,7 +149,6 @@ export function SalePage() {
     return {
       paymentMethod: payment,
       withInvoice,
-      serviceFee,
       ...(payment === PaymentMethod.CASH ? { amountPaid } : {}),
       ...(payment === PaymentMethod.CREDIT ? { customerId: customer?.id } : {}),
     };
@@ -189,7 +196,7 @@ export function SalePage() {
   );
 
   const discountLabel = sale?.discountValue
-    ? sale.discountType === 'PERCENT'
+    ? sale.discountType === DiscountType.PERCENT
       ? `${sale.discountValue}%`
       : formatBRL(sale.discountValue)
     : '—';
@@ -229,15 +236,14 @@ export function SalePage() {
 
         <div className="flex flex-col gap-2.5">
           <SaleTotalCard
-            total={checkout.total}
-            itemCount={checkout.itemCount}
-            productCount={checkout.productCount}
+            total={sale?.total ?? 0}
+            itemCount={items.reduce((acc, item) => acc + item.quantity, 0)}
+            productCount={items.length}
           />
           <SaleChargesCard
             discountLabel={discountLabel}
-            serviceFee={serviceFee}
-            fee={checkout.fee}
-            onToggleServiceFee={setServiceFee}
+            serviceFee={sale?.serviceFee ?? null}
+            onToggleServiceFee={(on) => void flow.setServiceFee(on)}
             withInvoice={withInvoice}
             onToggleInvoice={setWithInvoice}
           />
@@ -247,7 +253,7 @@ export function SalePage() {
               received={received}
               onReceivedChange={(value) => setReceived(maskBRL(value))}
               onEnter={() => void finalize()}
-              change={checkout.change}
+              change={change}
             />
           ) : null}
           {payment === PaymentMethod.CREDIT ? (

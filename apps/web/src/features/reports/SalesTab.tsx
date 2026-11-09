@@ -1,4 +1,10 @@
-import { PAYMENT_METHOD_LABELS, SaleStatus } from '@beverage/shared';
+import {
+  PAYMENT_METHOD_LABELS,
+  SALE_STATUS_LABELS,
+  saleCode,
+  SaleStatus,
+  SERVICE_FEE_PERCENT,
+} from '@beverage/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { BarChart } from '@/components/BarChart';
@@ -11,7 +17,6 @@ import { Tag } from '@/components/Tag';
 import { toast } from '@/components/Toast';
 import { formatBRL, formatDateTime } from '@/lib/format';
 import { salesHistoryQuery, useVoidSale, type Sale } from '@/features/sale/api';
-import { saleCode, SERVICE_FEE_LABEL } from '@/features/sale/sale';
 import { salesReportQuery } from './api';
 import { SaleDetailModal } from './SaleDetailModal';
 
@@ -24,7 +29,7 @@ export function SalesTab({ from, to }: { from: string; to: string }) {
   const [voiding, setVoiding] = useState<Sale | null>(null);
   const voidSale = useVoidSale();
 
-  const cancelled = sales.filter((s) => s.status === SaleStatus.CANCELLED).length;
+  const voided = sales.filter((s) => s.status === SaleStatus.VOIDED).length;
   const ticket = report && report.count > 0 ? report.total / report.count : 0;
 
   const confirmVoid = (sale: Sale) =>
@@ -46,11 +51,11 @@ export function SalesTab({ from, to }: { from: string; to: string }) {
         <StatCard
           label="Taxa de serviço"
           value={formatBRL(report?.serviceFeeTotal)}
-          sub={`${SERVICE_FEE_LABEL} — fica com a casa`}
+          sub={`${SERVICE_FEE_PERCENT}% do subtotal — fica com a casa`}
         />
         <StatCard label="Nº de vendas" value={report?.count ?? 0} />
         <StatCard label="Ticket médio" value={formatBRL(ticket)} />
-        <StatCard label="Canceladas" value={cancelled} sub="estoque estornado automaticamente" />
+        <StatCard label="Estornadas" value={voided} sub="itens devolvidos ao estoque" />
       </div>
       <Card>
         <div className="s-card-title">
@@ -81,17 +86,17 @@ export function SalesTab({ from, to }: { from: string; to: string }) {
               s.paymentMethod ? PAYMENT_METHOD_LABELS[s.paymentMethod] : '—',
               s.withInvoice ? 'sim' : 'não',
               <b key="t">{formatBRL(s.total)}</b>,
-              s.status === SaleStatus.CANCELLED ? (
-                <Tag key="a" tone="danger">
-                  cancelada
-                </Tag>
-              ) : (
+              s.status === SaleStatus.COMPLETED ? (
                 // o span impede que o clique no Estornar também abra o detalhe
                 <span key="a" onClick={(e) => e.stopPropagation()}>
                   <Button ghost danger onClick={() => setVoiding(s)}>
                     Estornar
                   </Button>
                 </span>
+              ) : (
+                <Tag key="a" tone="danger">
+                  {SALE_STATUS_LABELS[s.status].toLowerCase()}
+                </Tag>
               ),
             ],
           }))}

@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import type { PaymentMethod } from '@beverage/shared';
+import { SERVICE_FEE_LABEL, type PaymentMethod } from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Kbd } from '@/components/Kbd';
@@ -7,7 +7,6 @@ import { Toggle } from '@/components/Toggle';
 import { formatBRL } from '@/lib/format';
 import type { Customer } from './api';
 import { PAYMENT_TILES, SALE_HOTKEYS } from './hotkeys';
-import { SERVICE_FEE_LABEL } from './sale';
 
 export function SaleTotalCard({
   total,
@@ -35,14 +34,13 @@ export function SaleTotalCard({
 export function SaleChargesCard({
   discountLabel,
   serviceFee,
-  fee,
   onToggleServiceFee,
   withInvoice,
   onToggleInvoice,
 }: {
   discountLabel: string;
-  serviceFee: boolean;
-  fee: number;
+  /** Valor da Taxa de serviço; null = desligada. */
+  serviceFee: number | null;
   onToggleServiceFee: (on: boolean) => void;
   withInvoice: boolean;
   onToggleInvoice: (on: boolean) => void;
@@ -58,14 +56,18 @@ export function SaleChargesCard({
       </div>
       <div className="s-divider" />
       <div className="flex justify-between items-center">
-        <span className="text-[13.5px]">Taxa de serviço ({SERVICE_FEE_LABEL})</span>
+        <span className="text-[13.5px]">{SERVICE_FEE_LABEL}</span>
         <span className="flex items-center gap-2">
-          {serviceFee ? (
+          {serviceFee !== null ? (
             <span className="s-dim text-[13px]" data-testid="sale-service-fee-value">
-              {formatBRL(fee)}
+              {formatBRL(serviceFee)}
             </span>
           ) : null}
-          <Toggle on={serviceFee} onChange={onToggleServiceFee} ariaLabel="Taxa de serviço" />
+          <Toggle
+            on={serviceFee !== null}
+            onChange={onToggleServiceFee}
+            ariaLabel="Taxa de serviço"
+          />
         </span>
       </div>
       <div className="s-divider" />

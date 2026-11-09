@@ -29,6 +29,7 @@ export function makeSale(overrides: Partial<Sale> = {}): Sale {
     openedAt: '2026-03-14T20:00:00.000Z',
     completedAt: '2026-03-14T20:05:00.000Z',
     cancelledAt: null,
+    voidedAt: null,
     items: [],
     customer: null,
     operator: { id: 'u-1', name: 'Admin' },

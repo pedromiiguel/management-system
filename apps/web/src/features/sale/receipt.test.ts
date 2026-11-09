@@ -1,17 +1,17 @@
-import { PaymentMethod } from '@beverage/shared';
+import { DiscountType, PaymentMethod } from '@beverage/shared';
 import { describe, expect, it } from 'vitest';
 import { makeItem, makeSale } from './fixtures';
 import { buildCupom } from './receipt';
 
 const sale = makeSale({
   subtotal: 54,
-  total: 54.1,
-  discountType: 'PERCENT',
+  total: 54,
+  discountType: DiscountType.PERCENT,
   discountValue: 10,
-  serviceFee: 5.5,
+  serviceFee: 5.4,
   paymentMethod: PaymentMethod.CASH,
   amountPaid: 60,
-  change: 5.9,
+  change: 6,
   customer: { id: 'c-1', name: 'Fulano de Tal' },
   items: [
     makeItem({ id: 'a', quantity: 3, unitPrice: 12 }),
@@ -58,11 +58,11 @@ describe('buildCupom', () => {
 
   it('shows discount with percentage, service fee and payment lines', () => {
     expect(lines).toContainEqual(expect.stringMatching(/^DESCONTO \(10%\) +-R\$ 5,40$/));
-    expect(lines).toContainEqual(expect.stringMatching(/^TAXA DE SERVICO \(10%\) +R\$ 5,50$/));
-    expect(lines).toContainEqual(expect.stringMatching(/^TOTAL GERAL +R\$ 54,10$/));
+    expect(lines).toContainEqual(expect.stringMatching(/^TAXA DE SERVICO \(10%\) +R\$ 5,40$/));
+    expect(lines).toContainEqual(expect.stringMatching(/^TOTAL GERAL +R\$ 54,00$/));
     expect(lines).toContain('PAGAMENTO: DINHEIRO');
     expect(lines).toContainEqual(expect.stringMatching(/^RECEBIDO +R\$ 60,00$/));
-    expect(lines).toContainEqual(expect.stringMatching(/^TROCO +R\$ 5,90$/));
+    expect(lines).toContainEqual(expect.stringMatching(/^TROCO +R\$ 6,00$/));
     expect(lines).toContainEqual(expect.stringMatching(/^CLIENTE +Fulano de Tal$/));
   });
 

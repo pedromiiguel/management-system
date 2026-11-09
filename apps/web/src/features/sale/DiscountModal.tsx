@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { discountSchema, type DiscountInput } from '@beverage/shared';
+import { DiscountType, discountSchema, type DiscountInput } from '@beverage/shared';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Modal } from '@/components/Modal';
@@ -28,7 +28,7 @@ export function DiscountModal({
   >({
     resolver: zodResolver(formSchema),
     mode: 'onChange',
-    defaultValues: { type: 'AMOUNT', raw: '' },
+    defaultValues: { type: DiscountType.AMOUNT, raw: '' },
   });
   const type = watch('type');
 
@@ -41,20 +41,24 @@ export function DiscountModal({
       <form onSubmit={handleSubmit(onApply)}>
         <div className="flex gap-2 mb-2.5">
           <Chip
-            active={type === 'AMOUNT'}
-            onClick={() => setValue('type', 'AMOUNT', { shouldValidate: true })}
+            active={type === DiscountType.AMOUNT}
+            onClick={() => setValue('type', DiscountType.AMOUNT, { shouldValidate: true })}
           >
             Valor (R$)
           </Chip>
           <Chip
-            active={type === 'PERCENT'}
-            onClick={() => setValue('type', 'PERCENT', { shouldValidate: true })}
+            active={type === DiscountType.PERCENT}
+            onClick={() => setValue('type', DiscountType.PERCENT, { shouldValidate: true })}
           >
             Percentual (%)
           </Chip>
         </div>
         <div className="s-input">
-          <input autoFocus placeholder={type === 'AMOUNT' ? '0,00' : '0'} {...register('raw')} />
+          <input
+            autoFocus
+            placeholder={type === DiscountType.AMOUNT ? '0,00' : '0'}
+            {...register('raw')}
+          />
         </div>
         <div className="flex gap-2 justify-between mt-3.5">
           <Button ghost onClick={() => onApply(null)}>
