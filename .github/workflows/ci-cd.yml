@@ -203,7 +203,10 @@ jobs:
       # seed. Páginas e limites em apps/web/lighthouserc.json.
       - name: Lighthouse
         working-directory: apps/web
-        run: npx --yes @lhci/cli@0.14.0 autorun
+        # Com puppeteerScript o lhci não acha o Chrome sozinho: usa o do runner.
+        run: |
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          npx --yes @lhci/cli@0.14.0 autorun --collect.chromePath="$CHROME_PATH"
       - name: Resumo das notas
         if: ${{ !cancelled() }}
         working-directory: apps/web
