@@ -4,12 +4,12 @@ O workflow [`.github/workflows/ci-cd.yml`](../.github/workflows/ci-cd.yml) roda 
 todo pull request e em todo push em `main`. Cada job roda só se a parte que ele
 verifica mudou; o job `changes` decide por pasta:
 
-| Mudou                                                               | Roda                                |
-| ------------------------------------------------------------------- | ----------------------------------- |
-| só docs (`docs/`, `*.md` fora dos apps…)                            | só o Prettier                       |
-| `apps/web/`                                                         | `web` (+ deploy do front na `main`) |
-| `apps/api/` ou `railway.json`                                       | `api`, `api-e2e` (+ deploy da API)  |
-| `packages/shared/` ou infra (workflow, lockfile, `package.json`, …) | tudo                                |
+| Mudou                                                               | Roda                                              |
+| ------------------------------------------------------------------- | ------------------------------------------------- |
+| só docs (`docs/`, `*.md` fora dos apps…)                            | só o Prettier                                     |
+| `apps/web/`                                                         | `web`, `lighthouse` (+ deploy do front na `main`) |
+| `apps/api/` ou `railway.json`                                       | `api`, `api-e2e` (+ deploy da API)                |
+| `packages/shared/` ou infra (workflow, lockfile, `package.json`, …) | tudo                                              |
 
 `workflow_dispatch` (Actions → CI/CD → Run workflow) roda e publica tudo.
 
@@ -19,7 +19,8 @@ verifica mudou; o job `changes` decide por pasta:
 | `shared`     | type-check e testes do pacote shared                                                    |
 | `api`        | build (shared → api), type-check e testes unitários                                     |
 | `api-e2e`    | testes e2e da API contra um Postgres 17 descartável do próprio job                      |
-| `web`        | lint, build, type-check, testes e Lighthouse (`apps/web/lighthouserc.json`)             |
+| `web`        | lint, build, type-check e testes                                                        |
+| `lighthouse` | Lighthouse em todas as telas, com API e banco de exemplo (ver abaixo)                   |
 | `ci-ok`      | verde quando nenhum job falhou (pulado conta como ok) — use este como check obrigatório |
 | `deploy-api` | `railway up --ci` e smoke test (`GET /auth/me` sem token tem que dar 401)               |
 | `deploy-web` | builda o web com `VITE_API_URL` e publica os estáticos na Vercel (`--prebuilt --prod`)  |
@@ -30,10 +31,17 @@ container da API).
 
 ### Lighthouse
 
-Roda 3 vezes (mediana) na tela de login, em perfil desktop, contra o build de
-produção servido pelo `vite preview`. Acessibilidade e boas práticas abaixo de
-90 reprovam o PR; desempenho abaixo de 85 e SEO abaixo de 80 só geram aviso.
-Os relatórios HTML ficam no artefato `lighthouse` da execução.
+O job `lighthouse` sobe um Postgres descartável com os dados de exemplo
+(`db:migrate` + `db:seed:fixtures`), a API e o build de produção do web no
+`vite preview`, e mede todas as telas em perfil desktop: `/login` sem sessão e
+`/sale`, `/products`, `/stock`, `/financial`, `/reports` e `/settings` logado
+como o admin do seed (`apps/web/lighthouse/login.cjs` grava a sessão antes de
+cada página). Acessibilidade e boas práticas abaixo de 90 reprovam o PR;
+desempenho abaixo de 85 e SEO abaixo de 80 só geram aviso. Páginas e limites
+em `apps/web/lighthouserc.json`; ao criar uma rota nova, inclua-a lá.
+
+As notas por página aparecem no _Summary_ da execução; os relatórios HTML
+completos ficam no artefato `lighthouse`.
 
 ### Proteção da `main`
 

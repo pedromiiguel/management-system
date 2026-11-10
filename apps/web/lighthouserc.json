@@ -3,10 +3,21 @@
     "collect": {
       "startServerCommand": "npx vite preview --port 4173 --strictPort",
       "startServerReadyPattern": "localhost:4173",
-      "url": ["http://localhost:4173/login"],
-      "numberOfRuns": 3,
+      "url": [
+        "http://localhost:4173/login",
+        "http://localhost:4173/sale",
+        "http://localhost:4173/products",
+        "http://localhost:4173/stock",
+        "http://localhost:4173/financial",
+        "http://localhost:4173/reports",
+        "http://localhost:4173/settings"
+      ],
+      "numberOfRuns": 1,
+      "puppeteerScript": "./lighthouse/login.cjs",
+      "puppeteerLaunchOptions": { "args": ["--no-sandbox"] },
       "settings": {
         "preset": "desktop",
+        "disableStorageReset": true,
         "chromeFlags": "--headless=new --no-sandbox"
       }
     },

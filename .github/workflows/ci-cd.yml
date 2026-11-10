@@ -132,7 +132,7 @@ jobs:
       - run: npm run test:e2e:api
 
   web:
-    name: Web (lint, build, type-check, testes e Lighthouse)
+    name: Web (lint, build, type-check e testes)
     needs: changes
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
@@ -154,12 +154,63 @@ jobs:
         run: npm run typecheck --workspace apps/web
       - name: Testes unitários
         run: npm test --workspace apps/web
-      # Lighthouse no build de produção servido pelo `vite preview` (que faz o
-      # fallback de SPA). Limites e páginas em apps/web/lighthouserc.json.
+
+  lighthouse:
+    name: Web (Lighthouse em todas as páginas)
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: beverage
+          POSTGRES_PASSWORD: beverage
+          POSTGRES_DB: beverage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U beverage -d beverage"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Banco descartável do próprio job, com os dados de exemplo do seed.
+      DATABASE_URL: postgresql://beverage:beverage@localhost:5432/beverage?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Banco com dados de exemplo
+        run: npm run db:migrate && npm run db:seed:fixtures
+      - name: Subir a API
+        run: |
+          npm run build --workspace apps/api
+          (cd apps/api && nohup node dist/main.js > /tmp/api.log 2>&1 &)
+          for i in $(seq 1 30); do
+            [ "$(curl -s -o /dev/null -w '%{http_code}' localhost:3000/api/auth/me)" = "401" ] && exit 0
+            sleep 2
+          done
+          cat /tmp/api.log; exit 1
+      - name: Build do web
+        run: npm run build --workspace apps/web
+      # Build de produção no `vite preview` (fallback de SPA e proxy /api → API
+      # acima). Antes de cada página, lighthouse/login.cjs entra com o admin do
+      # seed. Páginas e limites em apps/web/lighthouserc.json.
       - name: Lighthouse
         working-directory: apps/web
         run: npx --yes @lhci/cli@0.14.0 autorun
-      - name: Relatório do Lighthouse
+      - name: Resumo das notas
+        if: ${{ !cancelled() }}
+        working-directory: apps/web
+        run: |
+          [ -f lighthouse-report/manifest.json ] || exit 0
+          node lighthouse/summary.mjs lighthouse-report >> "$GITHUB_STEP_SUMMARY"
+      - name: Relatórios HTML
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
@@ -172,7 +223,7 @@ jobs:
   # (job pulado por não ter mudança conta como ok).
   ci-ok:
     name: CI ok
-    needs: [changes, format, shared, api, api-e2e, web]
+    needs: [changes, format, shared, api, api-e2e, web, lighthouse]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
