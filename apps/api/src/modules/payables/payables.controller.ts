@@ -1,6 +1,12 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { PayableInput, payableSchema, Permission } from '@beverage/shared';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
+import {
+  PayableInput,
+  PayableListQuery,
+  payableListQuerySchema,
+  payableSchema,
+  Permission,
+} from '@beverage/shared';
+import { RequirePermission } from '../auth/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { PayablesService } from './payables.service';
 
@@ -10,8 +16,8 @@ export class PayablesController {
 
   @Get()
   @RequirePermission(Permission.FINANCIAL_READ)
-  list(@Query('status') status?: 'OPEN' | 'PAID') {
-    return this.payablesService.list(status);
+  list(@Query(new ZodValidationPipe(payableListQuerySchema)) query: PayableListQuery) {
+    return this.payablesService.list(query.status);
   }
 
   @Post()

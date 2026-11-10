@@ -1,15 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { FinancialCategoryInput, ManualEntryInput } from '@beverage/shared';
+import {
+  CashMovementType,
+  FinancialCategoryInput,
+  FinancialCategoryKind,
+  ManualEntryInput,
+  startOfStoreDay,
+  storeCalendarStarts,
+  storeDateKey,
+  storeMonthKeys,
+} from '@beverage/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CashLedger } from '../cash-register/cash-ledger';
+import { Period, SalesQuery } from '../sales/sales-query';
 import { SettingsService } from '../settings/settings.service';
 
 const Decimal = Prisma.Decimal;
+
+/** Meses na série do painel (o atual por último). */
+const MONTHLY_SERIES_LENGTH = 6;
 
 @Injectable()
 export class FinancialService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly cash: CashLedger,
+    private readonly sales: SalesQuery,
     private readonly settings: SettingsService,
   ) {}
 
@@ -17,32 +33,35 @@ export class FinancialService {
    * FR-29: fluxo de caixa por período. PULL/FLOAT ficam de fora — são
    * transferências internas da gaveta, não receita/despesa.
    */
-  async cashFlow(from: Date, to: Date) {
+  async cashFlow(period: Period) {
     const movements = await this.prisma.cashMovement.findMany({
-      where: { type: { in: ['INFLOW', 'OUTFLOW'] }, occurredAt: { gte: from, lte: to } },
+      where: {
+        type: { in: [CashMovementType.INFLOW, CashMovementType.OUTFLOW] },
+        occurredAt: { gte: period.from, lte: period.to },
+      },
       include: { category: true, sale: { select: { id: true } } },
       orderBy: { occurredAt: 'desc' },
     });
-    const inflows = movements
-      .filter((m) => m.type === 'INFLOW')
-      .reduce((acc, m) => acc.add(m.amount), new Decimal(0));
-    const outflows = movements
-      .filter((m) => m.type === 'OUTFLOW')
-      .reduce((acc, m) => acc.add(m.amount), new Decimal(0));
+    const sum = (type: CashMovementType) =>
+      movements
+        .filter((m) => m.type === type)
+        .reduce((acc, m) => acc.add(m.amount), new Decimal(0));
+    const inflows = sum(CashMovementType.INFLOW);
+    const outflows = sum(CashMovementType.OUTFLOW);
     return { movements, inflows, outflows, balance: inflows.sub(outflows) };
   }
 
   /** FR-35: lançamento manual avulso (fora do PDV/caixa). */
   manualEntry(input: ManualEntryInput) {
-    return this.prisma.cashMovement.create({
-      data: {
-        type: input.kind === 'INCOME' ? 'INFLOW' : 'OUTFLOW',
-        amount: new Decimal(input.amount),
-        description: input.description,
-        categoryId: input.categoryId,
-        occurredAt: input.date ?? new Date(),
-      },
-      include: { category: true },
+    return this.cash.outsideDrawer(this.prisma, {
+      type:
+        input.kind === FinancialCategoryKind.INCOME
+          ? CashMovementType.INFLOW
+          : CashMovementType.OUTFLOW,
+      amount: new Decimal(input.amount),
+      description: input.description,
+      categoryId: input.categoryId,
+      occurredAt: input.date,
     });
   }
 
@@ -58,81 +77,54 @@ export class FinancialService {
   }
 
   /**
-   * FR-32/33/34/36 — receita bruta dia/mês/ano-calendário (BR-01/BR-02),
-   * resultado do mês e consolidação por forma de pagamento.
+   * FR-32/33/34/36 — receita do dia/mês/ano-calendário da loja (BR-01/BR-02),
+   * resultado do mês, cobrado por forma de pagamento e a série dos últimos
+   * meses da loja. Receita segue a definição única de `SalesQuery` (sem Taxa
+   * de serviço); a taxa vem à parte e entra no resultado — fica com a casa.
    */
   async dashboard() {
     const now = new Date();
-    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const yearStart = new Date(now.getFullYear(), 0, 1); // BR-02: ano-calendário
+    const starts = storeCalendarStarts(now);
+    const month = { from: starts.month, to: now };
+    const monthKeys = storeMonthKeys(now, MONTHLY_SERIES_LENGTH);
+    const seriesPeriod = { from: startOfStoreDay(`${monthKeys[0]}-01`), to: now };
 
-    const [revenueDay, revenueMonth, revenueYear, byMethod, cogsMonth, expensesMonth, target] =
-      await Promise.all([
-        this.grossRevenue(dayStart, now),
-        this.grossRevenue(monthStart, now),
-        this.grossRevenue(yearStart, now),
-        this.revenueByMethod(monthStart, now),
-        this.cogs(monthStart, now),
-        this.expenses(monthStart, now),
-        this.settings.get('revenueTargetMonthly'),
-      ]);
+    const [day, monthTotals, year, byMethod, cogs, expenses, byMonth, target] = await Promise.all([
+      this.sales.totals({ from: starts.day, to: now }),
+      this.sales.totals(month),
+      this.sales.totals({ from: starts.year, to: now }),
+      this.sales.chargedByMethod(month),
+      this.sales.cogs(month),
+      this.cash.expenses(this.prisma, month),
+      this.sales.totalsBy(seriesPeriod, (at) => storeDateKey(at).slice(0, 7)),
+      this.settings.get('revenueTargetMonthly'),
+    ]);
+    const { revenue, serviceFee } = monthTotals;
 
     return {
-      revenue: { day: revenueDay, month: revenueMonth, year: revenueYear },
+      revenue: { day: day.revenue, month: revenue, year: year.revenue },
+      serviceFee: { day: day.serviceFee, month: serviceFee, year: year.serviceFee },
+      /** Valor cobrado (com Taxa de serviço) por forma de pagamento no mês. */
       byMethodMonth: byMethod,
+      monthly: monthKeys.map((key) => {
+        const totals = byMonth.find((m) => m.key === key);
+        return {
+          month: key,
+          revenue: totals?.revenue ?? new Decimal(0),
+          serviceFee: totals?.serviceFee ?? new Decimal(0),
+        };
+      }),
       result: {
-        revenue: revenueMonth,
-        cogs: cogsMonth,
-        expenses: expensesMonth,
-        profit: revenueMonth.sub(cogsMonth).sub(expensesMonth),
+        revenue,
+        serviceFee,
+        cogs,
+        expenses,
+        profit: revenue.add(serviceFee).sub(cogs).sub(expenses),
       },
       target: {
         monthly: target,
-        progress:
-          target && target > 0 ? revenueMonth.div(new Decimal(target)).toDecimalPlaces(4) : null,
+        progress: target === null ? null : revenue.div(target).toDecimalPlaces(4),
       },
     };
-  }
-
-  /** BR-01: receita bruta = soma das vendas concluídas, sem dedução. */
-  private async grossRevenue(from: Date, to: Date) {
-    const agg = await this.prisma.sale.aggregate({
-      where: { status: 'COMPLETED', completedAt: { gte: from, lte: to } },
-      _sum: { total: true },
-    });
-    return agg._sum.total ?? new Decimal(0);
-  }
-
-  private async revenueByMethod(from: Date, to: Date) {
-    const groups = await this.prisma.sale.groupBy({
-      by: ['paymentMethod'],
-      where: { status: 'COMPLETED', completedAt: { gte: from, lte: to } },
-      _sum: { total: true },
-      _count: true,
-    });
-    return groups.map((g) => ({
-      paymentMethod: g.paymentMethod,
-      total: g._sum.total ?? new Decimal(0),
-      count: g._count,
-    }));
-  }
-
-  /** CMV com custo congelado no item da venda (FR-33). */
-  private async cogs(from: Date, to: Date) {
-    const items = await this.prisma.saleItem.findMany({
-      where: { sale: { status: 'COMPLETED', completedAt: { gte: from, lte: to } } },
-      select: { quantity: true, unitCost: true },
-    });
-    return items.reduce((acc, i) => acc.add(i.unitCost.mul(i.quantity)), new Decimal(0));
-  }
-
-  /** Despesas do período — exclui estornos de venda (saleId nulo). */
-  private async expenses(from: Date, to: Date) {
-    const agg = await this.prisma.cashMovement.aggregate({
-      where: { type: 'OUTFLOW', saleId: null, occurredAt: { gte: from, lte: to } },
-      _sum: { amount: true },
-    });
-    return agg._sum.amount ?? new Decimal(0);
   }
 }

@@ -1,1 +1,0 @@
-export { LoginBrandPanel } from './LoginBrandPanel';

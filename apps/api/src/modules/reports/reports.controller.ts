@@ -1,11 +1,16 @@
-import { BadRequestException, Controller, Get, Query, Res } from '@nestjs/common';
+import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { Permission } from '@beverage/shared';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
+import { Permission, ReportQuery, reportQuerySchema } from '@beverage/shared';
+import { z } from 'zod';
+import { RequirePermission } from '../auth/require-permission.decorator';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CsvColumn, toCsv } from '../../common/utils/csv';
 import { StockService } from '../stock/stock.service';
 import { ReportsService } from './reports.service';
 
+const formatQuerySchema = reportQuerySchema.pick({ format: true });
+
+/** Cada relatório responde JSON ou, com `format=csv`, o arquivo para download. */
 @Controller('reports')
 @RequirePermission(Permission.REPORTS_READ)
 export class ReportsController {
@@ -17,97 +22,69 @@ export class ReportsController {
   @Get('sales')
   async salesByPeriod(
     @Res({ passthrough: true }) res: Response,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-    @Query('format') format?: string,
+    @Query(new ZodValidationPipe(reportQuerySchema)) query: ReportQuery,
   ) {
-    const period = this.parsePeriod(from, to);
-    const report = await this.reportsService.salesByPeriod(period.from, period.to);
-    if (format === 'csv') {
-      const columns: CsvColumn[] = [
-        { key: 'day', label: 'Dia' },
-        { key: 'count', label: 'Vendas' },
-        { key: 'total', label: 'Total (R$)' },
-      ];
-      const rows = report.days.map((d) => ({ ...d, total: d.total.toNumber() }));
-      return this.sendCsv(res, 'vendas-por-periodo.csv', toCsv(rows, columns));
-    }
-    return report;
+    const report = await this.reportsService.salesByPeriod(query);
+    if (query.format === 'json') return report;
+    return sendCsv(res, 'vendas-por-periodo.csv', report.days, [
+      { key: 'day', label: 'Dia' },
+      { key: 'count', label: 'Vendas' },
+      { key: 'revenue', label: 'Receita (R$)' },
+      { key: 'serviceFee', label: 'Taxa de serviço (R$)' },
+    ]);
   }
 
   /** FR-38/FR-39: mais vendidos e margem em um único relatório. */
   @Get('products')
   async productPerformance(
     @Res({ passthrough: true }) res: Response,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-    @Query('format') format?: string,
+    @Query(new ZodValidationPipe(reportQuerySchema)) query: ReportQuery,
   ) {
-    const period = this.parsePeriod(from, to);
-    const report = await this.reportsService.productPerformance(period.from, period.to);
-    if (format === 'csv') {
-      const columns: CsvColumn[] = [
-        { key: 'name', label: 'Produto' },
-        { key: 'sku', label: 'SKU' },
-        { key: 'quantity', label: 'Qtd vendida' },
-        { key: 'revenue', label: 'Receita (R$)' },
-        { key: 'cost', label: 'Custo (R$)' },
-        { key: 'margin', label: 'Margem (R$)' },
-        { key: 'marginPercent', label: 'Margem (%)' },
-      ];
-      const rows = report.map((r) => ({
-        name: r.product?.name,
-        sku: r.product?.sku,
-        quantity: r.quantity,
-        revenue: r.revenue.toNumber(),
-        cost: r.cost.toNumber(),
-        margin: r.margin.toNumber(),
-        marginPercent: r.marginPercent.toNumber(),
-      }));
-      return this.sendCsv(res, 'desempenho-produtos.csv', toCsv(rows, columns));
-    }
-    return report;
+    const report = await this.reportsService.productPerformance(query);
+    if (query.format === 'json') return report;
+    const rows = report.map(({ product, ...r }) => ({
+      ...r,
+      name: product.name,
+      sku: product.sku,
+    }));
+    return sendCsv(res, 'desempenho-produtos.csv', rows, [
+      { key: 'name', label: 'Produto' },
+      { key: 'sku', label: 'SKU' },
+      { key: 'quantity', label: 'Qtd vendida' },
+      { key: 'grossSales', label: 'Valor bruto (R$)' },
+      { key: 'cost', label: 'Custo (R$)' },
+      { key: 'margin', label: 'Margem (R$)' },
+      { key: 'marginPercent', label: 'Margem (%)' },
+    ]);
   }
 
   /** FR-40: posição atual de estoque. */
   @Get('stock-position')
-  async stockPosition(@Res({ passthrough: true }) res: Response, @Query('format') format?: string) {
+  async stockPosition(
+    @Res({ passthrough: true }) res: Response,
+    @Query(new ZodValidationPipe(formatQuerySchema)) query: z.output<typeof formatQuerySchema>,
+  ) {
     const report = await this.stockService.position();
-    if (format === 'csv') {
-      const columns: CsvColumn[] = [
-        { key: 'sku', label: 'SKU' },
-        { key: 'name', label: 'Produto' },
-        { key: 'unit', label: 'Unidade' },
-        { key: 'currentStock', label: 'Estoque' },
-        { key: 'minimumStock', label: 'Mínimo' },
-        { key: 'stockCost', label: 'Custo em estoque (R$)' },
-        { key: 'stockValue', label: 'Valor de venda (R$)' },
-      ];
-      const rows = report.map((r) => ({
-        ...r,
-        stockCost: r.stockCost.toNumber(),
-        stockValue: r.stockValue.toNumber(),
-      }));
-      return this.sendCsv(res, 'posicao-estoque.csv', toCsv(rows, columns));
-    }
-    return report;
+    if (query.format === 'json') return report;
+    return sendCsv(res, 'posicao-estoque.csv', report, [
+      { key: 'sku', label: 'SKU' },
+      { key: 'name', label: 'Produto' },
+      { key: 'unit', label: 'Unidade' },
+      { key: 'currentStock', label: 'Estoque' },
+      { key: 'minimumStock', label: 'Mínimo' },
+      { key: 'stockCost', label: 'Custo em estoque (R$)' },
+      { key: 'stockValue', label: 'Valor de venda (R$)' },
+    ]);
   }
+}
 
-  private parsePeriod(from?: string, to?: string) {
-    if (!from || !to) throw new BadRequestException('Informe o período (from/to)');
-    // `from`/`to` chegam como "YYYY-MM-DD" (sem hora). `new Date(from)` já
-    // parseia como meia-noite UTC; construir o fim do dia como string local
-    // ("...T23:59:59.999", sem "Z") — não com `Date#setHours` sobre um Date
-    // já em UTC — evita cortar o dia várias horas antes do fim real em fusos
-    // atrás de UTC (achado desta migração, ver ADR 0009).
-    const start = new Date(from);
-    const end = new Date(`${to}T23:59:59.999`);
-    return { from: start, to: end };
-  }
-
-  private sendCsv(res: Response, filename: string, content: string) {
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    return content;
-  }
+function sendCsv<Row extends object>(
+  res: Response,
+  filename: string,
+  rows: Row[],
+  columns: CsvColumn<Row>[],
+) {
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  return toCsv(rows, columns);
 }

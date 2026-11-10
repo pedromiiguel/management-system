@@ -1,18 +1,28 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { ProductInput, ProductStockEntryInput, UpdateProductInput } from '@beverage/shared';
+import {
+  ProductInput,
+  ProductListQuery,
+  ProductStockEntryInput,
+  UpdateProductInput,
+} from '@beverage/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StockLedger } from '../stock/stock-ledger';
+
+const withBatches = { batches: { orderBy: { expiresAt: 'asc' } } } satisfies Prisma.ProductInclude;
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly stock: StockLedger,
+  ) {}
 
-  /** Busca por nome, SKU ou EAN (FR-03/FR-11) com paginação. */
-  async list(params: { search?: string; activeOnly?: boolean; page?: number; perPage?: number }) {
-    const { search, activeOnly = true, page = 1, perPage = 50 } = params;
+  /** Busca por nome (sem acento), SKU ou EAN (FR-03/FR-11) com paginação. */
+  async list(query: ProductListQuery) {
+    const { search, all, page, perPage } = query;
 
-    // Nome ignora acentos (ex.: "agua" encontra "Água") via extensão unaccent do Postgres;
-    // Prisma não expõe essa função no query builder, por isso resolve os ids via SQL bruto.
+    // Prisma não expõe `unaccent`; os ids que casam vêm por SQL.
     let matchingIds: string[] | undefined;
     if (search) {
       const rows = await this.prisma.$queryRaw<{ id: string }[]>`
@@ -25,7 +35,7 @@ export class ProductsService {
     }
 
     const where: Prisma.ProductWhereInput = {
-      ...(activeOnly ? { active: true } : {}),
+      ...(all ? {} : { active: true }),
       ...(matchingIds ? { id: { in: matchingIds } } : {}),
     };
     const [items, total] = await this.prisma.$transaction([
@@ -50,108 +60,60 @@ export class ProductsService {
     return product;
   }
 
-  getById(id: string) {
-    return this.prisma.product.findUniqueOrThrow({
-      where: { id },
-      include: { batches: { orderBy: { expiresAt: 'asc' } } },
-    });
-  }
-
   create(input: ProductInput) {
-    const { stockEntry, ...productInput } = input;
+    const { stockEntry, ean, ...data } = input;
     return this.prisma.$transaction(async (tx) => {
-      const product = await tx.product.create({ data: this.normalize(productInput) });
-      if (stockEntry) {
-        await this.applyStockEntry(tx, product.id, stockEntry, productInput.purchasePrice);
-      }
-      return tx.product.findUniqueOrThrow({
-        where: { id: product.id },
-        include: { batches: { orderBy: { expiresAt: 'asc' } } },
-      });
+      const product = await tx.product.create({ data: { ...data, ean: ean || null } });
+      return this.withEntry(tx, product.id, stockEntry);
     });
   }
 
   update(id: string, input: UpdateProductInput) {
-    const { stockEntry, ...productInput } = input;
+    const { stockEntry, ean, ...data } = input;
     return this.prisma.$transaction(async (tx) => {
-      const product = await tx.product.update({
+      await tx.product.update({
         where: { id },
-        data: this.normalize(productInput),
+        data: { ...data, ...(ean === undefined ? {} : { ean: ean || null }) },
       });
-      if (stockEntry) {
-        await this.applyStockEntry(tx, product.id, stockEntry, productInput.purchasePrice);
-      }
-      return tx.product.findUniqueOrThrow({
-        where: { id },
-        include: { batches: { orderBy: { expiresAt: 'asc' } } },
-      });
+      return this.withEntry(tx, id, stockEntry);
     });
   }
 
-  /** Entrada embutida no cadastro/edição de produto — ver ADR 0001. Sempre aditiva. */
-  private async applyStockEntry(
-    tx: Prisma.TransactionClient,
-    productId: string,
-    entry: ProductStockEntryInput,
-    purchasePriceInput?: number,
-  ) {
-    const unitCost =
-      purchasePriceInput ??
-      (
-        await tx.product.findUniqueOrThrow({
-          where: { id: productId },
-          select: { purchasePrice: true },
-        })
-      ).purchasePrice;
-
-    await tx.stockMovement.create({
-      data: {
-        productId,
-        type: 'ENTRY',
-        source: 'PURCHASE',
-        quantity: entry.quantity,
-        unitCost,
-        note: 'Entrada lançada no cadastro do produto',
-      },
-    });
-    if (entry.batch || entry.expiresAt) {
-      await tx.productBatch.create({
-        data: {
-          productId,
-          batch: entry.batch,
-          expiresAt: entry.expiresAt,
-          quantity: entry.quantity,
-        },
-      });
-    }
-    await tx.product.update({
-      where: { id: productId },
-      data: { currentStock: { increment: entry.quantity } },
-    });
-  }
-
-  /** BR-04: produto com vendas não é excluído — apenas desativado. */
   async deactivate(id: string) {
     return this.prisma.product.update({ where: { id }, data: { active: false } });
   }
 
+  /**
+   * Excluir (CONTEXT.md): produto com venda registrada não é excluído, só
+   * desativado (BR-04). Sem venda, sai o cadastro junto com suas linhas de
+   * estoque (Entradas, Ajustes, lotes), numa transação.
+   */
   async remove(id: string) {
-    const salesCount = await this.prisma.saleItem.count({ where: { productId: id } });
-    if (salesCount > 0) {
-      throw new BadRequestException(
-        'Produto possui vendas registradas e não pode ser excluído — desative-o (BR-04)',
-      );
-    }
-    await this.prisma.$transaction([
-      this.prisma.productBatch.deleteMany({ where: { productId: id } }),
-      this.prisma.stockMovement.deleteMany({ where: { productId: id } }),
-      this.prisma.product.delete({ where: { id } }),
-    ]);
-    return { deleted: true };
+    return this.prisma.$transaction(async (tx) => {
+      if ((await tx.saleItem.count({ where: { productId: id } })) > 0) {
+        throw new BadRequestException(
+          'Produto possui vendas registradas e não pode ser excluído — desative-o (BR-04)',
+        );
+      }
+      await this.stock.deleteProductRows(tx, id);
+      await tx.product.delete({ where: { id } });
+      return { deleted: true };
+    });
   }
 
-  private normalize<T extends { ean?: string | null }>(input: T): T {
-    // EAN vazio vira null para não colidir com a unique constraint.
-    return { ...input, ean: input.ean ? input.ean : null };
+  /** Entrada embutida no cadastro (o custo é o preço de compra do produto). */
+  private async withEntry(
+    tx: Prisma.TransactionClient,
+    productId: string,
+    entry: ProductStockEntryInput | undefined,
+  ) {
+    if (entry) {
+      await this.stock.entry(tx, {
+        productId,
+        ...entry,
+        note: 'Entrada lançada no cadastro do produto',
+      });
+    }
+    return tx.product.findUniqueOrThrow({ where: { id: productId }, include: withBatches });
   }
 }

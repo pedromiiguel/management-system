@@ -1,6 +1,12 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { Permission, SettleReceivableInput, settleReceivableSchema } from '@beverage/shared';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
+import {
+  Permission,
+  ReceivableListQuery,
+  receivableListQuerySchema,
+  SettleReceivableInput,
+  settleReceivableSchema,
+} from '@beverage/shared';
+import { RequirePermission } from '../auth/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { ReceivablesService } from './receivables.service';
 
@@ -10,8 +16,8 @@ export class ReceivablesController {
 
   @Get()
   @RequirePermission(Permission.FINANCIAL_READ)
-  list(@Query('customerId') customerId?: string, @Query('status') status?: 'OPEN' | 'RECEIVED') {
-    return this.receivablesService.list({ customerId, status });
+  list(@Query(new ZodValidationPipe(receivableListQuerySchema)) query: ReceivableListQuery) {
+    return this.receivablesService.list(query);
   }
 
   @Post(':id/settle')

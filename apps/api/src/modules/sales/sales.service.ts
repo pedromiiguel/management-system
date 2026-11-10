@@ -10,15 +10,25 @@ import {
   CompleteSaleInput,
   DiscountInput,
   PaymentMethod,
-  SERVICE_FEE_RATE,
-  StockPolicy,
+  priceSale,
+  saleCode,
+  SaleHistoryQuery,
+  SaleStatus,
+  SystemCategory,
 } from '@beverage/shared';
+import { isUniqueViolation } from '../../prisma/errors';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CashLedger } from '../cash-register/cash-ledger';
 import { ProductsService } from '../products/products.service';
+import { ReceivablesService } from '../receivables/receivables.service';
 import { SettingsService } from '../settings/settings.service';
+import { StockLedger } from '../stock/stock-ledger';
 
 const Decimal = Prisma.Decimal;
 type Decimal = Prisma.Decimal;
+type Db = Prisma.TransactionClient;
+
+const HISTORY_PAGE_SIZE = 25;
 
 const saleInclude = {
   items: {
@@ -29,110 +39,129 @@ const saleInclude = {
   operator: { select: { id: true, name: true } },
 } satisfies Prisma.SaleInclude;
 
+/**
+ * Ciclo de vida da Venda (CONTEXT.md): abrir → Bipar/Alterar quantidade/
+ * Remover → concluir; Cancelar (em andamento) ou Estornar (concluída).
+ *
+ * Valores: `subtotal`, `serviceFee` e `total` vêm sempre de `priceSale`
+ * (@beverage/shared) e são regravados a cada alteração. `total` é sempre o
+ * valor devido — já inclui a Taxa de serviço quando ligada (`serviceFee` não
+ * nulo = taxa ligada).
+ */
 @Injectable()
 export class SalesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly products: ProductsService,
     private readonly settings: SettingsService,
+    private readonly stock: StockLedger,
+    private readonly cash: CashLedger,
+    private readonly receivables: ReceivablesService,
   ) {}
 
-  /** FR-09: abre o "carrinho". Reaproveita venda em andamento do operador, se houver. */
+  /**
+   * FR-09: abre o "carrinho". Reaproveita a venda em andamento do operador —
+   * só pode haver uma (índice único parcial), inclusive com aberturas simultâneas.
+   */
   async open(operatorId: string) {
-    const existing = await this.prisma.sale.findFirst({
-      where: { operatorId, status: 'IN_PROGRESS' },
-      include: saleInclude,
-    });
+    const inProgress = () =>
+      this.prisma.sale.findFirst({
+        where: { operatorId, status: SaleStatus.IN_PROGRESS },
+        include: saleInclude,
+      });
+    const existing = await inProgress();
     if (existing) return existing;
-    return this.prisma.sale.create({ data: { operatorId }, include: saleInclude });
+    try {
+      return await this.prisma.sale.create({ data: { operatorId }, include: saleInclude });
+    } catch (error) {
+      const opened = isUniqueViolation(error) ? await inProgress() : null;
+      if (opened) return opened;
+      throw error;
+    }
   }
 
-  getById(id: string) {
-    return this.prisma.sale.findUniqueOrThrow({ where: { id }, include: saleInclude });
-  }
-
-  /** FR-10/11/12/15: adiciona item por EAN/SKU; soma quantidade se repetido. */
+  /**
+   * Bipar (FR-10/11/12/15): soma a quantidade se o produto já está na venda.
+   * Devolve o item bipado (`itemId`) — criado ou somado.
+   */
   async addItem(saleId: string, input: AddSaleItemInput) {
-    const sale = await this.requireInProgress(saleId);
-    const product = await this.products.findByCode(input.code);
-    const policy = await this.settings.get('stockPolicy');
-
-    const existing = await this.prisma.saleItem.findUnique({
-      where: { saleId_productId: { saleId: sale.id, productId: product.id } },
+    let warning: string | null = null;
+    let itemId = '';
+    const sale = await this.changeInProgress(saleId, async (tx) => {
+      const product = await this.products.findByCode(input.code);
+      const existing = await tx.saleItem.findUnique({
+        where: { saleId_productId: { saleId, productId: product.id } },
+      });
+      const quantity = (existing?.quantity ?? 0) + input.quantity;
+      warning = this.stock.checkAvailability(product, quantity, await this.stockPolicy());
+      const item = existing
+        ? await tx.saleItem.update({ where: { id: existing.id }, data: { quantity } })
+        : await tx.saleItem.create({
+            data: {
+              saleId,
+              productId: product.id,
+              quantity,
+              unitPrice: product.salePrice,
+              unitCost: product.purchasePrice,
+            },
+          });
+      itemId = item.id;
     });
-    const newQuantity = (existing?.quantity ?? 0) + input.quantity;
-
-    let warning: string | null = null;
-    if (newQuantity > product.currentStock) {
-      const message = `Estoque insuficiente de "${product.name}": disponível ${product.currentStock}, solicitado ${newQuantity}`;
-      if (policy === StockPolicy.BLOCK) throw new ConflictException(message);
-      warning = message;
-    }
-
-    if (existing) {
-      await this.prisma.saleItem.update({
-        where: { id: existing.id },
-        data: { quantity: newQuantity },
-      });
-    } else {
-      await this.prisma.saleItem.create({
-        data: {
-          saleId: sale.id,
-          productId: product.id,
-          quantity: input.quantity,
-          unitPrice: product.salePrice,
-          unitCost: product.purchasePrice,
-        },
-      });
-    }
-    const updated = await this.recomputeTotals(sale.id);
-    return { sale: updated, warning };
+    return { sale, itemId, warning };
   }
 
-  /** FR-14: altera quantidade ou remove item antes da conclusão. */
+  /** Alterar quantidade (FR-14) de um Item já na venda. */
   async updateItem(saleId: string, itemId: string, quantity: number) {
-    await this.requireInProgress(saleId);
-    const item = await this.prisma.saleItem.findFirst({ where: { id: itemId, saleId } });
-    if (!item) throw new NotFoundException('Item não encontrado nesta venda');
-
-    const policy = await this.settings.get('stockPolicy');
-    const product = await this.prisma.product.findUniqueOrThrow({ where: { id: item.productId } });
     let warning: string | null = null;
-    if (quantity > product.currentStock) {
-      const message = `Estoque insuficiente de "${product.name}": disponível ${product.currentStock}`;
-      if (policy === StockPolicy.BLOCK) throw new ConflictException(message);
-      warning = message;
-    }
-
-    await this.prisma.saleItem.update({ where: { id: itemId }, data: { quantity } });
-    return { sale: await this.recomputeTotals(saleId), warning };
+    const sale = await this.changeInProgress(saleId, async (tx) => {
+      const item = await tx.saleItem.findFirst({
+        where: { id: itemId, saleId },
+        include: { product: true },
+      });
+      if (!item) throw new NotFoundException('Item não encontrado nesta venda');
+      warning = this.stock.checkAvailability(item.product, quantity, await this.stockPolicy());
+      await tx.saleItem.update({ where: { id: itemId }, data: { quantity } });
+    });
+    return { sale, warning };
   }
 
-  async removeItem(saleId: string, itemId: string) {
-    await this.requireInProgress(saleId);
-    await this.prisma.saleItem.deleteMany({ where: { id: itemId, saleId } });
-    return this.recomputeTotals(saleId);
+  /** Remover (FR-14) um Item da venda em andamento. */
+  removeItem(saleId: string, itemId: string) {
+    return this.changeInProgress(saleId, (tx) =>
+      tx.saleItem.deleteMany({ where: { id: itemId, saleId } }),
+    );
   }
 
   /** FR-16: desconto em valor ou percentual. */
-  async setDiscount(saleId: string, discount: DiscountInput | null) {
-    await this.requireInProgress(saleId);
-    await this.prisma.sale.update({
-      where: { id: saleId },
-      data: {
-        discountType: discount?.type ?? null,
-        discountValue: discount ? new Decimal(discount.value) : null,
-      },
-    });
-    return this.recomputeTotals(saleId);
+  setDiscount(saleId: string, discount: DiscountInput | null) {
+    return this.changeInProgress(saleId, (tx) =>
+      tx.sale.update({
+        where: { id: saleId },
+        data: {
+          discountType: discount?.type ?? null,
+          discountValue: discount ? new Decimal(discount.value) : null,
+        },
+      }),
+    );
   }
 
-  /** FR-21: cancela venda em andamento — nada de estoque/financeiro foi tocado. */
+  /** Liga/desliga a Taxa de serviço; o total passa a refleti-la imediatamente. */
+  setServiceFee(saleId: string, enabled: boolean) {
+    // O valor exato é calculado em `reprice`; aqui só liga (≠ null) ou desliga.
+    return this.changeInProgress(saleId, (tx) =>
+      tx.sale.update({
+        where: { id: saleId },
+        data: { serviceFee: enabled ? new Decimal(0) : null },
+      }),
+    );
+  }
+
+  /** Cancelar (FR-21): abandona a venda em andamento — nada de estoque/financeiro foi tocado. */
   async cancelInProgress(saleId: string) {
-    await this.requireInProgress(saleId);
+    await this.requireInProgress(this.prisma, saleId);
     return this.prisma.sale.update({
       where: { id: saleId },
-      data: { status: 'CANCELLED', cancelledAt: new Date() },
+      data: { status: SaleStatus.CANCELLED, cancelledAt: new Date() },
       include: saleInclude,
     });
   }
@@ -142,203 +171,106 @@ export class SalesService {
    * financeiro na mesma transação; qualquer falha desfaz tudo.
    */
   async complete(saleId: string, input: CompleteSaleInput) {
-    const policy = await this.settings.get('stockPolicy');
-    const enabledMethods = await this.settings.get('enabledPaymentMethods');
-    if (!enabledMethods.includes(input.paymentMethod)) {
+    const { enabledPaymentMethods, stockPolicy } = await this.settings.getAll();
+    if (!enabledPaymentMethods.includes(input.paymentMethod)) {
       throw new BadRequestException('Forma de pagamento desabilitada nas configurações');
     }
+    // O schema garante: dinheiro traz o valor recebido; a prazo traz o cliente.
+    const amountPaid = input.paymentMethod === PaymentMethod.CASH ? input.amountPaid : null;
 
     return this.prisma.$transaction(async (tx) => {
+      await this.requireInProgress(tx, saleId);
       const sale = await tx.sale.findUniqueOrThrow({
         where: { id: saleId },
         include: { items: { include: { product: true } } },
       });
-      if (sale.status !== 'IN_PROGRESS') {
-        throw new ConflictException('Venda não está em andamento');
-      }
-      if (sale.items.length === 0) {
-        throw new BadRequestException('Venda sem itens');
-      }
+      if (sale.items.length === 0) throw new BadRequestException('Venda sem itens');
 
-      // Totais (Decimal — sem float)
-      const subtotal = sale.items.reduce(
-        (acc, i) => acc.add(i.unitPrice.mul(i.quantity)),
-        new Decimal(0),
-      );
-      let total = this.applyDiscount(subtotal, sale.discountType, sale.discountValue);
-
-      // Taxa de serviço opcional do cupom: 10% sobre o subtotal (pré-desconto),
-      // somada após o desconto — entra no total cobrado, no troco e no financeiro.
-      let serviceFee: Decimal | null = null;
-      if (input.serviceFee) {
-        serviceFee = subtotal.mul(SERVICE_FEE_RATE).toDecimalPlaces(2);
-        total = total.add(serviceFee);
+      const price = priceOf(sale, amountPaid);
+      if (price.change !== null && price.change < 0) {
+        throw new BadRequestException('Valor recebido é menor que o total da venda');
       }
+      const total = toDecimal(price.total);
 
-      // Troco (FR-18) — dinheiro exige valor recebido suficiente
-      let amountPaid: Decimal | null = null;
-      let change: Decimal | null = null;
-      if (input.paymentMethod === PaymentMethod.CASH) {
-        if (input.amountPaid === undefined) {
-          throw new BadRequestException('Informe o valor recebido em dinheiro');
-        }
-        amountPaid = new Decimal(input.amountPaid);
-        if (amountPaid.lt(total)) {
-          throw new BadRequestException('Valor recebido é menor que o total da venda');
-        }
-        change = amountPaid.sub(total);
-      }
+      await this.stock.exitForSale(tx, sale.id, sale.items, stockPolicy);
 
-      // Caixa aberto — obrigatório para dinheiro (sangria/fechamento dependem dele)
-      const register = await tx.cashRegister.findFirst({
-        where: { status: 'OPEN' },
-        orderBy: { openedAt: 'desc' },
-      });
-      if (input.paymentMethod === PaymentMethod.CASH && !register) {
-        throw new ConflictException('Abra o caixa antes de receber em dinheiro');
-      }
-
-      // Baixa de estoque com guarda contra corrida (BR-03)
-      for (const item of sale.items) {
-        if (policy === StockPolicy.BLOCK) {
-          const updated = await tx.product.updateMany({
-            where: { id: item.productId, currentStock: { gte: item.quantity } },
-            data: { currentStock: { decrement: item.quantity } },
-          });
-          if (updated.count === 0) {
-            throw new ConflictException(
-              `Estoque insuficiente de "${item.product.name}" — venda não concluída`,
-            );
-          }
-        } else {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: { currentStock: { decrement: item.quantity } },
-          });
-        }
-        await tx.stockMovement.create({
-          data: {
-            productId: item.productId,
-            type: 'EXIT',
-            source: 'SALE',
-            quantity: item.quantity,
-            saleId: sale.id,
-          },
-        });
-        await this.consumeBatchesFefo(tx, item.productId, item.quantity);
-      }
-
-      // Lançamento financeiro (BR-08)
+      let cashRegisterId: string | null = null;
       if (input.paymentMethod === PaymentMethod.CREDIT) {
-        await tx.accountReceivable.create({
-          data: {
-            customerId: input.customerId!,
-            saleId: sale.id,
-            amount: total,
-            dueDate: input.dueDate,
-          },
+        await this.receivables.createForSale(tx, {
+          customerId: input.customerId,
+          saleId: sale.id,
+          amount: total,
+          dueDate: input.dueDate,
         });
       } else {
-        const salesCategory = await tx.financialCategory.findUnique({
-          where: { name: 'Vendas' },
+        const { register } = await this.cash.receive(tx, {
+          amount: total,
+          paymentMethod: input.paymentMethod,
+          description: `Venda ${saleCode(sale.id)}`,
+          category: SystemCategory.SALES,
+          saleId: sale.id,
         });
-        await tx.cashMovement.create({
-          data: {
-            cashRegisterId: register?.id,
-            type: 'INFLOW',
-            amount: total,
-            description: `Venda ${sale.id.slice(-6).toUpperCase()}`,
-            paymentMethod: input.paymentMethod,
-            categoryId: salesCategory?.id,
-            saleId: sale.id,
-          },
-        });
+        cashRegisterId = register?.id ?? null;
       }
 
       return tx.sale.update({
         where: { id: sale.id },
         data: {
-          status: 'COMPLETED',
+          status: SaleStatus.COMPLETED,
           completedAt: new Date(),
-          subtotal,
-          total,
+          ...pricingColumns(price),
           paymentMethod: input.paymentMethod,
-          amountPaid,
-          change,
-          serviceFee,
+          amountPaid: amountPaid === null ? null : toDecimal(amountPaid),
+          change: price.change === null ? null : toDecimal(price.change),
           withInvoice: input.withInvoice,
           customerId: input.customerId,
-          cashRegisterId: register?.id,
+          cashRegisterId,
         },
         include: saleInclude,
       });
     });
   }
 
-  /** FR-22/BR-05: cancela venda concluída com estorno de estoque e financeiro. */
+  /**
+   * Estornar (FR-22/BR-05): itens voltam ao estoque (e aos lotes), o valor é
+   * devolvido pelo caixa aberto agora — ou o fiado é desfeito. O registro fica
+   * como VOIDED para auditoria.
+   */
   async void(saleId: string) {
     return this.prisma.$transaction(async (tx) => {
-      const sale = await tx.sale.findUniqueOrThrow({
-        where: { id: saleId },
-        include: { items: true, receivable: true },
-      });
-      if (sale.status !== 'COMPLETED') {
+      const sale = await tx.sale.findUniqueOrThrow({ where: { id: saleId } });
+      if (sale.status !== SaleStatus.COMPLETED) {
         throw new ConflictException('Apenas vendas concluídas podem ser estornadas');
       }
 
-      if (sale.receivable) {
-        if (sale.receivable.status === 'RECEIVED') {
-          throw new ConflictException(
-            'O fiado desta venda já foi recebido — estorne o recebimento no financeiro antes de cancelar',
-          );
-        }
-        await tx.accountReceivable.delete({ where: { id: sale.receivable.id } });
+      if (sale.paymentMethod === PaymentMethod.CREDIT) {
+        await this.receivables.cancelForSale(tx, sale.id);
       } else {
-        // Estorno do recebimento como saída de caixa (mantém o histórico — NFR-11)
-        await tx.cashMovement.create({
-          data: {
-            cashRegisterId: sale.cashRegisterId,
-            type: 'OUTFLOW',
-            amount: sale.total,
-            description: `Estorno da venda ${sale.id.slice(-6).toUpperCase()}`,
-            paymentMethod: sale.paymentMethod,
-            saleId: sale.id,
-          },
+        await this.cash.refundSale(tx, {
+          amount: sale.total,
+          paymentMethod: sale.paymentMethod!,
+          description: `Estorno da venda ${saleCode(sale.id)}`,
+          saleId: sale.id,
         });
       }
-
-      for (const item of sale.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { currentStock: { increment: item.quantity } },
-        });
-        await tx.stockMovement.create({
-          data: {
-            productId: item.productId,
-            type: 'ENTRY',
-            source: 'CANCELLATION',
-            quantity: item.quantity,
-            saleId: sale.id,
-          },
-        });
-      }
+      await this.stock.returnForVoid(tx, sale.id);
 
       return tx.sale.update({
         where: { id: sale.id },
-        data: { status: 'CANCELLED', cancelledAt: new Date() },
+        data: { status: SaleStatus.VOIDED, voidedAt: new Date() },
         include: saleInclude,
       });
     });
   }
 
-  /** FR-24: histórico com filtros. */
-  async history(params: { from?: Date; to?: Date; status?: string; page?: number }) {
-    const { from, to, status, page = 1 } = params;
-    const perPage = 25;
+  /** FR-24: histórico (concluídas, canceladas e estornadas) com filtros. */
+  async history(query: SaleHistoryQuery) {
+    const { from, to, status, page } = query;
+    const range = { gte: from, lte: to };
     const where: Prisma.SaleWhereInput = {
-      status: status ? (status as Prisma.SaleWhereInput['status']) : { not: 'IN_PROGRESS' },
+      status: status ?? { not: SaleStatus.IN_PROGRESS },
       ...(from || to
-        ? { OR: [{ completedAt: { gte: from, lte: to } }, { cancelledAt: { gte: from, lte: to } }] }
+        ? { OR: [{ completedAt: range }, { cancelledAt: range }, { voidedAt: range }] }
         : {}),
     };
     const [items, total] = await this.prisma.$transaction([
@@ -346,69 +278,82 @@ export class SalesService {
         where,
         include: saleInclude,
         orderBy: { openedAt: 'desc' },
-        skip: (page - 1) * perPage,
-        take: perPage,
+        skip: (page - 1) * HISTORY_PAGE_SIZE,
+        take: HISTORY_PAGE_SIZE,
       }),
       this.prisma.sale.count({ where }),
     ]);
-    return { items, total, page, perPage };
+    return { items, total, page, perPage: HISTORY_PAGE_SIZE };
   }
 
   // ---------- helpers ----------
 
-  private async requireInProgress(saleId: string) {
-    const sale = await this.prisma.sale.findUniqueOrThrow({ where: { id: saleId } });
-    if (sale.status !== 'IN_PROGRESS') {
+  /**
+   * Toda alteração de venda em andamento: confere o status, aplica a mudança e
+   * reprecifica, numa transação. Devolve a venda atualizada.
+   */
+  private changeInProgress(saleId: string, change: (tx: Db) => Promise<unknown>) {
+    return this.prisma.$transaction(async (tx) => {
+      await this.requireInProgress(tx, saleId);
+      await change(tx);
+      return this.reprice(tx, saleId);
+    });
+  }
+
+  private async requireInProgress(db: Db, saleId: string) {
+    const sale = await db.sale.findUniqueOrThrow({ where: { id: saleId } });
+    if (sale.status !== SaleStatus.IN_PROGRESS) {
       throw new ConflictException('Venda não está em andamento');
     }
     return sale;
   }
 
-  private async recomputeTotals(saleId: string) {
-    const sale = await this.prisma.sale.findUniqueOrThrow({
+  private async reprice(db: Db, saleId: string) {
+    const sale = await db.sale.findUniqueOrThrow({
       where: { id: saleId },
       include: { items: true },
     });
-    const subtotal = sale.items.reduce(
-      (acc, i) => acc.add(i.unitPrice.mul(i.quantity)),
-      new Decimal(0),
-    );
-    const total = this.applyDiscount(subtotal, sale.discountType, sale.discountValue);
-    return this.prisma.sale.update({
+    return db.sale.update({
       where: { id: saleId },
-      data: { subtotal, total },
+      data: pricingColumns(priceOf(sale, null)),
       include: saleInclude,
     });
   }
 
-  private applyDiscount(
-    subtotal: Decimal,
-    type: 'AMOUNT' | 'PERCENT' | null,
-    value: Decimal | null,
-  ): Decimal {
-    if (!type || !value) return subtotal;
-    const total =
-      type === 'AMOUNT'
-        ? subtotal.sub(value)
-        : subtotal.mul(new Decimal(100).sub(value)).div(100).toDecimalPlaces(2);
-    return total.lt(0) ? new Decimal(0) : total;
+  private stockPolicy() {
+    return this.settings.get('stockPolicy');
   }
+}
 
-  /** FR-08: consome lotes na ordem de vencimento (FEFO), best-effort. */
-  private async consumeBatchesFefo(tx: Prisma.TransactionClient, productId: string, qty: number) {
-    let remaining = qty;
-    const batches = await tx.productBatch.findMany({
-      where: { productId, quantity: { gt: 0 } },
-      orderBy: [{ expiresAt: 'asc' }, { createdAt: 'asc' }],
-    });
-    for (const batch of batches) {
-      if (remaining <= 0) break;
-      const consumed = Math.min(batch.quantity, remaining);
-      await tx.productBatch.update({
-        where: { id: batch.id },
-        data: { quantity: { decrement: consumed } },
-      });
-      remaining -= consumed;
-    }
-  }
+function priceOf(
+  sale: {
+    items: { unitPrice: Decimal; quantity: number }[];
+    discountType: DiscountInput['type'] | null;
+    discountValue: Decimal | null;
+    serviceFee: Decimal | null;
+  },
+  amountPaid: number | null,
+) {
+  return priceSale({
+    items: sale.items.map((i) => ({ unitPrice: i.unitPrice.toNumber(), quantity: i.quantity })),
+    discount:
+      sale.discountType && sale.discountValue
+        ? { type: sale.discountType, value: sale.discountValue.toNumber() }
+        : null,
+    serviceFee: sale.serviceFee !== null,
+    amountPaid,
+  });
+}
+
+function pricingColumns(price: ReturnType<typeof priceSale>) {
+  return {
+    subtotal: toDecimal(price.subtotal),
+    serviceFee: price.serviceFee === null ? null : toDecimal(price.serviceFee),
+    total: toDecimal(price.total),
+  };
+}
+
+/** `priceSale` devolve reais exatos em centavos; `toFixed(2)` os traz de volta sem perda. */
+function toDecimal(reais: number): Decimal {
+  return new Decimal(reais.toFixed(2));
 }

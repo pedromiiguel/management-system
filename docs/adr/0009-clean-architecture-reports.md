@@ -1,8 +1,8 @@
 # 0009 — Reports como 5º módulo da Clean Architecture
 
-- **Status:** Aceito (implementado)
+- **Status:** Substituída pela [ADR 0014](0014-organizacao-por-funcionalidade.md)
 - **Data:** 2026-07-24
-- **Estende:** o padrão promovido a convenção de repo pela [ADR 0006](0006-clean-architecture-financial-promove-convencao.md), aplicando a mesma receita de migração de tipos do [ADR 0005](0005-centraliza-tipos-em-domain.md) e a convenção de componentes do [componentes-mvvm.md](../componentes-mvvm.md)
+- **Estende:** o padrão promovido a convenção de repo pela [ADR 0006](0006-clean-architecture-financial-promove-convencao.md), aplicando a mesma receita de migração de tipos do [ADR 0005](0005-centraliza-tipos-em-domain.md) e a convenção de componentes do `componentes-mvvm.md` (removido — ver [arquitetura.md](../arquitetura.md))
 - **Resolve parcialmente:** a promessa registrada na ADR 0006 ("quando `reports.tsx` for migrado, [`IGetSalesTotal`] deve se mover para lá")
 
 ## Contexto

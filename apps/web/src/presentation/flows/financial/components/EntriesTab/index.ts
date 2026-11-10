@@ -1,1 +1,0 @@
-export { EntriesTab } from './EntriesTab';

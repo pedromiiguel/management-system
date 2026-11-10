@@ -2,12 +2,10 @@ import { expect, test } from '@playwright/test';
 import { resetDatabase } from './support/db';
 import { openSettingsTab } from './support/settings';
 
-// Suíte E2E de configurações — trava o comportamento observável das 3 abas
-// ANTES da refatoração estrutural (ADR 0001/0010), mesmo espírito das suítes
-// de financeiro/produtos/estoque/relatórios. A única regra de negócio com
-// ramificação real (guarda de lockout do papel Administrador) já está coberta
-// por apps/api/test/users.e2e-spec.ts (supertest) — aqui só se verifica o
-// caminho feliz da UI das 3 abas.
+// Suíte E2E de configurações — o comportamento observável das 3 abas. A única
+// regra com ramificação real (guarda de lockout do papel Administrador) está
+// coberta por apps/api/test/users.e2e-spec.ts — aqui só o caminho feliz da UI
+// (ver "Testes" em docs/arquitetura.md).
 
 test.describe('Configurações — Geral', () => {
   test.beforeAll(() => resetDatabase());
@@ -25,7 +23,7 @@ test.describe('Configurações — Geral', () => {
     await expect(page.getByRole('button', { name: '60 dias' })).toHaveClass(/is-active/);
   });
 
-  test('salva a meta de faturamento mensal (FR-36)', async ({ page }) => {
+  test('salva a meta de receita mensal (FR-36)', async ({ page }) => {
     await page.getByPlaceholder('ex.: 50000,00').fill('75000,00');
     await page.getByRole('button', { name: 'Salvar' }).click();
     await expect(page.locator('.s-toast')).toContainText('Configuração salva');
@@ -85,7 +83,7 @@ test.describe('Configurações — Categorias financeiras', () => {
   test.beforeAll(() => resetDatabase());
   test.beforeEach(async ({ page }) => openSettingsTab(page, 'Categorias financeiras'));
 
-  test('lista as categorias padrão do seed com a origem "sistema"', async ({ page }) => {
+  test('lista as categorias do sistema (migração) com a origem "sistema"', async ({ page }) => {
     const row = page.locator('.s-tr').filter({ hasText: 'Vendas' });
     await expect(row.getByText('sistema')).toBeVisible();
   });

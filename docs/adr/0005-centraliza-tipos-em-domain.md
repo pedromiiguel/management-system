@@ -1,6 +1,6 @@
 # 0005 — Centraliza os tipos do Sale em `domain/models`; extrai objetos inline
 
-- **Status:** Aceito
+- **Status:** Substituída pela [ADR 0014](0014-organizacao-por-funcionalidade.md)
 - **Data:** 2026-07-22
 - **Resolve:** o 3º desvio registrado no [ADR 0003](0003-clean-architecture-piloto-pos.md#4-onde-cada-coisa-mora) (`domain/models` reexportando de `lib/types.ts` em vez de definir os tipos)
 

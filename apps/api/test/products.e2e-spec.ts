@@ -1,208 +1,166 @@
-import { execFileSync } from 'node:child_process';
-import path from 'node:path';
-import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import { PaymentMethod, Permission } from '@beverage/shared';
-import request from 'supertest';
-import { AppModule } from '../src/app.module';
+import { createTestApp, TestApp } from './support/app';
 
 /**
- * Regras de negócio de `products` com ramificação real (ADR 0007): BR-04
- * (bloqueio de exclusão com venda) e a permissão dupla (PRODUCTS_WRITE +
- * STOCK_WRITE) na entrada de estoque embutida. A transação de
- * `applyStockEntry` e a normalização de EAN ficam fora deste gate por
- * decisão explícita — cobertas por teste unitário de handler na fase 3.
- * Reset de schema único para o arquivo, mesmo padrão de `financial.e2e-spec.ts`.
+ * Produtos: Entrada embutida no cadastro exige também STOCK_WRITE; Excluir só
+ * vale para produto sem venda registrada (BR-04), levando junto as linhas de
+ * estoque; edição parcial não reescreve o que não foi enviado.
  */
-function resetDatabase(): void {
-  const repoRoot = path.resolve(__dirname, '../../..');
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  execFileSync(npmCmd, ['run', 'db:reset', '--workspace', 'apps/api'], {
-    cwd: repoRoot,
-    stdio: 'inherit',
-    shell: process.platform === 'win32',
-    env: {
-      ...process.env,
-      PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'Sim, pode resetar (Recomendado)',
-    },
-  });
-}
-
-describe('Products — regras de negócio (ADR 0007)', () => {
-  let app: INestApplication;
-  let adminToken: string;
-  /** Papel só com PRODUCTS_WRITE (sem STOCK_WRITE), criado via API — exercita a guarda dupla. */
+describe('Products', () => {
+  let t: TestApp;
   let productsOnlyToken: string;
+  let seq = 0;
 
   beforeAll(async () => {
-    resetDatabase();
-
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = moduleRef.createNestApplication();
-    app.setGlobalPrefix('api');
-    await app.init();
-
-    const adminLogin = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({ login: 'admin', password: 'admin123' });
-    adminToken = adminLogin.body.accessToken;
-
-    const role = await request(app.getHttpServer())
-      .post('/api/users/roles')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send({ name: 'Cadastro de produtos (teste)', permissions: [Permission.PRODUCTS_WRITE] })
-      .expect(201);
-
-    await request(app.getHttpServer())
-      .post('/api/users')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send({
-        name: 'Sem estoque',
-        login: 'sem-estoque',
-        password: 'senha123',
-        roleId: role.body.id,
-      })
-      .expect(201);
-
-    const login = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({ login: 'sem-estoque', password: 'senha123' });
-    productsOnlyToken = login.body.accessToken;
+    t = await createTestApp();
+    productsOnlyToken = await t.userWith([Permission.PRODUCTS_WRITE]);
   });
 
-  afterAll(async () => {
-    await app.close();
-  });
+  afterAll(() => t.close());
 
-  const auth = (token: string) => `Bearer ${token}`;
+  function productBody(extra: Record<string, unknown> = {}) {
+    seq += 1;
+    return {
+      name: `Produto teste ${seq}`,
+      sku: `TEST-PROD-${seq}`,
+      unit: 'un',
+      purchasePrice: 1,
+      salePrice: 2,
+      ...extra,
+    };
+  }
 
   describe('Permissão dupla na entrada de estoque embutida', () => {
     it('permite criar produto sem stockEntry só com products.write', async () => {
-      await request(app.getHttpServer())
-        .post('/api/products')
-        .set('Authorization', auth(productsOnlyToken))
-        .send({
-          name: 'Produto sem entrada',
-          sku: 'TEST-SEM-ENTRADA',
-          unit: 'un',
-          purchasePrice: 1,
-          salePrice: 2,
-          minimumStock: 0,
-        })
-        .expect(201);
+      await t.as(productsOnlyToken).post('/api/products').send(productBody()).expect(201);
     });
 
     it('rejeita stockEntry quando falta stock.write', async () => {
-      const res = await request(app.getHttpServer())
+      await t
+        .as(productsOnlyToken)
         .post('/api/products')
-        .set('Authorization', auth(productsOnlyToken))
-        .send({
-          name: 'Produto com entrada negada',
-          sku: 'TEST-ENTRADA-NEGADA',
-          unit: 'un',
-          purchasePrice: 1,
-          salePrice: 2,
-          minimumStock: 0,
-          stockEntry: { quantity: 10 },
-        });
-      expect(res.status).toBe(403);
+        .send(productBody({ stockEntry: { quantity: 10 } }))
+        .expect(403);
     });
 
-    it('permite stockEntry quando o usuário tem products.write e stock.write', async () => {
-      await request(app.getHttpServer())
+    it('permite stockEntry com products.write e stock.write — e lança a Entrada', async () => {
+      const res = await t
+        .as(t.adminToken)
         .post('/api/products')
-        .set('Authorization', auth(adminToken))
-        .send({
-          name: 'Produto com entrada permitida',
-          sku: 'TEST-ENTRADA-OK',
-          unit: 'un',
-          purchasePrice: 1,
-          salePrice: 2,
-          minimumStock: 0,
-          stockEntry: { quantity: 10 },
-        })
+        .send(productBody({ purchasePrice: 3.25, stockEntry: { quantity: 10, batch: 'L1' } }))
         .expect(201);
+      expect(res.body.currentStock).toBe(10);
+      expect(res.body.batches).toHaveLength(1);
+
+      const movements = await t.prisma.stockMovement.findMany({
+        where: { productId: res.body.id },
+      });
+      expect(movements).toHaveLength(1);
+      expect(movements[0]!.unitCost!.toNumber()).toBe(3.25);
     });
 
     it('mesma guarda vale para edição (update)', async () => {
-      const created = await request(app.getHttpServer())
+      const created = await t
+        .as(t.adminToken)
         .post('/api/products')
-        .set('Authorization', auth(adminToken))
-        .send({
-          name: 'Produto para editar',
-          sku: 'TEST-EDITAR',
-          unit: 'un',
-          purchasePrice: 1,
-          salePrice: 2,
-          minimumStock: 0,
-        })
+        .send(productBody())
         .expect(201);
-
-      const res = await request(app.getHttpServer())
+      await t
+        .as(productsOnlyToken)
         .patch(`/api/products/${created.body.id}`)
-        .set('Authorization', auth(productsOnlyToken))
-        .send({ stockEntry: { quantity: 5 } });
-      expect(res.status).toBe(403);
+        .send({ stockEntry: { quantity: 5 } })
+        .expect(403);
     });
   });
 
-  describe('BR-04: bloqueio de exclusão de produto com venda registrada', () => {
-    it('permite excluir produto sem venda registrada', async () => {
-      const created = await request(app.getHttpServer())
+  describe('Edição parcial', () => {
+    it('PATCH parcial não reativa, não zera o mínimo e não apaga o EAN', async () => {
+      const created = await t
+        .as(t.adminToken)
         .post('/api/products')
-        .set('Authorization', auth(adminToken))
-        .send({
-          name: 'Produto sem venda',
-          sku: 'TEST-SEM-VENDA',
-          unit: 'un',
-          purchasePrice: 1,
-          salePrice: 2,
-          minimumStock: 0,
-        })
+        .send(productBody({ ean: '7890000000017', minimumStock: 7 }))
         .expect(201);
+      const id = created.body.id as string;
+      await t.as(t.adminToken).patch(`/api/products/${id}/deactivate`).expect(200);
 
-      await request(app.getHttpServer())
-        .delete(`/api/products/${created.body.id}`)
-        .set('Authorization', auth(adminToken))
+      const res = await t
+        .as(t.adminToken)
+        .patch(`/api/products/${id}`)
+        .send({ salePrice: 5 })
         .expect(200);
+      expect(res.body).toMatchObject({
+        active: false,
+        minimumStock: 7,
+        ean: '7890000000017',
+        salePrice: 5,
+      });
+    });
+
+    it('EAN vazio remove o EAN', async () => {
+      const created = await t
+        .as(t.adminToken)
+        .post('/api/products')
+        .send(productBody({ ean: '7890000000024' }))
+        .expect(201);
+      const res = await t
+        .as(t.adminToken)
+        .patch(`/api/products/${created.body.id}`)
+        .send({ ean: '' })
+        .expect(200);
+      expect(res.body.ean).toBeNull();
+    });
+  });
+
+  describe('Excluir (BR-04)', () => {
+    it('permite excluir produto sem venda', async () => {
+      const created = await t
+        .as(t.adminToken)
+        .post('/api/products')
+        .send(productBody())
+        .expect(201);
+      await t.as(t.adminToken).delete(`/api/products/${created.body.id}`).expect(200);
     });
 
     it('rejeita excluir produto com venda registrada', async () => {
-      const created = await request(app.getHttpServer())
-        .post('/api/products')
-        .set('Authorization', auth(adminToken))
-        .send({
-          name: 'Produto com venda',
-          sku: 'TEST-COM-VENDA',
-          unit: 'un',
-          purchasePrice: 1,
-          salePrice: 2,
-          minimumStock: 0,
-          stockEntry: { quantity: 10 },
-        })
-        .expect(201);
-
-      const sale = await request(app.getHttpServer())
-        .post('/api/sales')
-        .set('Authorization', auth(adminToken))
-        .expect(201);
-
-      await request(app.getHttpServer())
+      const body = productBody({ stockEntry: { quantity: 10 } });
+      const created = await t.as(t.adminToken).post('/api/products').send(body).expect(201);
+      const sale = await t.as(t.adminToken).post('/api/sales').expect(201);
+      await t
+        .as(t.adminToken)
         .post(`/api/sales/${sale.body.id}/items`)
-        .set('Authorization', auth(adminToken))
-        .send({ code: 'TEST-COM-VENDA', quantity: 1 })
+        .send({ code: body.sku, quantity: 1 })
         .expect(201);
-
-      await request(app.getHttpServer())
+      await t
+        .as(t.adminToken)
         .post(`/api/sales/${sale.body.id}/complete`)
-        .set('Authorization', auth(adminToken))
         .send({ paymentMethod: PaymentMethod.PIX })
         .expect(201);
 
-      const res = await request(app.getHttpServer())
-        .delete(`/api/products/${created.body.id}`)
-        .set('Authorization', auth(adminToken));
-      expect(res.status).toBe(400);
+      await t.as(t.adminToken).delete(`/api/products/${created.body.id}`).expect(400);
+      expect(await t.prisma.product.count({ where: { id: created.body.id } })).toBe(1);
+    });
+
+    it('exclui produto com Entrada e lote mas sem venda, junto com as linhas de estoque', async () => {
+      const created = await t
+        .as(t.adminToken)
+        .post('/api/products')
+        .send(productBody({ stockEntry: { quantity: 3, batch: 'L1', expiresAt: '2030-01-01' } }))
+        .expect(201);
+      const productId = created.body.id;
+      await t
+        .as(t.adminToken)
+        .post('/api/stock/adjustments')
+        .send({ productId, quantity: -1, reason: 'quebra' })
+        .expect(201);
+      expect(await t.prisma.stockMovement.count({ where: { productId } })).toBe(2);
+
+      await t.as(t.adminToken).delete(`/api/products/${productId}`).expect(200);
+      expect(await t.prisma.product.count({ where: { id: productId } })).toBe(0);
+      expect(await t.prisma.stockMovement.count({ where: { productId } })).toBe(0);
+      expect(await t.prisma.productBatch.count({ where: { productId } })).toBe(0);
+      expect(await t.prisma.stockMovementBatch.count({ where: { movement: { productId } } })).toBe(
+        0,
+      );
     });
   });
 });

@@ -1,78 +1,25 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { StockAdjustmentInput, StockEntryInput } from '@beverage/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SettingsService } from '../settings/settings.service';
+import { StockLedger } from './stock-ledger';
 
 @Injectable()
 export class StockService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly ledger: StockLedger,
     private readonly settings: SettingsService,
   ) {}
 
-  /** FR-05: entrada de compra/reposição — movimento + saldo na mesma transação. */
+  /** FR-05: Entrada de compra/reposição. */
   createEntry(input: StockEntryInput) {
-    return this.prisma.$transaction(async (tx) => {
-      const movement = await tx.stockMovement.create({
-        data: {
-          productId: input.productId,
-          type: 'ENTRY',
-          source: 'PURCHASE',
-          quantity: input.quantity,
-          unitCost: input.unitCost,
-          note: input.note,
-        },
-      });
-      if (input.batch || input.expiresAt) {
-        await tx.productBatch.create({
-          data: {
-            productId: input.productId,
-            batch: input.batch,
-            expiresAt: input.expiresAt,
-            quantity: input.quantity,
-          },
-        });
-      }
-      const product = await tx.product.update({
-        where: { id: input.productId },
-        data: {
-          currentStock: { increment: input.quantity },
-          // Entrada com custo atualiza o preço de compra de referência.
-          ...(input.unitCost !== undefined ? { purchasePrice: input.unitCost } : {}),
-        },
-      });
-      return { movement, currentStock: product.currentStock };
-    });
+    return this.prisma.$transaction((tx) => this.ledger.entry(tx, input));
   }
 
-  /** Ajuste manual auditável (inventário, quebra, perda). */
+  /** Ajustar: correção manual auditável (inventário, quebra, perda). */
   createAdjustment(input: StockAdjustmentInput) {
-    return this.prisma.$transaction(async (tx) => {
-      if (input.quantity < 0) {
-        const updated = await tx.product.updateMany({
-          where: { id: input.productId, currentStock: { gte: -input.quantity } },
-          data: { currentStock: { increment: input.quantity } },
-        });
-        if (updated.count === 0) {
-          throw new BadRequestException('Ajuste deixaria o estoque negativo');
-        }
-      } else {
-        await tx.product.update({
-          where: { id: input.productId },
-          data: { currentStock: { increment: input.quantity } },
-        });
-      }
-      const movement = await tx.stockMovement.create({
-        data: {
-          productId: input.productId,
-          type: input.quantity > 0 ? 'ENTRY' : 'EXIT',
-          source: 'ADJUSTMENT',
-          quantity: Math.abs(input.quantity),
-          note: input.reason,
-        },
-      });
-      return movement;
-    });
+    return this.prisma.$transaction((tx) => this.ledger.adjust(tx, input));
   }
 
   listMovements(productId?: string) {
@@ -87,26 +34,23 @@ export class StockService {
   /** FR-07 (estoque mínimo) + FR-08 (validade FEFO). */
   async alerts() {
     const expiryAlertDays = await this.settings.get('expiryAlertDays');
-    const threshold = new Date();
-    threshold.setDate(threshold.getDate() + expiryAlertDays);
+    const threshold = new Date(Date.now() + expiryAlertDays * 24 * 60 * 60 * 1000);
 
-    const [lowStockRaw, expiring] = await Promise.all([
-      this.prisma.$queryRaw<
-        { id: string; name: string; sku: string; currentStock: number; minimumStock: number }[]
-      >`SELECT id, name, sku, "currentStock", "minimumStock"
-        FROM product
-        WHERE active = true AND "minimumStock" > 0 AND "currentStock" <= "minimumStock"
-        ORDER BY ("currentStock"::float / NULLIF("minimumStock", 0)) ASC`,
+    const [lowStock, expiring] = await Promise.all([
+      this.lowStock(),
       this.prisma.productBatch.findMany({
         where: { quantity: { gt: 0 }, expiresAt: { not: null, lte: threshold } },
         include: { product: { select: { id: true, name: true, sku: true } } },
         orderBy: { expiresAt: 'asc' },
       }),
     ]);
-    return { lowStock: lowStockRaw, expiring };
+    return { lowStock, expiring };
   }
 
-  /** FR-40: posição atual de estoque. */
+  /**
+   * FR-40: posição atual de estoque. `low` é a única regra de "abaixo do
+   * mínimo" (FR-07) — usada pelo alerta e mostrada como veio pelo web.
+   */
   async position() {
     const products = await this.prisma.product.findMany({
       where: { active: true },
@@ -124,8 +68,29 @@ export class StockService {
     });
     return products.map((p) => ({
       ...p,
+      low: isLowStock(p),
       stockCost: p.purchasePrice.mul(p.currentStock),
       stockValue: p.salePrice.mul(p.currentStock),
     }));
   }
+
+  /** Produtos ativos no mínimo ou abaixo, mais críticos (menor saldo/mínimo) primeiro. */
+  private async lowStock() {
+    const rows = await this.position();
+    return rows
+      .filter((p) => p.low)
+      .map(({ id, name, sku, currentStock, minimumStock }) => ({
+        id,
+        name,
+        sku,
+        currentStock,
+        minimumStock,
+      }))
+      .sort((a, b) => a.currentStock / a.minimumStock - b.currentStock / b.minimumStock);
+  }
+}
+
+/** FR-07: com mínimo definido, saldo no mínimo ou abaixo. */
+function isLowStock(p: { currentStock: number; minimumStock: number }): boolean {
+  return p.minimumStock > 0 && p.currentStock <= p.minimumStock;
 }

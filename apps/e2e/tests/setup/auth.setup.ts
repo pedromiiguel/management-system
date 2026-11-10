@@ -12,7 +12,7 @@ setup('autentica uma vez e persiste a sessão', async ({ page }) => {
 
   await page.goto('/login');
   await page.getByLabel('Usuário').fill(ADMIN.login);
-  await page.getByLabel('Senha').fill(ADMIN.password);
+  await page.getByLabel('Senha', { exact: true }).fill(ADMIN.password);
   await page.getByRole('button', { name: 'Entrar' }).click();
 
   await expect(page).toHaveURL(/\/sale$/);

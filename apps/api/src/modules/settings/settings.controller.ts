@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Put } from '@nestjs/common';
-import { Permission, SettingsInput, settingsSchema } from '@beverage/shared';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
+import { Permission, SettingsInput, updateSettingsSchema } from '@beverage/shared';
+import { RequirePermission } from '../auth/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { SettingsService } from './settings.service';
 
@@ -15,7 +15,7 @@ export class SettingsController {
 
   @Put()
   @RequirePermission(Permission.SETTINGS_WRITE)
-  update(@Body(new ZodValidationPipe(settingsSchema)) body: SettingsInput) {
+  update(@Body(new ZodValidationPipe(updateSettingsSchema)) body: SettingsInput) {
     return this.settingsService.update(body);
   }
 }

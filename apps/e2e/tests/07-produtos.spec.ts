@@ -3,11 +3,10 @@ import { resetDatabase } from './support/db';
 import { openProductsPage } from './support/products';
 import { PRODUCTS } from './support/seed-data';
 
-// Suíte E2E de products — trava a integração UI ↔ API de products.tsx ANTES
-// da refatoração estrutural (ADR 0007), mesmo espírito das suítes do PDV e do
-// financeiro. Regra de negócio com ramificação (BR-04, permissão dupla) já
-// está coberta por apps/api/test/products.e2e-spec.ts (supertest) — aqui só
-// se verifica o caminho feliz da UI (ver Decisão 4 da ADR 0007).
+// Suíte E2E de produtos — a integração UI ↔ API da tela /products. Regra de
+// negócio com ramificação (BR-04, permissão dupla) está coberta por
+// apps/api/test/products.e2e-spec.ts — aqui só o caminho feliz da UI
+// (ver "Testes" em docs/arquitetura.md).
 
 test.describe('Produtos — Listagem, busca e filtros', () => {
   test.beforeAll(() => resetDatabase());

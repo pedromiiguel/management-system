@@ -1,1 +1,0 @@
-export { ReceivablesTab } from './ReceivablesTab';

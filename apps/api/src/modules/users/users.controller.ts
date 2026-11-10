@@ -5,10 +5,12 @@ import {
   Permission,
   RoleInput,
   roleSchema,
+  UpdateRoleInput,
+  updateRoleSchema,
   UpdateUserInput,
   updateUserSchema,
 } from '@beverage/shared';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
+import { RequirePermission } from '../auth/require-permission.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { UsersService } from './users.service';
 
@@ -46,7 +48,10 @@ export class UsersController {
   }
 
   @Patch('roles/:id')
-  updateRole(@Param('id') id: string, @Body(new ZodValidationPipe(roleSchema)) body: RoleInput) {
+  updateRole(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(updateRoleSchema)) body: UpdateRoleInput,
+  ) {
     return this.usersService.updateRole(id, body);
   }
 }

@@ -47,7 +47,13 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://beverage:beverage@postgres:5432/beverage?schema=public
-      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      # Sem default: a API (NODE_ENV=production) recusa subir sem segredo próprio e
+      # diz o que definir. Não use ${JWT_SECRET:?}: o compose interpola o arquivo
+      # todo e `docker compose up -d postgres` (dev) passaria a exigir o segredo.
+      JWT_SECRET: ${JWT_SECRET:-}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-12h}
+      # O web é servido pelo nginx na mesma origem (/api), então CORS pode ficar fechado.
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
       OBSERVE_APP_KEY: ${OBSERVE_APP_KEY:-}
       OBSERVE_APP_SECRET: ${OBSERVE_APP_SECRET:-}
       PORT: 3000
@@ -58,7 +64,7 @@ services:
     profiles: ['prod']
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: docker/web.Dockerfile
     restart: unless-stopped
     depends_on:
       - api

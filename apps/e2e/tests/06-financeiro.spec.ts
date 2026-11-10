@@ -8,11 +8,10 @@ import { CUSTOMER_NAME } from './support/seed-data';
 // invisível copiado no meio da string.
 const brl = (value: string) => `R$ ${value}`;
 
-// Suíte E2E do financeiro — trava o comportamento observável das 5 abas
-// ANTES da refatoração estrutural (ADR 0001/0006), mesmo espírito da suíte
-// do PDV. Regra de negócio (diferença de caixa, liquidação de fiado) já está
-// coberta por apps/api/test/financial.e2e-spec.ts (supertest) — aqui só se
-// verifica a integração UI ↔ API.
+// Suíte E2E do financeiro — o comportamento observável das 5 abas. Regra de
+// negócio (diferença de caixa, liquidação de fiado) está coberta por
+// apps/api/test/financial.e2e-spec.ts — aqui só a integração UI ↔ API
+// (ver "Testes" em docs/arquitetura.md).
 
 test.describe('Financeiro — Caixa (BR-06)', () => {
   test.beforeAll(() => resetDatabase());
@@ -127,8 +126,9 @@ test.describe('Financeiro — Visão geral', () => {
   test.beforeEach(async ({ page }) => openFinancialTab(page, 'Visão geral'));
 
   test('mostra os indicadores principais sem nenhuma venda no período (seed)', async ({ page }) => {
-    await expect(page.getByText('Faturamento (mês)')).toBeVisible();
+    await expect(page.getByText('Receita (mês)')).toBeVisible();
+    await expect(page.getByText('Taxa de serviço (mês)')).toBeVisible();
     await expect(page.getByText('Resultado (mês)')).toBeVisible();
-    await expect(page.getByText('Meta de faturamento')).toBeVisible();
+    await expect(page.getByText('Meta de receita')).toBeVisible();
   });
 });

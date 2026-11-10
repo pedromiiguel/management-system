@@ -1,6 +1,6 @@
 # 0003 — PDV como piloto da Clean Architecture (`arquiteture.md`)
 
-- **Status:** Aceito
+- **Status:** Substituída pela [ADR 0014](0014-organizacao-por-funcionalidade.md)
 - **Data:** 2026-07-21
 - **Supersede:** [0002](0002-escopo-refatoracao-pos.md) na parte estrutural (a decisão de escopo — só `pos.tsx`, `financial.tsx` fora — continua válida) **e corrige** a premissa de 0002 de que o foco do scanner não tinha cobertura E2E — ver Consequências.
 

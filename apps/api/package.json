@@ -11,8 +11,10 @@
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:reset": "prisma migrate reset --force --skip-generate",
-    "db:generate": "prisma generate"
+    "db:seed:fixtures": "prisma db seed -- --fixtures",
+    "db:reset": "prisma migrate reset --force --skip-generate --skip-seed && prisma db seed -- --fixtures",
+    "db:generate": "prisma generate",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "ts-node --transpile-only prisma/seed.ts"
@@ -55,6 +57,9 @@
     "transform": {
       "^.+\\.ts$": "ts-jest"
     },
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@beverage/shared$": "<rootDir>/../../../packages/shared/src"
+    }
   }
 }

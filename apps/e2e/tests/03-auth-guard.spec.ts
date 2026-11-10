@@ -23,7 +23,7 @@ test.describe('autenticação e guarda de rota', () => {
     await expect(page).toHaveURL(/\/login/);
 
     await page.getByLabel('Usuário').fill(ADMIN.login);
-    await page.getByLabel('Senha').fill(ADMIN.password);
+    await page.getByLabel('Senha', { exact: true }).fill(ADMIN.password);
     await page.getByRole('button', { name: 'Entrar' }).click();
 
     await expect(page).toHaveURL(/\/stock$/);
@@ -32,7 +32,7 @@ test.describe('autenticação e guarda de rota', () => {
   test('credenciais inválidas exibem erro e não criam sessão', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel('Usuário').fill(ADMIN.login);
-    await page.getByLabel('Senha').fill('senha-errada');
+    await page.getByLabel('Senha', { exact: true }).fill('senha-errada');
     await page.getByRole('button', { name: 'Entrar' }).click();
 
     await expect(page.getByText('Login ou senha inválidos')).toBeVisible();
@@ -48,7 +48,7 @@ test.describe('autenticação e guarda de rota', () => {
   }) => {
     await page.goto('/login');
     await page.getByLabel('Usuário').fill(ADMIN.login);
-    await page.getByLabel('Senha').fill(ADMIN.password);
+    await page.getByLabel('Senha', { exact: true }).fill(ADMIN.password);
     await page.getByRole('button', { name: 'Entrar' }).click();
     await expect(page).toHaveURL(/\/sale$/);
 
