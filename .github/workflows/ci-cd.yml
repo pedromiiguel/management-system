@@ -1,0 +1,155 @@
+# CI/CD: em todo PR e push roda lint, type-check, build e testes (unitários +
+# e2e da API num Postgres descartável). Só num push em `main`, e só se tudo
+# passar, publica a API no Railway e depois o front na Vercel.
+# Secrets e variáveis necessários: docs/deploy.md.
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Lint, type-check, build e testes unitários
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci # o postinstall da API roda `prisma generate`
+      - name: Lint
+        run: npm run lint
+      - name: Formatação (Prettier)
+        run: npx prettier --check .
+      # O build vem antes do type-check: `vite build` gera routeTree.gen.ts
+      # (fora do git), que o tsc do web precisa.
+      - name: Build (shared → api → web)
+        run: npm run build
+      - name: Type-check
+        run: npm run typecheck
+      - name: Testes unitários (api jest + shared vitest + web vitest)
+        run: npm test
+
+  api-e2e:
+    name: Testes e2e da API (Postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: beverage
+          POSTGRES_PASSWORD: beverage
+          POSTGRES_DB: beverage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U beverage -d beverage"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Banco descartável do próprio job — nunca aponte para o banco da loja.
+      DATABASE_URL: postgresql://beverage:beverage@localhost:5432/beverage?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:e2e:api
+
+  deploy-api:
+    name: Deploy da API (Railway)
+    needs: [checks, api-e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    concurrency:
+      group: deploy-api
+      cancel-in-progress: false
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm install --global @railway/cli
+      # Envia o monorepo; o Railway builda com railway.json → apps/api/Dockerfile,
+      # que roda `prisma migrate deploy` antes de subir. `--ci` acompanha o build
+      # e falha o job se ele falhar.
+      - name: railway up
+        run: railway up --ci --service "${{ vars.RAILWAY_SERVICE }}"
+
+  deploy-web:
+    name: Deploy do front (Vercel)
+    needs: [deploy-api]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    concurrency:
+      group: deploy-web
+      cancel-in-progress: false
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Build do web
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: |
+          if [ -z "$VITE_API_URL" ]; then
+            echo "::error::Defina a variável VITE_API_URL (URL pública da API no Railway, terminando em /api)."
+            exit 1
+          fi
+          npm run build --workspace apps/web
+      # Build feito aqui (o mesmo código que passou nos testes); a Vercel só
+      # recebe os arquivos estáticos no formato Build Output API v3. As rotas
+      # repetem apps/web/vercel.json: arquivo existente, senão index.html (SPA).
+      - name: Montar .vercel/output
+        run: |
+          mkdir -p .vercel/output
+          cp -r apps/web/dist .vercel/output/static
+          cat > .vercel/output/config.json <<'JSON'
+          {
+            "version": 3,
+            "routes": [
+              {
+                "src": "/assets/(.*)",
+                "headers": { "cache-control": "public, max-age=31536000, immutable" },
+                "continue": true
+              },
+              { "handle": "filesystem" },
+              { "src": "/(.*)", "dest": "/index.html" }
+            ]
+          }
+          JSON
+      - id: deploy
+        name: vercel deploy
+        run: |
+          url=$(npx --yes vercel@latest deploy --prebuilt --prod --token "${{ secrets.VERCEL_TOKEN }}")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Publicado em $url"

@@ -29,6 +29,7 @@ npm run dev:api        # NestJS watch mode only (builds shared first)
 npm run dev:web        # Vite only
 npm run build          # builds shared → api → web (order matters)
 npm run lint           # eslint — apps/web only (config in apps/web)
+npm run typecheck      # tsc --noEmit: shared + api + web (web needs routeTree.gen.ts: run the web build or dev first)
 npm run format         # prettier --write .
 npm test               # api jest (unit) + shared vitest + web vitest — no shared build needed
 npm run test:e2e:api   # api e2e (jest --runInBand, real Postgres)
@@ -38,6 +39,8 @@ npm run db:seed        # base seed only (admin + system role, suggested categori
 npm run db:seed:fixtures  # base + example data (products, customer, open register, fiado)
 npm run db:reset       # migrate reset + seed with fixtures (used by Playwright)
 ```
+
+CI/CD: `.github/workflows/ci-cd.yml` runs lint, Prettier, build, type-check, unit tests and API e2e on every PR/push; on `main` it then deploys the API to Railway and the web to Vercel. Secrets/variables: [docs/deploy.md](docs/deploy.md).
 
 Database runs via `docker compose up -d postgres` (Postgres 17 on `localhost:5432`, creds `beverage`/`beverage`, database `beverage`). A `backup` service does daily `pg_dump` into `backups/`. The `prod` profile (`docker compose --profile prod up -d --build`) builds and runs api + web (`docker/web.Dockerfile`, nginx proxying `/api`); it requires `JWT_SECRET`.
 
