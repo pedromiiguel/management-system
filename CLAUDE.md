@@ -40,7 +40,7 @@ npm run db:seed:fixtures  # base + example data (products, customer, open regist
 npm run db:reset       # migrate reset + seed with fixtures (used by Playwright)
 ```
 
-CI/CD: `.github/workflows/ci-cd.yml` runs lint, Prettier, build, type-check, unit tests and API e2e on every PR/push; on `main` it then deploys the API to Railway and the web to Vercel. Secrets/variables: [docs/deploy.md](docs/deploy.md).
+CI/CD: `.github/workflows/ci-cd.yml` runs only the jobs whose paths changed (docs-only → just Prettier): shared, api (build/type-check/unit), api-e2e, web (lint/build/type-check/tests/Lighthouse via `apps/web/lighthouserc.json`); `CI ok` is the single required check. On `main` it then deploys the API to Railway and/or the web to Vercel. Secrets/variables: [docs/deploy.md](docs/deploy.md).
 
 Database runs via `docker compose up -d postgres` (Postgres 17 on `localhost:5432`, creds `beverage`/`beverage`, database `beverage`). A `backup` service does daily `pg_dump` into `backups/`. The `prod` profile (`docker compose --profile prod up -d --build`) builds and runs api + web (`docker/web.Dockerfile`, nginx proxying `/api`); it requires `JWT_SECRET`.
 

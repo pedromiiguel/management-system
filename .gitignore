@@ -12,3 +12,5 @@ backups/
 .claude/
 .agents/
 .vercel/
+.lighthouseci/
+lighthouse-report/

@@ -1,17 +1,45 @@
 # Deploy (CI/CD)
 
 O workflow [`.github/workflows/ci-cd.yml`](../.github/workflows/ci-cd.yml) roda em
-todo pull request e em todo push em `main`:
+todo pull request e em todo push em `main`. Cada job roda só se a parte que ele
+verifica mudou; o job `changes` decide por pasta:
 
-| Job          | O que faz                                                                                   | Quando           |
-| ------------ | ------------------------------------------------------------------------------------------- | ---------------- |
-| `checks`     | `npm ci`, lint, Prettier, build (shared → api → web), type-check, testes unitários          | sempre           |
-| `api-e2e`    | testes e2e da API contra um Postgres 17 descartável do próprio job                          | sempre           |
-| `deploy-api` | `railway up --ci`: o Railway builda `apps/api/Dockerfile` (via `railway.json`) e sobe a API | push em `main`\* |
-| `deploy-web` | builda o web com `VITE_API_URL`, publica os estáticos na Vercel (`--prebuilt --prod`)       | push em `main`\* |
+| Mudou                                                               | Roda                                |
+| ------------------------------------------------------------------- | ----------------------------------- |
+| só docs (`docs/`, `*.md` fora dos apps…)                            | só o Prettier                       |
+| `apps/web/`                                                         | `web` (+ deploy do front na `main`) |
+| `apps/api/` ou `railway.json`                                       | `api`, `api-e2e` (+ deploy da API)  |
+| `packages/shared/` ou infra (workflow, lockfile, `package.json`, …) | tudo                                |
 
-\* Só se `checks` e `api-e2e` passarem; o front só é publicado depois que a API
-subiu (as migrations rodam no start do container da API).
+`workflow_dispatch` (Actions → CI/CD → Run workflow) roda e publica tudo.
+
+| Job          | O que faz                                                                               |
+| ------------ | --------------------------------------------------------------------------------------- |
+| `format`     | `prettier --check .` (sempre; não instala dependências)                                 |
+| `shared`     | type-check e testes do pacote shared                                                    |
+| `api`        | build (shared → api), type-check e testes unitários                                     |
+| `api-e2e`    | testes e2e da API contra um Postgres 17 descartável do próprio job                      |
+| `web`        | lint, build, type-check, testes e Lighthouse (`apps/web/lighthouserc.json`)             |
+| `ci-ok`      | verde quando nenhum job falhou (pulado conta como ok) — use este como check obrigatório |
+| `deploy-api` | `railway up --ci` e smoke test (`GET /auth/me` sem token tem que dar 401)               |
+| `deploy-web` | builda o web com `VITE_API_URL` e publica os estáticos na Vercel (`--prebuilt --prod`)  |
+
+Os deploys só rodam em push na `main` com `ci-ok` verde. O front é publicado
+depois da API quando os dois mudaram (as migrations rodam no start do
+container da API).
+
+### Lighthouse
+
+Roda 3 vezes (mediana) na tela de login, em perfil desktop, contra o build de
+produção servido pelo `vite preview`. Acessibilidade e boas práticas abaixo de
+90 reprovam o PR; desempenho abaixo de 85 e SEO abaixo de 80 só geram aviso.
+Os relatórios HTML ficam no artefato `lighthouse` da execução.
+
+### Proteção da `main`
+
+Em Settings → Branches → regra para `main`, marque _Require status checks to
+pass_ e escolha **CI ok**. Não escolha os jobs individuais: quando um é pulado
+por falta de mudança, só o `ci-ok` garante o resultado.
 
 ## O que configurar no GitHub
 
