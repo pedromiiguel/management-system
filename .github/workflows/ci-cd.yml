@@ -1,14 +1,14 @@
-# CI/CD: em todo PR e push roda lint, type-check, build e testes (unitários +
-# e2e da API num Postgres descartável). Só num push em `main`, e só se tudo
-# passar, publica a API no Railway e depois o front na Vercel.
-# Secrets e variáveis necessários: docs/deploy.md.
+# CI/CD: cada job roda só quando o que ele verifica mudou (filtro por pasta no
+# job `changes`). Mudança só de docs roda apenas o Prettier. Em push na `main`,
+# e só se o `ci-ok` passar, publica a API no Railway e o front na Vercel — cada
+# um só se a sua parte mudou. Secrets, variáveis e regras: docs/deploy.md.
 name: CI/CD
 
 on:
   pull_request:
   push:
     branches: [main]
-  workflow_dispatch:
+  workflow_dispatch: # roda tudo e publica tudo (redeploy manual)
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -18,10 +18,73 @@ permissions:
   contents: read
 
 jobs:
-  checks:
-    name: Lint, type-check, build e testes unitários
+  changes:
+    name: Detectar o que mudou
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      # Mudança em shared ou na infra de build (lockfile, workflow, tsconfig
+      # base, versão do Node) afeta os dois apps.
+      shared: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.infra == 'true' }}
+      api: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.api == 'true' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.infra == 'true' }}
+      web: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.web == 'true' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.infra == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            infra:
+              - '.github/workflows/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig.base.json'
+              - '.nvmrc'
+            shared:
+              - 'packages/shared/**'
+            api:
+              - 'apps/api/**'
+              - 'railway.json'
+            web:
+              - 'apps/web/**'
+
+  format:
+    name: Formatação (Prettier)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      # Sem npm ci: a mesma versão do package-lock, baixada sozinha. Roda
+      # sempre, porque docs também seguem o Prettier.
+      - run: npx --yes prettier@3.8.4 --check .
+
+  shared:
+    name: Shared (type-check e testes)
+    needs: changes
+    if: needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit -p packages/shared/tsconfig.json
+      - run: npm test --workspace packages/shared
+
+  api:
+    name: API (build, type-check e testes unitários)
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,21 +92,17 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci # o postinstall da API roda `prisma generate`
-      - name: Lint
-        run: npm run lint
-      - name: Formatação (Prettier)
-        run: npx prettier --check .
-      # O build vem antes do type-check: `vite build` gera routeTree.gen.ts
-      # (fora do git), que o tsc do web precisa.
-      - name: Build (shared → api → web)
-        run: npm run build
+      - name: Build (shared → api)
+        run: npm run build --workspace packages/shared && npm run build --workspace apps/api
       - name: Type-check
-        run: npm run typecheck
-      - name: Testes unitários (api jest + shared vitest + web vitest)
-        run: npm test
+        run: npx tsc --noEmit -p apps/api/tsconfig.json
+      - name: Testes unitários
+        run: npm test --workspace apps/api
 
   api-e2e:
-    name: Testes e2e da API (Postgres)
+    name: API (testes e2e com Postgres)
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     services:
@@ -72,10 +131,121 @@ jobs:
       - run: npm ci
       - run: npm run test:e2e:api
 
+  web:
+    name: Web (lint, build, type-check e testes)
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      # O build vem antes do type-check: `vite build` gera routeTree.gen.ts
+      # (fora do git), que o tsc do web precisa.
+      - name: Build
+        run: npm run build --workspace apps/web
+      - name: Type-check
+        run: npm run typecheck --workspace apps/web
+      - name: Testes unitários
+        run: npm test --workspace apps/web
+
+  lighthouse:
+    name: Web (Lighthouse em todas as páginas)
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: beverage
+          POSTGRES_PASSWORD: beverage
+          POSTGRES_DB: beverage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U beverage -d beverage"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Banco descartável do próprio job, com os dados de exemplo do seed.
+      DATABASE_URL: postgresql://beverage:beverage@localhost:5432/beverage?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Banco com dados de exemplo
+        run: npm run db:migrate && npm run db:seed:fixtures
+      - name: Subir a API
+        run: |
+          npm run build --workspace apps/api
+          (cd apps/api && nohup node dist/main.js > /tmp/api.log 2>&1 &)
+          for i in $(seq 1 30); do
+            [ "$(curl -s -o /dev/null -w '%{http_code}' localhost:3000/api/auth/me)" = "401" ] && exit 0
+            sleep 2
+          done
+          cat /tmp/api.log; exit 1
+      - name: Build do web
+        run: npm run build --workspace apps/web
+      # Build de produção no `vite preview` (fallback de SPA e proxy /api → API
+      # acima). Antes de cada página, lighthouse/login.cjs entra com o admin do
+      # seed. Páginas e limites em apps/web/lighthouserc.json.
+      - name: Lighthouse
+        working-directory: apps/web
+        # Com puppeteerScript o lhci não acha o Chrome sozinho: usa o do runner.
+        run: |
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          npx --yes @lhci/cli@0.14.0 autorun --collect.chromePath="$CHROME_PATH"
+      - name: Resumo das notas
+        if: ${{ !cancelled() }}
+        working-directory: apps/web
+        run: |
+          [ -f lighthouse-report/manifest.json ] || exit 0
+          node lighthouse/summary.mjs lighthouse-report >> "$GITHUB_STEP_SUMMARY"
+      - name: Relatórios HTML
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: apps/web/lighthouse-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # Check único para a proteção de branch: verde quando nenhum job falhou
+  # (job pulado por não ter mudança conta como ok).
+  ci-ok:
+    name: CI ok
+    needs: [changes, format, shared, api, api-e2e, web, lighthouse]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resultado
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Resultados: $RESULTS"
+          for r in $RESULTS; do
+            case "$r" in success|skipped) ;; *) echo "::error::Algum job terminou como $r"; exit 1 ;; esac
+          done
+
   deploy-api:
     name: Deploy da API (Railway)
-    needs: [checks, api-e2e]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [changes, ci-ok]
+    if: >-
+      !cancelled() && needs.ci-ok.result == 'success' &&
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' &&
+      needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
@@ -95,10 +265,30 @@ jobs:
       # e falha o job se ele falhar.
       - name: railway up
         run: railway up --ci --service "${{ vars.RAILWAY_SERVICE }}"
+      # Smoke test: a API respondeu? /auth/me sem token tem que dar 401.
+      - name: Smoke test da API
+        env:
+          API_URL: ${{ vars.VITE_API_URL }}
+        run: |
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$API_URL/auth/me" || true)
+            echo "Tentativa $i: HTTP $code"
+            [ "$code" = "401" ] && exit 0
+            sleep 15
+          done
+          echo "::error::A API não respondeu 401 em $API_URL/auth/me depois do deploy."
+          exit 1
 
   deploy-web:
     name: Deploy do front (Vercel)
-    needs: [deploy-api]
+    needs: [changes, ci-ok, deploy-api]
+    # Depois da API (quando ela também foi publicada), para o front novo não
+    # chegar antes do backend que ele espera.
+    if: >-
+      !cancelled() && needs.ci-ok.result == 'success' &&
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped') &&
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' &&
+      needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
