@@ -46,8 +46,6 @@ export default defineConfig({
                   group: [
                     '@/features/*/*',
                     '!@/features/*/api',
-                    '!@/features/financial/CategoriesTab',
-                    '!@/features/users/AccessTab',
                     '!@/features/sale/SaleDetailModal',
                   ],
                   message:
