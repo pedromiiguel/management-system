@@ -14,6 +14,8 @@ import type {
   SettleReceivableInput,
 } from '@beverage/shared';
 
+export type { IPeriod } from '@domain/models/period-model';
+
 export interface IFinancialCategory {
   id: string;
   name: string;
@@ -101,11 +103,6 @@ export interface ICashFlow {
   inflows: number;
   outflows: number;
   balance: number;
-}
-
-export interface IPeriod {
-  from: string;
-  to: string;
 }
 
 export type TCreateCategoryParams = FinancialCategoryInput;

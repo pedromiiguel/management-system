@@ -72,10 +72,10 @@ Clean Architecture do guia, com as camadas agrupadas por módulo
     `types.ts`, `constants.ts` e, quando preciso, `schema.ts`, `utils.ts`,
     `components/` e sub-flows.
   - Módulos: `auth` (sessão e login), `settings`, `products`, `stock`, `users`,
-    `financial`. Ainda em `features/` (ADR 0014), migrando um por PR: `sale`, `reports`.
+    `financial`, `reports`. Ainda em `features/` (ADR 0014): `sale`.
 - `@shared/` — contratos técnicos sem framework (`IHttpClient`, `IKeyValueStorage`).
-- `domain/` — erros de domínio (`NotFoundError`, `ConflictError`…, com `status`) e
-  `IPaginated`.
+- `domain/` — erros de domínio (`NotFoundError`, `ConflictError`…, com `status`),
+  `IPaginated` e `IPeriod`.
 - `data/base-service/` — `BaseService.send`: 2xx devolve o corpo; o resto vira erro de
   domínio com a mensagem da API.
 - `infra/` — `AxiosHttpClient` (nunca lança; token e 401 por construtor),
@@ -83,7 +83,7 @@ Clean Architecture do guia, com as camadas agrupadas por módulo
 - `main/` — composition root: `makeHttpClient`, `query/query-client` (toast global de
   erro, ignora 401), `query/query-keys` (`rootKeys` + `useInvalidate`).
 - `presentation/` — `components/` (UI compartilhada, pasta plana), `flows/app-shell`,
-  `utils/` (`toast`, `format`), `hooks/`, `constants/navigation`.
+  `utils/` (`toast`, `format`, `download`), `hooks/`, `constants/navigation`.
 - `lib/http.ts` — ponte temporária sobre o `BaseService` para o que ainda está em
   `features/`; some no fim da migração.
 
@@ -109,8 +109,8 @@ O Oxlint (`no-restricted-imports` no `vite.config.ts` da raiz) barra o resto.
 
 ### Dependências (`features/`, enquanto existir)
 
-- Entre funcionalidades, só o `api.ts` e os **componentes de entrada**:
-  `sale/SaleDetailModal` (Relatórios).
+- Os módulos ainda importam de `features/sale` o `api.ts` e o componente de entrada
+  `SaleDetailModal` (usados pelo histórico de vendas em Relatórios).
 
 Uma funcionalidade nova costuma ser: schema no shared → módulo na API com permissão →
 `modules/<m>/` (gateway, handler, factory, queries, flow) → rota.

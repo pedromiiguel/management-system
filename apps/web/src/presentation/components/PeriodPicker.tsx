@@ -1,9 +1,10 @@
+import type { IPeriod } from '@domain/models/period-model';
 import { addDaysToKey } from '@beverage/shared';
 import { Chip } from '@presentation/components/Chip';
 import { monthToDate, todayKey } from '@presentation/utils/format';
 
 /** Período fechado de dias da loja, `AAAA-MM-DD` (a API corta no fuso da loja). */
-export type Period = { from: string; to: string };
+export type Period = IPeriod;
 
 const PRESETS: { id: string; label: string; period: () => Period }[] = [
   { id: 'today', label: 'Hoje', period: () => ({ from: todayKey(), to: todayKey() }) },

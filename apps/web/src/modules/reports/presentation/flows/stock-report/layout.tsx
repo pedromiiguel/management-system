@@ -1,15 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
 import { Card } from '@presentation/components/Card';
 import { StatCard } from '@presentation/components/StatCard';
 import { Table } from '@presentation/components/Table';
 import { formatBRL } from '@presentation/utils/format';
-import { stockPositionQuery } from './api';
+import type { TStockReportLayoutProps } from './types';
 
-export function StockTab() {
-  const { data: rows = [] } = useQuery(stockPositionQuery());
-  const totalCost = rows.reduce((acc, r) => acc + r.stockCost, 0);
-  const totalValue = rows.reduce((acc, r) => acc + r.stockValue, 0);
-
+export function StockReportLayout({ rows, totalCost, totalValue }: TStockReportLayoutProps) {
   return (
     <>
       <div className="flex gap-3">
@@ -23,22 +18,22 @@ export function StockTab() {
           widths="90px 1fr 50px 80px 60px 120px 120px"
           align={[null, null, null, 'center', 'center', 'right', 'right']}
           dense
-          rows={rows.map((r) => ({
-            key: r.id,
+          rows={rows.map((row) => ({
+            key: row.id,
             cells: [
-              r.sku,
-              r.name,
-              r.unit,
-              r.low ? (
+              row.sku,
+              row.name,
+              row.unit,
+              row.low ? (
                 <b key="s" className="s-low">
-                  {r.currentStock}
+                  {row.currentStock}
                 </b>
               ) : (
-                r.currentStock
+                row.currentStock
               ),
-              r.minimumStock,
-              formatBRL(r.stockCost),
-              formatBRL(r.stockValue),
+              row.minimumStock,
+              formatBRL(row.stockCost),
+              formatBRL(row.stockValue),
             ],
           }))}
         />
