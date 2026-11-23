@@ -48,7 +48,6 @@ export default defineConfig({
                     '!@/features/*/api',
                     '!@/features/financial/CategoriesTab',
                     '!@/features/users/AccessTab',
-                    '!@/features/stock/StockEntryModal',
                     '!@/features/sale/SaleDetailModal',
                   ],
                   message:

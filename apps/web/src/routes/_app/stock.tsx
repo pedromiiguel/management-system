@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { StockPage } from '@/features/stock/StockPage';
+import { StockFlow } from '@modules/stock/presentation/flows/stock';
 
 export const Route = createFileRoute('/_app/stock')({
-  component: StockPage,
+  component: StockFlow,
 });

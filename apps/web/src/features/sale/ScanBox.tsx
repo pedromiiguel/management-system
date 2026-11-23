@@ -5,7 +5,8 @@ import { useState, type KeyboardEvent, type RefObject } from 'react';
 import { Kbd } from '@presentation/components/Kbd';
 import { formatBRL } from '@presentation/utils/format';
 import { useDebounce } from '@presentation/hooks/use-debounce';
-import { productSearchQuery, type Product } from '@/features/products/api';
+import type { IProduct as Product } from '@modules/products/domain/product-model';
+import { productSearchQuery } from '@modules/products/main/products-queries';
 import { SALE_HOTKEYS } from './hotkeys';
 
 const SUGGESTION_LIMIT = 6;
