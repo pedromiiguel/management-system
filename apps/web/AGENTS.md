@@ -39,6 +39,9 @@ Estrutura e regra de dependência em [docs/arquitetura.md](../../docs/arquitetur
   erro.
 - Controller tem o estado; layout é JSX puro (sem `useState`, `useEffect` nem query).
   Componente sem estado continua um `.tsx` simples. Sem barrels além do `index.ts` do flow.
+- Com o React Compiler, o layout memoiza o `{...register('campo')}`: depois de um `reset()` o
+  campo não é registrado de novo e o valor antigo fica na tela. Para limpar um formulário que
+  continua aberto, use `setValue`.
 - Convenções do guia nos módulos: named exports, interfaces `I*`, types `T*`, `useState`
   terminando em `State`, `cond ? <X /> : null` (nunca `&&`), ternário de prop vira constante.
 - Formulários usam os schemas do shared via `@hookform/resolvers`. Como os schemas base não

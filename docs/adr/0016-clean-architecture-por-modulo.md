@@ -40,8 +40,8 @@ src/
 
 Desvios do guia, para não recriar os problemas da ADR 0014:
 
-1. **Uma interface por módulo**, não por ação. Um endpoint novo é um método no gateway e
-   um `send` no handler — o mesmo lugar.
+1. **Uma interface por recurso da API** (em geral, uma por módulo), não por ação. Um
+   endpoint novo é um método no gateway e um `send` no handler — o mesmo lugar.
 2. **Converter só onde há transformação real** (o próprio guia diz isso).
 3. **Sem `withResult`/`handleActionError`.** A leitura e as ações passam pelo TanStack
    Query, que já entrega `error` à tela e tem um `onError` global com o toast

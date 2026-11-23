@@ -61,7 +61,8 @@ Clean Architecture do guia, com as camadas agrupadas por módulo
   Importam só a entrada de um flow (`@modules/<m>/presentation/flows/<tela>`).
 - `modules/<m>/` — um módulo por funcionalidade:
   - `domain/` — models (formato da API e da tela) e `I<M>Gateway`, a interface com
-    um método por chamada à API. Tipos puros e regras sem framework.
+    um método por chamada à API — uma por recurso da API (o financeiro tem quatro:
+    financeiro, caixa, fiado e contas a pagar). Tipos puros e regras sem framework.
   - `data/` — `<M>Handler extends BaseService implements I<M>Gateway`: só conhece o
     `IHttpClient`. Converter só quando há transformação real.
   - `main/` — `make<M>Gateway()` e as `queryOptions`/mutations (TanStack Query), que
@@ -70,8 +71,8 @@ Clean Architecture do guia, com as camadas agrupadas por módulo
     `controller.tsx` (estado, hooks, queries), `layout.tsx` (JSX, só props),
     `types.ts`, `constants.ts` e, quando preciso, `schema.ts`, `utils.ts`,
     `components/` e sub-flows.
-  - Módulos: `auth` (sessão e login), `settings`, `products`, `stock`. Ainda em
-    `features/` (ADR 0014), migrando um por PR: `sale`, `financial`, `reports`, `users`.
+  - Módulos: `auth` (sessão e login), `settings`, `products`, `stock`, `users`,
+    `financial`. Ainda em `features/` (ADR 0014), migrando um por PR: `sale`, `reports`.
 - `@shared/` — contratos técnicos sem framework (`IHttpClient`, `IKeyValueStorage`).
 - `domain/` — erros de domínio (`NotFoundError`, `ConflictError`…, com `status`) e
   `IPaginated`.
@@ -109,7 +110,6 @@ O Oxlint (`no-restricted-imports` no `vite.config.ts` da raiz) barra o resto.
 ### Dependências (`features/`, enquanto existir)
 
 - Entre funcionalidades, só o `api.ts` e os **componentes de entrada**:
-  `financial/CategoriesTab` e `users/AccessTab` (Configurações) e
   `sale/SaleDetailModal` (Relatórios).
 
 Uma funcionalidade nova costuma ser: schema no shared → módulo na API com permissão →

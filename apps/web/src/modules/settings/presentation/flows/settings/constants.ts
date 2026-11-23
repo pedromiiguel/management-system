@@ -1,11 +1,11 @@
-import { CategoriesTab } from '@/features/financial/CategoriesTab';
-import { AccessTab } from '@/features/users/AccessTab';
+import { CategoriesFlow } from '@modules/financial/presentation/flows/categories';
+import { AccessFlow } from '@modules/users/presentation/flows/access';
 import { GeneralFlow } from './general';
 
 export const TABS = [
   { id: 'general', label: 'Geral', Component: GeneralFlow },
-  { id: 'access', label: 'Usuários & Perfis', Component: AccessTab },
-  { id: 'categories', label: 'Categorias financeiras', Component: CategoriesTab },
+  { id: 'access', label: 'Usuários & Perfis', Component: AccessFlow },
+  { id: 'categories', label: 'Categorias financeiras', Component: CategoriesFlow },
 ] as const;
 
 export const DEFAULT_TITLE = 'Configurações';
