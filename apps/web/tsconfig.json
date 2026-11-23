@@ -15,6 +15,13 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@shared/*": ["src/@shared/*"],
+      "@domain/*": ["src/domain/*"],
+      "@data/*": ["src/data/*"],
+      "@infra/*": ["src/infra/*"],
+      "@main/*": ["src/main/*"],
+      "@presentation/*": ["src/presentation/*"],
+      "@modules/*": ["src/modules/*"],
       "@beverage/shared": ["../../packages/shared/src/index.ts"]
     }
   },
