@@ -14,3 +14,4 @@ backups/
 .vercel/
 .lighthouseci/
 lighthouse-report/
+.vitest/

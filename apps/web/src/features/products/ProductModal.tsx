@@ -18,20 +18,18 @@ import { useDeactivateProduct, useSaveProduct, type Product } from './api';
 // quantidade for preenchida. O custo é o preço de compra do próprio formulário.
 const formSchema = productSchema
   .extend({ stockEntry: productStockEntrySchema.partial().optional() })
-  .transform(
-    ({ stockEntry, ...product }): ProductInput => ({
-      ...product,
-      ...(stockEntry?.quantity
-        ? {
-            stockEntry: {
-              quantity: stockEntry.quantity,
-              batch: stockEntry.batch,
-              expiresAt: stockEntry.expiresAt,
-            },
-          }
-        : {}),
-    }),
-  );
+  .transform(({ stockEntry, ...product }): ProductInput => ({
+    ...product,
+    ...(stockEntry?.quantity
+      ? {
+          stockEntry: {
+            quantity: stockEntry.quantity,
+            batch: stockEntry.batch,
+            expiresAt: stockEntry.expiresAt,
+          },
+        }
+      : {}),
+  }));
 
 const optional = (v: string) => v || undefined;
 

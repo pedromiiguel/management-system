@@ -7,7 +7,7 @@ Monorepo com npm **workspaces** (não pnpm/turbo/nx), Node >= 22.
 ```
 packages/shared   @beverage/shared — contrato: schemas Zod, enums, permissões, priceSale, dia da loja
 apps/api          @beverage/api — NestJS 11 + Prisma 6 + PostgreSQL 17
-apps/web          @beverage/web — React 19 + Vite + TanStack Router/Query + Tailwind 4
+apps/web          @beverage/web — React 19 + Vite (via Vite+) + TanStack Router/Query + Tailwind 4
 apps/e2e          @beverage/e2e — Playwright (Chromium) contra web + api
 ```
 
@@ -27,9 +27,14 @@ apps/e2e          @beverage/e2e — Playwright (Chromium) contra web + api
 
 ## Comandos (da raiz)
 
-`npm run dev` · `npm test` · `npm run lint` · `npm run typecheck` · `npm run format` ·
-`npm run build`. O que foge do padrão:
+`npm run dev` · `npm test` · `npm run check` · `npm run typecheck` · `npm run build`. O que
+foge do padrão:
 
+- Ferramental é o **Vite+** (CLI `vp`): Vite, Vitest, Oxlint e Oxfmt numa dependência só.
+  `npm run check` = `vp check` (Oxfmt + Oxlint no repo todo); `lint` = `vp lint`;
+  `format` = `vp fmt`. Config de lint e formatação no `vite.config.ts` da raiz. Testes
+  importam de `vite-plus/test`, não de `vitest`. A API segue com Jest e `nest build`;
+  type-check segue no `tsc`.
 - O shared compila para CommonJS. A **API em execução** só enxerga mudanças no shared
   depois de `npm run build --workspace packages/shared` (`dev:api`, `db:*` e `build`
   já fazem isso). Testes e web leem o código-fonte direto.

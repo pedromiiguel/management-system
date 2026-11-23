@@ -1,6 +1,6 @@
 # Web (`@beverage/web`)
 
-React 19 + Vite + TanStack Router/Query + Tailwind 4, organizada **por funcionalidade**
+React 19 + Vite (via Vite+) + TanStack Router/Query + Tailwind 4, organizada **por funcionalidade**
 ([ADR 0014](../../docs/adr/0014-organizacao-por-funcionalidade.md)). Visão geral e regras
 de dependência em [docs/arquitetura.md](../../docs/arquitetura.md#web-appswebsrc).
 
@@ -11,7 +11,8 @@ de dependência em [docs/arquitetura.md](../../docs/arquitetura.md#web-appswebsr
   renderiza o `AppShell`.
 - `src/features/<f>/` — tudo o que muda junto: `api.ts` (funções HTTP tipadas,
   `queryOptions`, mutations que invalidam **todo** recurso que o servidor altera),
-  páginas e componentes `.tsx`, lógica pura com teste vitest ao lado.
+  páginas e componentes `.tsx`, lógica pura com teste ao lado (`vp test`, importando de
+  `vite-plus/test`).
 - `src/lib/` — infraestrutura: `http` (axios, JWT, erros viram `ApiError`, logout no
   401), `session` (`useSession`, `hasPermission`, `startSession`, `logout` — a única
   saída, também limpa o cache), `session-query` (`/auth/me`, permissões vivas),
@@ -26,8 +27,8 @@ de dependência em [docs/arquitetura.md](../../docs/arquitetura.md#web-appswebsr
 ## Regras
 
 - Entre funcionalidades, importe só o `api.ts` e os componentes de entrada listados em
-  [docs/arquitetura.md](../../docs/arquitetura.md#dependências). O ESLint
-  (`no-restricted-imports`) barra o resto.
+  [docs/arquitetura.md](../../docs/arquitetura.md#dependências). O Oxlint
+  (`no-restricted-imports`, no `vite.config.ts` da raiz) barra o resto.
 - Tipos de resposta ficam no `api.ts` de cada funcionalidade; o shared exporta só tipos
   de entrada, `AppSettings` e enums.
 - Formulários usam os schemas do shared via `@hookform/resolvers`. Como os schemas base

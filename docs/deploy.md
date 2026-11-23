@@ -6,7 +6,7 @@ verifica mudou; o job `changes` decide por pasta:
 
 | Mudou                                                               | Roda                                              |
 | ------------------------------------------------------------------- | ------------------------------------------------- |
-| só docs (`docs/`, `*.md` fora dos apps…)                            | só o Prettier                                     |
+| só docs (`docs/`, `*.md` fora dos apps…)                            | só o `check` (Oxfmt + Oxlint)                     |
 | `apps/web/`                                                         | `web`, `lighthouse` (+ deploy do front na `main`) |
 | `apps/api/` ou `railway.json`                                       | `api`, `api-e2e` (+ deploy da API)                |
 | `packages/shared/` ou infra (workflow, lockfile, `package.json`, …) | tudo                                              |
@@ -15,11 +15,11 @@ verifica mudou; o job `changes` decide por pasta:
 
 | Job          | O que faz                                                                               |
 | ------------ | --------------------------------------------------------------------------------------- |
-| `format`     | `prettier --check .` (sempre; não instala dependências)                                 |
+| `check`      | `vp check`: formatação (Oxfmt) e lint (Oxlint) do repositório inteiro (sempre)          |
 | `shared`     | type-check e testes do pacote shared                                                    |
 | `api`        | build (shared → api), type-check e testes unitários                                     |
 | `api-e2e`    | testes e2e da API contra um Postgres 17 descartável do próprio job                      |
-| `web`        | lint, build, type-check e testes                                                        |
+| `web`        | build, type-check e testes                                                              |
 | `lighthouse` | Lighthouse em todas as telas, com API e banco de exemplo (ver abaixo)                   |
 | `ci-ok`      | verde quando nenhum job falhou (pulado conta como ok) — use este como check obrigatório |
 | `deploy-api` | `railway up --ci` e smoke test (`GET /auth/me` sem token tem que dar 401)               |

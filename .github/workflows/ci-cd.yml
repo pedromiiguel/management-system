@@ -1,7 +1,7 @@
 # CI/CD: cada job roda só quando o que ele verifica mudou (filtro por pasta no
-# job `changes`). Mudança só de docs roda apenas o Prettier. Em push na `main`,
-# e só se o `ci-ok` passar, publica a API no Railway e o front na Vercel — cada
-# um só se a sua parte mudou. Secrets, variáveis e regras: docs/deploy.md.
+# job `changes`). Mudança só de docs roda apenas o `vp check` (formatação e
+# lint). Em push na `main`, e só se o `ci-ok` passar, publica a API no Railway
+# e o front na Vercel — cada um só se a sua parte mudou. Secrets, variáveis e regras: docs/deploy.md.
 name: CI/CD
 
 on:
@@ -50,18 +50,20 @@ jobs:
             web:
               - 'apps/web/**'
 
-  format:
-    name: Formatação (Prettier)
+  check:
+    name: Formatação e lint (vp check)
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      # Sem npm ci: a mesma versão do package-lock, baixada sozinha. Roda
-      # sempre, porque docs também seguem o Prettier.
-      - run: npx --yes prettier@3.8.4 --check .
+          cache: npm
+      # Roda sempre, porque docs também seguem o Oxfmt. `vp check` = Oxfmt
+      # (formatação) + Oxlint (lint), com a config do vite.config.ts da raiz.
+      - run: npm ci
+      - run: npm run check
 
   shared:
     name: Shared (type-check e testes)
@@ -132,7 +134,7 @@ jobs:
       - run: npm run test:e2e:api
 
   web:
-    name: Web (lint, build, type-check e testes)
+    name: Web (build, type-check e testes)
     needs: changes
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
@@ -144,8 +146,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - name: Lint
-        run: npm run lint
       # O build vem antes do type-check: `vite build` gera routeTree.gen.ts
       # (fora do git), que o tsc do web precisa.
       - name: Build
@@ -226,7 +226,7 @@ jobs:
   # (job pulado por não ter mudança conta como ok).
   ci-ok:
     name: CI ok
-    needs: [changes, format, shared, api, api-e2e, web, lighthouse]
+    needs: [changes, check, shared, api, api-e2e, web, lighthouse]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:

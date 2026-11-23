@@ -25,7 +25,7 @@ diferentes**:
   de `settings.write`.
 - **Categorias financeiras** (NFR-10): lista e cria categorias de
   receita/despesa. `GET /financial/categories` exige `financial.read`; **`POST
-/financial/categories` exige `settings.write`** (não `financial.write`) —
+  /financial/categories` exige `settings.write`** (não `financial.write`) —
   provavelmente porque só quem administra o sistema cadastra categoria, não
   quem opera o financeiro no dia a dia.
 
