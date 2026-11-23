@@ -100,7 +100,7 @@ Diferente do `financial` (gate cobriu todas as regras apontadas pelo ADR
 regras de maior risco de regressão silenciosa:
 
 1. **BR-04** — produto com venda registrada não pode ser excluído (`DELETE
-/products/:id` deve falhar com `BadRequestException`; deve funcionar sem
+   /products/:id` deve falhar com `BadRequestException`; deve funcionar sem
    venda).
 2. **Permissão dupla na entrada embutida** — `POST`/`PATCH /products` com
    `stockEntry` preenchido exige `PRODUCTS_WRITE` **e** `STOCK_WRITE`; só

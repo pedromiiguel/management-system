@@ -229,7 +229,7 @@ claro que é dado agregado, não a entidade crua.
   `financial`, cumprindo o desvio da ADR 0006) e 2 em `domain/usecases/sale`
   (`IVoidSale`, `ISearchSaleHistory`), cada um com handler + teste unitário —
   48/48 testes verdes em `apps/web` (suíte completa). Typecheck (`tsc
---noEmit`) limpo.
+  --noEmit`) limpo.
 - `presentation/components/CupomReceipt.tsx` extraído de `ReceiptModal`
   (sale) — componente global puramente apresentacional (sem Model, ver
   "Componente puramente apresentacional" em `componentes-mvvm.md`), consumido

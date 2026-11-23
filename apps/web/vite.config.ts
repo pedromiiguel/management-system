@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, lazyPlugins } from 'vite-plus';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
@@ -7,14 +7,14 @@ import babel from '@rolldown/plugin-babel';
 
 export default defineConfig({
   root: __dirname,
-  plugins: [
+  plugins: lazyPlugins(() => [
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     react(),
     babel({
       presets: [reactCompilerPreset()],
     }),
     tailwindcss(),
-  ],
+  ]),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -27,5 +27,8 @@ export default defineConfig({
     proxy: {
       '/api': { target: 'http://localhost:3000', changeOrigin: true },
     },
+  },
+  test: {
+    environment: 'node',
   },
 });
