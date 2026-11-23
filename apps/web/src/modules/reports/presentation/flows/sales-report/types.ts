@@ -1,6 +1,6 @@
 import type { IPeriod } from '@domain/models/period-model';
 import type { IPaginated } from '@domain/models/paginated-model';
-import type { Sale } from '@/features/sale/api';
+import type { ISale } from '@modules/sale/domain/sale-model';
 import type { ISalesReport } from '../../../domain/report-model';
 
 export type TSalesReportFlowProps = { period: IPeriod };
@@ -8,15 +8,15 @@ export type TSalesReportFlowProps = { period: IPeriod };
 export type TSalesReportLayoutProps = {
   report: ISalesReport | undefined;
   averageTicket: number;
-  history: IPaginated<Sale> | undefined;
+  history: IPaginated<ISale> | undefined;
   page: number;
-  detail: Sale | null;
-  voiding: Sale | null;
+  detail: ISale | null;
+  voiding: ISale | null;
   isVoiding: boolean;
   onPageChange: (page: number) => void;
-  onSaleClick: (sale: Sale) => void;
-  onVoidClick: (sale: Sale) => void;
-  onVoidConfirm: (sale: Sale) => void;
+  onSaleClick: (sale: ISale) => void;
+  onVoidClick: (sale: ISale) => void;
+  onVoidConfirm: (sale: ISale) => void;
   onDetailClose: () => void;
   onVoidClose: () => void;
 };

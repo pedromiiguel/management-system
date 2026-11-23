@@ -27,7 +27,7 @@ Um teste só:
 - API e2e: `apps/api/test/*.e2e-spec.ts`, harness em `test/support/` (um
   `migrate reset` por execução; `createTestApp()` usa o `configureApp` de produção).
 - Web e shared: Vitest (via `vp test`, importando de `vite-plus/test`) ao lado da lógica
-  pura (ex.: `features/sale/receipt.ts`) e dos handlers/stores da web que têm regra própria
+  pura (ex.: `modules/sale/presentation/components/cupom-receipt/build-cupom.ts`) e dos handlers/stores da web que têm regra própria
   (ex.: `modules/auth/data/session-store.ts`), com o `IHttpClient`/`IKeyValueStorage`
   mockado à mão. Handler que só repassa o HTTP não ganha teste: o e2e cobre.
 - Jest e vitest mapeiam `@beverage/shared` para o código-fonte TypeScript, então não

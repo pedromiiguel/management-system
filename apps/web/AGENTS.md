@@ -16,9 +16,6 @@ Estrutura e regra de dependência em [docs/arquitetura.md](../../docs/arquitetur
   (axios, localStorage), `main/` (composition root, `query-client`, `query-keys`),
   `presentation/` (`components/` de UI compartilhada, `flows/app-shell`, `utils/toast`,
   `utils/format`).
-- `src/features/` e `src/lib/http.ts` — organização anterior (ADR 0014), em migração para
-  `modules/`. Não crie arquivo novo lá: ao mexer numa funcionalidade ainda em `features/`,
-  siga o padrão dela ou migre o módulo inteiro.
 
 ## Um endpoint novo
 
@@ -50,7 +47,8 @@ Estrutura e regra de dependência em [docs/arquitetura.md](../../docs/arquitetur
 
 ## PDV
 
-O protocolo da venda em andamento mora em `features/sale/useSaleFlow.ts`: operações
+O protocolo da venda em andamento mora no flow `modules/sale/presentation/flows/sale/`
+(`use-sale-flow.ts` sobre a fila de `sale-queue.ts`): operações
 enfileiradas, quantidades pendentes confirmadas antes de qualquer outra operação. Os atalhos
 vêm da tabela `SALE_HOTKEYS`. Os verbos (Bipar × Alterar quantidade, Remover × Cancelar)
 estão no [CONTEXT.md](../../CONTEXT.md).

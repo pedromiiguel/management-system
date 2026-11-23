@@ -17,7 +17,6 @@ export default defineConfig({
   ]),
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
       ...Object.fromEntries(
         ['shared', 'domain', 'data', 'infra', 'main', 'presentation', 'modules'].map((layer) => [
           `@${layer}`,

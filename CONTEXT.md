@@ -45,7 +45,7 @@ Acréscimo opcional de 10% (`SERVICE_FEE_PERCENT`) sobre o subtotal da Venda (pr
 _Avoid_: Gorjeta, comissão (sugerem repasse a pessoa específica, que não existe no domínio)
 
 **Cupom**:
-Comprovante não-fiscal da Venda, texto de 40 colunas para impressora térmica de 80mm, gerado por `buildCupom` (`apps/web/src/features/sale/receipt.ts`) a partir dos dados persistidos — pode ser impresso na conclusão (PDV) ou reimpresso pelo detalhe no histórico (apenas Vendas concluídas). Não é documento fiscal (sem SEFAZ).
+Comprovante não-fiscal da Venda, texto de 40 colunas para impressora térmica de 80mm, gerado por `buildCupom` (`apps/web/src/modules/sale/presentation/components/cupom-receipt/build-cupom.ts`) a partir dos dados persistidos — pode ser impresso na conclusão (PDV) ou reimpresso pelo detalhe no histórico (apenas Vendas concluídas). Não é documento fiscal (sem SEFAZ).
 _Avoid_: Nota fiscal, NFC-e (documento fiscal de verdade — recurso adiado), recibo
 
 **Estornar** (Venda):

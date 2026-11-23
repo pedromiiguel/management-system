@@ -18,7 +18,7 @@ function isClientError(error: unknown): boolean {
   return status !== null && status >= 400 && status < 500;
 }
 
-/** 401 já leva ao login (lib/http) — não vale um aviso a mais. */
+/** 401 já leva ao login (makeHttpClient) — não vale um aviso a mais. */
 const isUnauthorized = (error: unknown) => statusOf(error) === 401;
 
 export const queryClient = new QueryClient({
