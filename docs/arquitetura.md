@@ -72,7 +72,7 @@ Clean Architecture do guia, com as camadas agrupadas por módulo
     `types.ts`, `constants.ts` e, quando preciso, `schema.ts`, `utils.ts`,
     `components/` e sub-flows.
   - Módulos: `auth` (sessão e login), `settings`, `products`, `stock`, `users`,
-    `financial`, `reports`. Ainda em `features/` (ADR 0014): `sale`.
+    `financial`, `reports`, `sale` (PDV e clientes do fiado).
 - `@shared/` — contratos técnicos sem framework (`IHttpClient`, `IKeyValueStorage`).
 - `domain/` — erros de domínio (`NotFoundError`, `ConflictError`…, com `status`),
   `IPaginated` e `IPeriod`.
@@ -84,8 +84,6 @@ Clean Architecture do guia, com as camadas agrupadas por módulo
   erro, ignora 401), `query/query-keys` (`rootKeys` + `useInvalidate`).
 - `presentation/` — `components/` (UI compartilhada, pasta plana), `flows/app-shell`,
   `utils/` (`toast`, `format`, `download`), `hooks/`, `constants/navigation`.
-- `lib/http.ts` — ponte temporária sobre o `BaseService` para o que ainda está em
-  `features/`; some no fim da migração.
 
 ### Camadas
 
@@ -106,11 +104,6 @@ presentation ──► main ──► data ──► domain
 - `main/` monta tudo e pode importar qualquer camada.
 
 O Oxlint (`no-restricted-imports` no `vite.config.ts` da raiz) barra o resto.
-
-### Dependências (`features/`, enquanto existir)
-
-- Os módulos ainda importam de `features/sale` o `api.ts` e o componente de entrada
-  `SaleDetailModal` (usados pelo histórico de vendas em Relatórios).
 
 Uma funcionalidade nova costuma ser: schema no shared → módulo na API com permissão →
 `modules/<m>/` (gateway, handler, factory, queries, flow) → rota.

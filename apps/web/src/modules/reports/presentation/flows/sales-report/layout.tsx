@@ -14,7 +14,7 @@ import { StatCard } from '@presentation/components/StatCard';
 import { Table } from '@presentation/components/Table';
 import { Tag } from '@presentation/components/Tag';
 import { formatBRL, formatDateTime } from '@presentation/utils/format';
-import { SaleDetailModal } from '@/features/sale/SaleDetailModal';
+import { SaleDetailModal } from '@modules/sale/presentation/flows/sale-detail';
 import type { TSalesReportLayoutProps } from './types';
 import { itemCount } from './utils';
 

@@ -56,6 +56,7 @@ A regra de dependência é verificada pelo Oxlint (`no-restricted-imports` no
 
 - Migração em etapas: `auth` e `settings` primeiro; depois produtos e estoque, financeiro
   e usuários, relatórios e, por último, o PDV. Até lá, `features/` e `lib/http.ts` (uma
-  ponte sobre o `BaseService`) convivem com `modules/`.
+  ponte sobre o `BaseService`) convivem com `modules/`. A migração terminou com o PDV:
+  `features/`, `lib/` e o alias `@/` saíram.
 - Mais arquivos por tela do que na ADR 0014 (controller, layout, types, constants), em
   troca de layouts sem estado e do mesmo padrão dos outros projetos.

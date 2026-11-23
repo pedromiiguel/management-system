@@ -12,7 +12,6 @@ const OUTER_LAYERS = [
   '@presentation/**',
   '@modules/*/main/**',
   '@modules/*/presentation/**',
-  '@/**',
 ];
 
 export default defineConfig({
@@ -33,29 +32,6 @@ export default defineConfig({
         files: ['apps/web/src/**/*.{ts,tsx}'],
         rules: { 'react-compiler/react-compiler': 'error' },
       },
-      {
-        // Entre funcionalidades, só o api.ts e os componentes de entrada (páginas
-        // ficam para as rotas). Ver "Dependências" em docs/arquitetura.md.
-        files: ['apps/web/src/features/**/*.{ts,tsx}'],
-        rules: {
-          'no-restricted-imports': [
-            'error',
-            {
-              patterns: [
-                {
-                  group: [
-                    '@/features/*/*',
-                    '!@/features/*/api',
-                    '!@/features/sale/SaleDetailModal',
-                  ],
-                  message:
-                    'Entre funcionalidades importe só o api.ts ou um componente de entrada (docs/arquitetura.md).',
-                },
-              ],
-            },
-          ],
-        },
-      },
       // Clean Architecture (docs/arquitetura.md#camadas): cada camada só importa
       // o que muda menos que ela. `main/` monta tudo e não tem restrição.
       {
@@ -66,7 +42,7 @@ export default defineConfig({
             {
               patterns: [
                 {
-                  group: ['@/**', '@*/**', '!@beverage/**', 'react', 'axios'],
+                  group: ['@*/**', '!@beverage/**', 'react', 'axios'],
                   message: LAYER_MESSAGE,
                 },
               ],
@@ -121,7 +97,7 @@ export default defineConfig({
             {
               patterns: [
                 {
-                  group: ['@data/**', '@main/**', '@presentation/**', '@modules/**', '@/**'],
+                  group: ['@data/**', '@main/**', '@presentation/**', '@modules/**'],
                   message: LAYER_MESSAGE,
                 },
               ],
@@ -148,7 +124,6 @@ export default defineConfig({
                     '@modules/*/data/**',
                     '@modules/*/presentation/**',
                     '!@modules/*/presentation/flows/*',
-                    '@/lib/**',
                     'axios',
                   ],
                   message: LAYER_MESSAGE,
