@@ -81,14 +81,17 @@ export function SaleChargesCard({
 
 export function PaymentTiles({
   payment,
+  enabled,
   onSelect,
 }: {
   payment: PaymentMethod;
+  enabled: readonly PaymentMethod[];
   onSelect: (method: PaymentMethod) => void;
 }) {
+  const tiles = PAYMENT_TILES.filter((tile) => enabled.includes(tile.method));
   return (
     <div className="grid grid-cols-2 gap-2">
-      {PAYMENT_TILES.map(({ method, label, hotkey }) => (
+      {tiles.map(({ method, label, hotkey }) => (
         <button
           key={method}
           className={clsx('s-paytile', payment === method && 'is-active')}

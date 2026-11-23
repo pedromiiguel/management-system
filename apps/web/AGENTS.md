@@ -47,10 +47,13 @@ Estrutura e regra de dependência em [docs/arquitetura.md](../../docs/arquitetur
 
 ## PDV
 
-O protocolo da venda em andamento mora no flow `modules/sale/presentation/flows/sale/`
-(`use-sale-flow.ts` sobre a fila de `sale-queue.ts`): operações
-enfileiradas, quantidades pendentes confirmadas antes de qualquer outra operação. Os atalhos
-vêm da tabela `SALE_HOTKEYS`. Os verbos (Bipar × Alterar quantidade, Remover × Cancelar)
+A venda em andamento é a sessão do PDV, `modules/sale/domain/sale-session.ts`, em TypeScript
+puro: a Venda, a fila de `sale-queue.ts` (operações uma por vez, quantidades pendentes
+confirmadas antes de qualquer outra), o checkout (forma de pagamento, valor recebido, cliente,
+nota) e as regras de conclusão, incluindo as formas ligadas nas Configurações. Regra nova da
+venda vai na sessão, com teste em `sale-session.test.ts` sobre o `FakeSaleGateway`. O flow
+`presentation/flows/sale/` só liga a sessão ao React (`use-sale-session.ts`) e cuida de
+modais, foco e atalhos (tabela `SALE_HOTKEYS`). Os verbos (Bipar × Alterar quantidade, Remover × Cancelar)
 estão no [CONTEXT.md](../../CONTEXT.md).
 
 Testes da web: [docs/agentes/testes.md](../../docs/agentes/testes.md).

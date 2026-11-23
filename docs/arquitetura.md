@@ -112,7 +112,8 @@ Uma funcionalidade nova costuma ser: schema no shared → módulo na API com per
 
 - `packages/shared` e `apps/web`: Vitest (`vp test`) da lógica pura (precificação, dia da
   loja, cupom, fila do PDV) e dos handlers que transformam dados, com o `IHttpClient`
-  mockado à mão.
+  mockado à mão. A sessão do PDV (`modules/sale/domain/sale-session.ts`) é testada pela
+  própria interface sobre um gateway em memória (`FakeSaleGateway`), sem React nem HTTP.
 - `apps/api/test`: e2e com supertest num Postgres real — cobrem as regras de
   negócio e suas ramificações (BR-xx, permissões, erros). Um `migrate reset`
   por execução; cada bloco volta a "seed base + fixtures" com `t.reset()`.

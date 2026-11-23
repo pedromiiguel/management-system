@@ -29,5 +29,6 @@ export const QUANTITY_DEBOUNCE_MS = 400;
 
 export const SALE_CANCELLED_MESSAGE = 'Venda cancelada';
 export const EMPTY_SALE_MESSAGE = 'Adicione itens antes de finalizar';
+export const PAYMENT_DISABLED_MESSAGE = 'Forma de pagamento desligada nas Configurações';
 export const CASH_MISSING_MESSAGE = 'Informe o valor recebido (maior ou igual ao total)';
 export const UNEXPECTED_ERROR_MESSAGE = 'Erro inesperado — tente novamente';

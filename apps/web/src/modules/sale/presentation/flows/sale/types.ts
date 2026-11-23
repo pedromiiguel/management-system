@@ -3,11 +3,6 @@ import type { DiscountInput, PaymentMethod } from '@beverage/shared';
 import type { IProduct } from '@modules/products/domain/product-model';
 import type { ICustomer, ISale, ISaleItem } from '@modules/sale/domain/sale-model';
 
-export type TAddItemResult =
-  | { status: 'added'; itemId: string }
-  | { status: 'not-found' }
-  | { status: 'failed' };
-
 export type TModalState =
   | { kind: 'none' }
   | { kind: 'search'; initialQuery?: string }
@@ -46,6 +41,8 @@ export type TSaleLayoutProps = {
   withInvoice: boolean;
   onInvoiceToggle: (on: boolean) => void;
   payment: PaymentMethod;
+  /** Formas ligadas nas Configurações: só elas aparecem. */
+  enabledPayments: readonly PaymentMethod[];
   onPaymentSelect: (method: PaymentMethod) => void;
   received: string;
   onReceivedChange: (value: string) => void;
