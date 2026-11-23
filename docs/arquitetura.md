@@ -77,15 +77,16 @@ Tudo depende do que muda menos: `routes → features → components → lib → 
   Páginas são importadas só pelas rotas. O resto (lógica pura, componentes
   internos) fica dentro da funcionalidade; se outra precisar, vira um
   componente de entrada ou sobe para `components/`/`lib/`/shared.
-- O ESLint (`apps/web/eslint.config.js`, `no-restricted-imports`) barra o resto;
-  um componente de entrada novo entra na lista de lá e daqui.
+- O lint (Oxlint via `vp lint`, regra `no-restricted-imports` no
+  `vite.config.ts` da raiz) barra o resto; um componente de entrada novo entra
+  na lista de lá e daqui.
 
 Uma funcionalidade nova costuma ser: schema no shared → módulo na API com
 permissão → `features/<f>/api.ts` + página → rota.
 
 ## Testes
 
-- `packages/shared` e `apps/web`: vitest da lógica pura (precificação, dia da
+- `packages/shared` e `apps/web`: Vitest (`vp test`) da lógica pura (precificação, dia da
   loja, cupom, fila do PDV).
 - `apps/api/test`: e2e com supertest num Postgres real — cobrem as regras de
   negócio e suas ramificações (BR-xx, permissões, erros). Um `migrate reset`

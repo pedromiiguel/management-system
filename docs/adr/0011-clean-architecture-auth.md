@@ -190,7 +190,7 @@ existente.
   fora da Clean Architecture (Decisão 3) — `getToken`/`setSession`/
   `clearSession`/`isAuthenticated`/`hasPermission` inalterados.
 - `login.tsx` (108 linhas, 1 arquivo) virou `presentation/flows/login/
-LoginPage/` (MVVM completo — `useSearch({ from: '/login' })` no lugar de
+  LoginPage/` (MVVM completo — `useSearch({ from: '/login' })` no lugar de
   `Route.useSearch()` pra evitar import circular com o arquivo de rota, sem
   mudar comportamento). `routes/login.tsx` é hoje um wrapper de 12 linhas
   (mantém `validateSearch`/`beforeLoad`, que são configuração de rota, não

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { createSaleQueue, PendingQuantityError } from './sale-queue';
 
 function setup(commitQuantity = vi.fn(async (_itemId: string, _quantity: number) => {})) {

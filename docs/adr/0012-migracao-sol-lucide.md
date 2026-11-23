@@ -141,7 +141,7 @@ Segue o padrão das rodadas anteriores. `componentes-mvvm.md` e
 3. **`Confirm`/`CupomReceipt`/`Screen`**: movidos para pastas MVVM próprias
    em `presentation/components/`. `CupomReceipt`/`Screen` não exigiram
    mudança nos imports dos consumidores (o path `@/presentation/components/
-{Nome}` já era usado, resolvendo agora pro `index.ts` da pasta em vez do
+   {Nome}` já era usado, resolvendo agora pro `index.ts` da pasta em vez do
    arquivo solto). `main.tsx` e os 2 consumidores de `Confirm`
    (`ProductsPage.model.ts`, `SalePage.model.ts`) tiveram o import
    atualizado manualmente (o script da fase 2 só cobria `components/sol`).
@@ -157,7 +157,7 @@ Segue o padrão das rodadas anteriores. `componentes-mvvm.md` e
   para servir essas duas primitivas, sem fechar a pendência.
 - **Deixar `sol.tsx` onde está, só tirar o ícone**: rejeitado pelo usuário
   — optou por migrar as 16 primitivas inteiras para `presentation/
-components/`, não só o ícone.
+  components/`, não só o ícone.
 - **Colapsar os componentes puramente apresentacionais em arquivo único**
   (opção que `componentes-mvvm.md` permite): rejeitado pelo usuário — prior
   idade para consistência de pasta entre todos os ~19 componentes desta

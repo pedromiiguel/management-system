@@ -1,5 +1,5 @@
 import { DiscountType } from '@beverage/shared';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { makeItem, makeSale } from './fixtures';
 import { parseScan, salePricing } from './sale';
 

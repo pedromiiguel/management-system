@@ -15,7 +15,7 @@ Architecture overview: [docs/arquitetura.md](docs/arquitetura.md). Decisions: [d
 npm **workspaces** (not turbo/pnpm/nx), Node >=22. Four workspaces:
 
 - `apps/api` — `@beverage/api`, NestJS 11 + Prisma 6 + PostgreSQL
-- `apps/web` — `@beverage/web`, React 19 + Vite 8 + TanStack Router/Query + Tailwind 4
+- `apps/web` — `@beverage/web`, React 19 + Vite 8 (via Vite+) + TanStack Router/Query + Tailwind 4
 - `apps/e2e` — `@beverage/e2e`, Playwright suite (Chromium) driving web + api
 - `packages/shared` — `@beverage/shared`, Zod schemas, enums/labels, sale pricing, store-day time helpers and the permission catalog shared by both apps
 
@@ -28,10 +28,11 @@ npm run dev            # api + web in parallel (predev:api builds shared first)
 npm run dev:api        # NestJS watch mode only (builds shared first)
 npm run dev:web        # Vite only
 npm run build          # builds shared → api → web (order matters)
-npm run lint           # eslint — apps/web only (config in apps/web)
+npm run check          # vp check: Oxfmt (format) + Oxlint (lint) on the whole repo
+npm run lint           # vp lint — Oxlint, config in the root vite.config.ts
 npm run typecheck      # tsc --noEmit: shared + api + web (web needs routeTree.gen.ts: run the web build or dev first)
-npm run format         # prettier --write .
-npm test               # api jest (unit) + shared vitest + web vitest — no shared build needed
+npm run format         # vp fmt — Oxfmt (Prettier-compatible), config in the root vite.config.ts
+npm test               # api jest (unit) + shared/web `vp test` (Vitest) — no shared build needed
 npm run test:e2e:api   # api e2e (jest --runInBand, real Postgres)
 npm run test:e2e       # Playwright (apps/e2e); starts/reuses dev:api + dev:web on 3000/5173
 npm run db:migrate     # prisma migrate deploy
@@ -40,7 +41,9 @@ npm run db:seed:fixtures  # base + example data (products, customer, open regist
 npm run db:reset       # migrate reset + seed with fixtures (used by Playwright)
 ```
 
-CI/CD: `.github/workflows/ci-cd.yml` runs only the jobs whose paths changed (docs-only → just Prettier): shared, api (build/type-check/unit), api-e2e, web (lint/build/type-check/tests), lighthouse (every screen, logged in via a seeded API; `apps/web/lighthouserc.json`); `CI ok` is the single required check. On `main` it then deploys the API to Railway and/or the web to Vercel. Secrets/variables: [docs/deploy.md](docs/deploy.md).
+Tooling is **Vite+** (`vite-plus`, CLI `vp`): Vite, Vitest, Oxlint and Oxfmt in one dev dependency. Lint and format config live in the root `vite.config.ts` (per-folder rules via `lint.overrides`; the React Compiler ESLint plugin runs as an Oxlint JS plugin); Vite/Vitest config stays in each package (`apps/web/vite.config.ts`). Tests import from `vite-plus/test`, not `vitest`. The root `overrides` aliases `vite` to `@voidzero-dev/vite-plus-core` — keep it equal to the version `vite-plus` ships. The API keeps Jest and `nest build`; type-checking stays on `tsc` (type-aware lint is off until the tsconfigs drop `baseUrl`/`moduleResolution: node`).
+
+CI/CD: `.github/workflows/ci-cd.yml` runs only the jobs whose paths changed (docs-only → just `check`): check (`vp check`, always), shared, api (build/type-check/unit), api-e2e, web (build/type-check/tests), lighthouse (every screen, logged in via a seeded API; `apps/web/lighthouserc.json`); `CI ok` is the single required check. On `main` it then deploys the API to Railway and/or the web to Vercel. Secrets/variables: [docs/deploy.md](docs/deploy.md).
 
 Database runs via `docker compose up -d postgres` (Postgres 17 on `localhost:5432`, creds `beverage`/`beverage`, database `beverage`). A `backup` service does daily `pg_dump` into `backups/`. The `prod` profile (`docker compose --profile prod up -d --build`) builds and runs api + web (`docker/web.Dockerfile`, nginx proxying `/api`); it requires `JWT_SECRET`.
 
@@ -92,7 +95,7 @@ Zod schemas in `packages/shared` are the single validation contract (bodies and 
 ### Web app — organized by feature
 
 - `src/routes/` — TanStack Router **file-based routing** (`autoCodeSplitting`); `routeTree.gen.ts` is generated, don't hand-edit. Routes are thin: `login`, `index`, and under `_app/` (guarded in `beforeLoad`, renders `AppShell`): `sale` (PDV), `products`, `stock`, `financial`, `reports`, `settings`.
-- `src/features/<feature>/` — everything that changes together: `api.ts` (typed HTTP functions, `queryOptions`, mutation hooks that invalidate every resource the server effect touches), pages and components as plain `.tsx`, and pure logic with colocated vitest tests (e.g. `sale/receipt.ts`, `sale/sale-queue.ts`). Features: auth, sale, products, stock, financial, reports, settings, users. Across features, import only `api.ts` and the named entry components listed in [docs/arquitetura.md](docs/arquitetura.md) (enforced by ESLint `no-restricted-imports`). Response types live in each feature's `api.ts` (shared exports only input types, `AppSettings` and enums).
+- `src/features/<feature>/` — everything that changes together: `api.ts` (typed HTTP functions, `queryOptions`, mutation hooks that invalidate every resource the server effect touches), pages and components as plain `.tsx`, and pure logic with colocated vitest tests (e.g. `sale/receipt.ts`, `sale/sale-queue.ts`). Features: auth, sale, products, stock, financial, reports, settings, users. Across features, import only `api.ts` and the named entry components listed in [docs/arquitetura.md](docs/arquitetura.md) (enforced by Oxlint `no-restricted-imports` in the root `vite.config.ts`). Response types live in each feature's `api.ts` (shared exports only input types, `AppSettings` and enums).
 - `src/lib/` — `http.ts` (axios instance, JWT injection, errors normalized to `ApiError`, logout on 401), `session.ts` (`useSession`, `hasPermission`, `startSession`, `logout` — the only exit, also clears the query cache), `session-query.ts` (`/auth/me`: live permissions loaded in `_app` `beforeLoad`, observed by `AppShell`, refreshes the stored session; invalidated by role updates), `query-keys.ts` (`rootKeys` + `useInvalidate`), `query-client.ts` (global error toast for queries and mutations, 401 skipped), `toast.ts` (toast store; `components/Toast` renders it), `format.ts` (money and dates — instants in the store zone, date-only values as `YYYY-MM-DD` with no zone shift). `lib/` imports neither `components/` nor `features/`.
 - `src/components/` — flat shared UI components (`Button`, `Modal`, `Table`, `Screen`, …). Styling is Tailwind 4 plus hand-authored `s-*` classes in `styles.css`; icons from `lucide-react`.
 
