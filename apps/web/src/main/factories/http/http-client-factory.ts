@@ -1,6 +1,6 @@
 import type { IHttpClient } from '@shared/http';
 import { AxiosHttpClient } from '@infra/http/axios-http-client';
-import { getToken, logout } from '@/lib/session';
+import { getToken, logout } from '@modules/auth/main/session';
 
 // `||` e não `??`: VITE_API_URL definido e vazio (dev local) cai no proxy '/api' do Vite.
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';

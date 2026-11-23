@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { STORE_TIME_ZONE } from '@beverage/shared';
-import { Chip } from '@/components/Chip';
-import { Screen } from '@/components/Screen';
-import { SegmentedControl } from '@/components/SegmentedControl';
+import { Chip } from '@presentation/components/Chip';
+import { Screen } from '@presentation/components/Screen';
+import { SegmentedControl } from '@presentation/components/SegmentedControl';
 import { EntriesTab } from './EntriesTab';
 import { OverviewTab } from './OverviewTab';
 import { PayablesTab } from './PayablesTab';

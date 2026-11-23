@@ -6,13 +6,13 @@ import {
   saleCode,
   type SettleReceivableInput,
 } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
-import { Modal } from '@/components/Modal';
-import { Table } from '@/components/Table';
-import { Tag } from '@/components/Tag';
-import { toast } from '@/lib/toast';
-import { formatBRL, formatDate, formatDateOnly } from '@/lib/format';
+import { Button } from '@presentation/components/Button';
+import { Card } from '@presentation/components/Card';
+import { Modal } from '@presentation/components/Modal';
+import { Table } from '@presentation/components/Table';
+import { Tag } from '@presentation/components/Tag';
+import { toast } from '@presentation/utils/toast';
+import { formatBRL, formatDate, formatDateOnly } from '@presentation/utils/format';
 import { receivablesQuery, useSettleReceivable, type Receivable } from './api';
 
 const SETTLE_METHODS: SettleReceivableInput['paymentMethod'][] = [

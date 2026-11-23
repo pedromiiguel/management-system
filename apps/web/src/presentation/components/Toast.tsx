@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { useToast } from '@/lib/toast';
+import { useToast } from '@presentation/utils/toast';
 
 export function Toaster() {
   const state = useToast();

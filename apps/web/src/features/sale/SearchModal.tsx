@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
-import { Modal } from '@/components/Modal';
-import { Table } from '@/components/Table';
-import { formatBRL } from '@/lib/format';
-import { useDebounce } from '@/lib/useDebounce';
+import { Modal } from '@presentation/components/Modal';
+import { Table } from '@presentation/components/Table';
+import { formatBRL } from '@presentation/utils/format';
+import { useDebounce } from '@presentation/hooks/use-debounce';
 import { productSearchQuery, type Product } from '@/features/products/api';
 import { SALE_HOTKEYS } from './hotkeys';
 

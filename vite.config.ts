@@ -3,6 +3,18 @@ import { defineConfig } from 'vite-plus';
 // Configuração do Vite+ para o monorepo inteiro: formatação (Oxfmt) e lint
 // (Oxlint). O Vite/Vitest de cada pacote fica no vite.config.ts do próprio
 // pacote (apps/web, packages/shared).
+const LAYER_MESSAGE =
+  'Import fora da regra de dependência das camadas (docs/arquitetura.md#camadas).';
+/** Camadas de fora: domain e data nunca as importam. */
+const OUTER_LAYERS = [
+  '@infra/**',
+  '@main/**',
+  '@presentation/**',
+  '@modules/*/main/**',
+  '@modules/*/presentation/**',
+  '@/**',
+];
+
 export default defineConfig({
   lint: {
     ignorePatterns: ['**/dist/**', 'apps/web/src/routeTree.gen.ts'],
@@ -47,30 +59,102 @@ export default defineConfig({
           ],
         },
       },
+      // Clean Architecture (docs/arquitetura.md#camadas): cada camada só importa
+      // o que muda menos que ela. `main/` monta tudo e não tem restrição.
       {
-        // lib e components dependem só do que muda menos que eles.
-        files: ['apps/web/src/components/**/*.{ts,tsx}'],
-        rules: {
-          'no-restricted-imports': [
-            'error',
-            {
-              patterns: [
-                { group: ['@/features/**'], message: 'components/ não importa features/.' },
-              ],
-            },
-          ],
-        },
-      },
-      {
-        files: ['apps/web/src/lib/**/*.{ts,tsx}'],
+        files: ['apps/web/src/@shared/**/*.ts'],
         rules: {
           'no-restricted-imports': [
             'error',
             {
               patterns: [
                 {
-                  group: ['@/features/**', '@/components/**'],
-                  message: 'lib/ não importa components/ nem features/.',
+                  group: ['@/**', '@*/**', '!@beverage/**', 'react', 'axios'],
+                  message: LAYER_MESSAGE,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        files: ['apps/web/src/domain/**/*.ts', 'apps/web/src/modules/*/domain/**/*.ts'],
+        rules: {
+          'no-restricted-imports': [
+            'error',
+            {
+              patterns: [
+                {
+                  group: [
+                    ...OUTER_LAYERS,
+                    '@data/**',
+                    '@modules/*/data/**',
+                    'react',
+                    'axios',
+                    '@tanstack/**',
+                  ],
+                  message: LAYER_MESSAGE,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        files: ['apps/web/src/data/**/*.ts', 'apps/web/src/modules/*/data/**/*.ts'],
+        rules: {
+          'no-restricted-imports': [
+            'error',
+            {
+              patterns: [
+                {
+                  group: [...OUTER_LAYERS, 'react', 'axios', '@tanstack/**'],
+                  message: LAYER_MESSAGE,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        files: ['apps/web/src/infra/**/*.ts'],
+        rules: {
+          'no-restricted-imports': [
+            'error',
+            {
+              patterns: [
+                {
+                  group: ['@data/**', '@main/**', '@presentation/**', '@modules/**', '@/**'],
+                  message: LAYER_MESSAGE,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        // Entre módulos, a apresentação usa o main/ do outro (queries, mutations,
+        // sessão), tipos do domain/ e a entrada de um flow — nunca data/ ou infra/.
+        files: [
+          'apps/web/src/presentation/**/*.{ts,tsx}',
+          'apps/web/src/modules/*/presentation/**/*.{ts,tsx}',
+        ],
+        rules: {
+          'no-restricted-imports': [
+            'error',
+            {
+              patterns: [
+                {
+                  group: [
+                    '@data/**',
+                    '@infra/**',
+                    '@modules/*/data/**',
+                    '@modules/*/presentation/**',
+                    '!@modules/*/presentation/flows/*',
+                    '@/lib/**',
+                    'axios',
+                  ],
+                  message: LAYER_MESSAGE,
                 },
               ],
             },

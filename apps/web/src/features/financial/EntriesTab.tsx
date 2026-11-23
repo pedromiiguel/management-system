@@ -10,15 +10,21 @@ import {
   PAYMENT_METHOD_LABELS,
   type ManualEntryInput,
 } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
-import { Chip } from '@/components/Chip';
-import { Modal, ModalActions } from '@/components/Modal';
-import { PeriodPicker } from '@/components/PeriodPicker';
-import { StatCard } from '@/components/StatCard';
-import { Table } from '@/components/Table';
-import { toast } from '@/lib/toast';
-import { formatBRL, formatDateTime, monthToDate, moneyText, optionalText } from '@/lib/format';
+import { Button } from '@presentation/components/Button';
+import { Card } from '@presentation/components/Card';
+import { Chip } from '@presentation/components/Chip';
+import { Modal, ModalActions } from '@presentation/components/Modal';
+import { PeriodPicker } from '@presentation/components/PeriodPicker';
+import { StatCard } from '@presentation/components/StatCard';
+import { Table } from '@presentation/components/Table';
+import { toast } from '@presentation/utils/toast';
+import {
+  formatBRL,
+  formatDateTime,
+  monthToDate,
+  moneyText,
+  optionalText,
+} from '@presentation/utils/format';
 import { cashFlowQuery, categoriesQuery, useCreateManualEntry } from './api';
 
 export function EntriesTab() {

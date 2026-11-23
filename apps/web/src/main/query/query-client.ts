@@ -1,5 +1,5 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
-import { toast } from './toast';
+import { toast } from '@presentation/utils/toast';
 
 declare module '@tanstack/react-query' {
   interface Register {

@@ -1,5 +1,5 @@
 import { PaymentMethod } from '@beverage/shared';
-import { Kbd } from '@/components/Kbd';
+import { Kbd } from '@presentation/components/Kbd';
 
 /**
  * Atalhos do PDV (FR-26): a mesma tabela registra a tecla, rotula botões e

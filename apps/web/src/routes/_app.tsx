@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { AppShell } from '@/components/AppShell';
-import { queryClient } from '@/lib/query-client';
-import { getSession } from '@/lib/session';
-import { sessionQuery } from '@/lib/session-query';
+import { AppShellFlow } from '@presentation/flows/app-shell';
+import { queryClient } from '@main/query/query-client';
+import { sessionQuery } from '@modules/auth/main/auth-queries';
+import { getSession } from '@modules/auth/main/session';
 
 export const Route = createFileRoute('/_app')({
   beforeLoad: async ({ location }) => {
@@ -11,5 +11,5 @@ export const Route = createFileRoute('/_app')({
     // falha vira aviso (QueryCache) e a sessão guardada segue valendo.
     await queryClient.ensureQueryData(sessionQuery()).catch(() => undefined);
   },
-  component: AppShell,
+  component: AppShellFlow,
 });

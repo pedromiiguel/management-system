@@ -1,6 +1,6 @@
 import { useHotkey } from '@tanstack/react-hotkeys';
-import { Button } from '@/components/Button';
-import { Modal } from '@/components/Modal';
+import { Button } from '@presentation/components/Button';
+import { Modal } from '@presentation/components/Modal';
 import type { Sale } from './api';
 import { CupomReceipt } from './CupomReceipt';
 

@@ -2,10 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
 import { PAYMENT_METHOD_LABELS, SERVICE_FEE_PERCENT } from '@beverage/shared';
-import { BarChart } from '@/components/BarChart';
-import { Card } from '@/components/Card';
-import { StatCard } from '@/components/StatCard';
-import { formatBRL } from '@/lib/format';
+import { BarChart } from '@presentation/components/BarChart';
+import { Card } from '@presentation/components/Card';
+import { StatCard } from '@presentation/components/StatCard';
+import { formatBRL } from '@presentation/utils/format';
 import { dashboardQuery } from './api';
 
 const MONTH_LABELS = [

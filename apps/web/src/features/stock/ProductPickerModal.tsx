@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Modal } from '@/components/Modal';
-import { Table } from '@/components/Table';
+import { Modal } from '@presentation/components/Modal';
+import { Table } from '@presentation/components/Table';
 import { productSearchQuery, type Product } from '@/features/products/api';
 
 const RESULT_LIMIT = 6;

@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
 import type { CompleteSaleBody, DiscountInput } from '@beverage/shared';
-import { toast } from '@/lib/toast';
-import { ApiError } from '@/lib/http';
-import { useInvalidate } from '@/lib/query-keys';
+import { toast } from '@presentation/utils/toast';
+import { NotFoundError } from '@domain/errors';
+import { useInvalidate } from '@main/query/query-keys';
 import { saleApi, SALE_SETTLEMENT_EFFECTS, type AddSaleItemInput, type Sale } from './api';
 import { createSaleQueue, PendingQuantityError } from './sale-queue';
 
@@ -104,7 +104,7 @@ export function useSaleFlow({ onSettled }: { onSettled: () => void }) {
         });
       } catch (error) {
         // Código sem cadastro exato (EAN/SKU/id): o PDV cai na busca por nome.
-        if (error instanceof ApiError && error.status === 404) return { status: 'not-found' };
+        if (error instanceof NotFoundError) return { status: 'not-found' };
         if (!(error instanceof PendingQuantityError)) toast(messageOf(error), 'danger');
         return { status: 'failed' };
       } finally {

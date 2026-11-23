@@ -1,6 +1,6 @@
 import { addDaysToKey } from '@beverage/shared';
-import { Chip } from '@/components/Chip';
-import { monthToDate, todayKey } from '@/lib/format';
+import { Chip } from '@presentation/components/Chip';
+import { monthToDate, todayKey } from '@presentation/utils/format';
 
 /** Período fechado de dias da loja, `AAAA-MM-DD` (a API corta no fuso da loja). */
 export type Period = { from: string; to: string };

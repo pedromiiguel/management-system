@@ -1,10 +1,10 @@
 import { clsx } from 'clsx';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Card } from '@/components/Card';
-import { IconButton } from '@/components/IconButton';
-import { Table } from '@/components/Table';
-import { formatBRL } from '@/lib/format';
+import { Card } from '@presentation/components/Card';
+import { IconButton } from '@presentation/components/IconButton';
+import { Table } from '@presentation/components/Table';
+import { formatBRL } from '@presentation/utils/format';
 import type { SaleItem } from './api';
 
 export function SaleItemsCard({

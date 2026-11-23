@@ -2,9 +2,9 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Confirm } from '@/components/Confirm';
-import { Toaster } from '@/components/Toast';
-import { queryClient } from '@/lib/query-client';
+import { Confirm } from '@presentation/components/Confirm';
+import { Toaster } from '@presentation/components/Toast';
+import { queryClient } from '@main/query/query-client';
 import { routeTree } from './routeTree.gen';
 import './styles.css';
 

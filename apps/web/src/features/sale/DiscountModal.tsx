@@ -2,10 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { DiscountType, discountSchema, type DiscountInput } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Chip } from '@/components/Chip';
-import { Modal } from '@/components/Modal';
-import { parseMoney } from '@/lib/format';
+import { Button } from '@presentation/components/Button';
+import { Chip } from '@presentation/components/Chip';
+import { Modal } from '@presentation/components/Modal';
+import { parseMoney } from '@presentation/utils/format';
 import { SALE_HOTKEYS } from './hotkeys';
 
 // O valor é digitado como texto ("12,50"); as regras são as do shared.

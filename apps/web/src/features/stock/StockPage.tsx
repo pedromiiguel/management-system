@@ -5,12 +5,12 @@ import {
   STOCK_MOVEMENT_TYPE_LABELS,
   StockMovementType,
 } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
-import { Screen } from '@/components/Screen';
-import { Table } from '@/components/Table';
-import { Tag } from '@/components/Tag';
-import { formatDateOnly, formatDateTime } from '@/lib/format';
+import { Button } from '@presentation/components/Button';
+import { Card } from '@presentation/components/Card';
+import { Screen } from '@presentation/components/Screen';
+import { Table } from '@presentation/components/Table';
+import { Tag } from '@presentation/components/Tag';
+import { formatDateOnly, formatDateTime } from '@presentation/utils/format';
 import { AdjustModal } from './AdjustModal';
 import { stockAlertsQuery, stockMovementsQuery } from './api';
 import { StockEntryModal } from './StockEntryModal';

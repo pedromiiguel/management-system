@@ -4,11 +4,11 @@ import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { customerSchema, type CustomerInput } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Modal } from '@/components/Modal';
-import { Table } from '@/components/Table';
-import { formatBRL } from '@/lib/format';
-import { useDebounce } from '@/lib/useDebounce';
+import { Button } from '@presentation/components/Button';
+import { Modal } from '@presentation/components/Modal';
+import { Table } from '@presentation/components/Table';
+import { formatBRL } from '@presentation/utils/format';
+import { useDebounce } from '@presentation/hooks/use-debounce';
 import { customerSearchQuery, useCreateCustomer, type Customer } from './api';
 import { SALE_HOTKEYS } from './hotkeys';
 

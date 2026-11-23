@@ -1,7 +1,7 @@
 import { queryOptions, useMutation } from '@tanstack/react-query';
 import type { CreateUserInput, Permission, RoleInput, UpdateRoleInput } from '@beverage/shared';
 import { http } from '@/lib/http';
-import { rootKeys, useInvalidate } from '@/lib/query-keys';
+import { rootKeys, useInvalidate } from '@main/query/query-keys';
 
 export interface Role {
   id: string;

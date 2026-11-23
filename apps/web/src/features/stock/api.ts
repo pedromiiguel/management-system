@@ -6,7 +6,7 @@ import type {
   StockMovementType,
 } from '@beverage/shared';
 import { http } from '@/lib/http';
-import { rootKeys, useInvalidate } from '@/lib/query-keys';
+import { rootKeys, useInvalidate } from '@main/query/query-keys';
 import type { Product } from '@/features/products/api';
 
 export interface StockAlerts {

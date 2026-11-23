@@ -7,13 +7,13 @@ import {
   type CompleteSaleBody,
   type DiscountInput,
 } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Modal } from '@/components/Modal';
-import { Screen } from '@/components/Screen';
-import { Tag } from '@/components/Tag';
-import { toast } from '@/lib/toast';
-import { formatBRL, maskBRL, parseMoney } from '@/lib/format';
-import { useSession } from '@/lib/session';
+import { Button } from '@presentation/components/Button';
+import { Modal } from '@presentation/components/Modal';
+import { Screen } from '@presentation/components/Screen';
+import { Tag } from '@presentation/components/Tag';
+import { toast } from '@presentation/utils/toast';
+import { formatBRL, maskBRL, parseMoney } from '@presentation/utils/format';
+import { useSession } from '@modules/auth/main/session';
 import type { Product } from '@/features/products/api';
 import type { AddSaleItemInput, Customer, Sale, SaleItem } from './api';
 import { CashPanel, CreditPanel, PaymentTiles, SaleChargesCard, SaleTotalCard } from './Checkout';

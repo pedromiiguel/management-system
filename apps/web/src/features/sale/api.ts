@@ -10,7 +10,7 @@ import type {
   SaleStatus,
 } from '@beverage/shared';
 import { http, type Paginated } from '@/lib/http';
-import { rootKeys, useInvalidate, type Resource } from '@/lib/query-keys';
+import { rootKeys, useInvalidate, type Resource } from '@main/query/query-keys';
 import type { Product } from '@/features/products/api';
 
 export interface Customer {
