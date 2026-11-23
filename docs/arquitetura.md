@@ -70,8 +70,8 @@ Clean Architecture do guia, com as camadas agrupadas por módulo
     `controller.tsx` (estado, hooks, queries), `layout.tsx` (JSX, só props),
     `types.ts`, `constants.ts` e, quando preciso, `schema.ts`, `utils.ts`,
     `components/` e sub-flows.
-  - Módulos: `auth` (sessão e login), `settings`. Ainda em `features/` (ADR 0014),
-    migrando um por PR: `sale`, `products`, `stock`, `financial`, `reports`, `users`.
+  - Módulos: `auth` (sessão e login), `settings`, `products`, `stock`. Ainda em
+    `features/` (ADR 0014), migrando um por PR: `sale`, `financial`, `reports`, `users`.
 - `@shared/` — contratos técnicos sem framework (`IHttpClient`, `IKeyValueStorage`).
 - `domain/` — erros de domínio (`NotFoundError`, `ConflictError`…, com `status`) e
   `IPaginated`.
@@ -109,8 +109,8 @@ O Oxlint (`no-restricted-imports` no `vite.config.ts` da raiz) barra o resto.
 ### Dependências (`features/`, enquanto existir)
 
 - Entre funcionalidades, só o `api.ts` e os **componentes de entrada**:
-  `financial/CategoriesTab` e `users/AccessTab` (Configurações),
-  `stock/StockEntryModal` (Produtos) e `sale/SaleDetailModal` (Relatórios).
+  `financial/CategoriesTab` e `users/AccessTab` (Configurações) e
+  `sale/SaleDetailModal` (Relatórios).
 
 Uma funcionalidade nova costuma ser: schema no shared → módulo na API com permissão →
 `modules/<m>/` (gateway, handler, factory, queries, flow) → rota.

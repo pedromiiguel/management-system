@@ -1,23 +1,10 @@
 import { queryOptions, useMutation } from '@tanstack/react-query';
-import type { ProductInput, UpdateProductInput } from '@beverage/shared';
-import { http, type Paginated } from '@/lib/http';
 import { rootKeys, useInvalidate } from '@main/query/query-keys';
-
-/** Produto como a API devolve; as demais telas usam recortes (`Pick`) dele. */
-export interface Product {
-  id: string;
-  sku: string;
-  ean: string | null;
-  name: string;
-  unit: string;
-  purchasePrice: number;
-  salePrice: number;
-  currentStock: number;
-  minimumStock: number;
-  active: boolean;
-}
+import type { TSaveProductParams } from '../domain/product-model';
+import { makeProductsGateway } from './products-factory';
 
 export const CATALOG_PAGE_SIZE = 50;
+const MIN_SEARCH_LENGTH = 2;
 
 const productKeys = {
   catalog: (search: string, page: number) =>
@@ -30,11 +17,11 @@ export const catalogQuery = (search: string, page: number) =>
   queryOptions({
     queryKey: productKeys.catalog(search, page),
     queryFn: () =>
-      http.get<Paginated<Product>>('/products', {
-        search: search || undefined,
+      makeProductsGateway().search({
+        search,
         page,
         perPage: CATALOG_PAGE_SIZE,
-        all: 'true',
+        includeInactive: true,
       }),
   });
 
@@ -42,8 +29,8 @@ export const catalogQuery = (search: string, page: number) =>
 export const productSearchQuery = (term: string, limit: number) =>
   queryOptions({
     queryKey: productKeys.search(term, limit),
-    queryFn: () => http.get<Paginated<Product>>('/products', { search: term, perPage: limit }),
-    enabled: term.length >= 2,
+    queryFn: () => makeProductsGateway().search({ search: term, perPage: limit }),
+    enabled: term.length >= MIN_SEARCH_LENGTH,
     select: (page) => page.items,
   });
 
@@ -53,10 +40,7 @@ const PRODUCT_EFFECTS = ['products', 'stock', 'reports'] as const;
 export function useSaveProduct() {
   const onSuccess = useInvalidate(...PRODUCT_EFFECTS);
   return useMutation({
-    mutationFn: (args: { id: string; input: UpdateProductInput } | { input: ProductInput }) =>
-      'id' in args
-        ? http.patch<Product>(`/products/${args.id}`, args.input)
-        : http.post<Product>('/products', args.input),
+    mutationFn: (params: TSaveProductParams) => makeProductsGateway().save(params),
     onSuccess,
   });
 }
@@ -64,16 +48,15 @@ export function useSaveProduct() {
 export function useDeactivateProduct() {
   const onSuccess = useInvalidate(...PRODUCT_EFFECTS);
   return useMutation({
-    mutationFn: (id: string) => http.patch<Product>(`/products/${id}/deactivate`),
+    mutationFn: (id: string) => makeProductsGateway().deactivate(id),
     onSuccess,
   });
 }
 
-/** Excluir: apaga o cadastro (a API recusa produto com venda registrada). */
 export function useDeleteProduct() {
   const onSuccess = useInvalidate(...PRODUCT_EFFECTS);
   return useMutation({
-    mutationFn: (id: string) => http.delete<{ deleted: boolean }>(`/products/${id}`),
+    mutationFn: (id: string) => makeProductsGateway().delete(id),
     onSuccess,
   });
 }

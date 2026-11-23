@@ -1,5 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import {
   STOCK_MOVEMENT_SOURCE_LABELS,
   STOCK_MOVEMENT_TYPE_LABELS,
@@ -11,25 +9,27 @@ import { Screen } from '@presentation/components/Screen';
 import { Table } from '@presentation/components/Table';
 import { Tag } from '@presentation/components/Tag';
 import { formatDateOnly, formatDateTime } from '@presentation/utils/format';
-import { AdjustModal } from './AdjustModal';
-import { stockAlertsQuery, stockMovementsQuery } from './api';
-import { StockEntryModal } from './StockEntryModal';
+import { StockAdjustmentFlow } from '../stock-adjustment';
+import { StockEntryFlow } from '../stock-entry';
+import type { TStockLayoutProps } from './types';
 
-export function StockPage() {
-  const [modal, setModal] = useState<'none' | 'entry' | 'adjust'>('none');
-  const { data: alerts } = useQuery(stockAlertsQuery());
-  const { data: movements = [] } = useQuery(stockMovementsQuery());
-  const closeModal = () => setModal('none');
-
+export function StockLayout({
+  movements,
+  alerts,
+  modal,
+  onEntryClick,
+  onAdjustmentClick,
+  onModalClose,
+}: TStockLayoutProps) {
   return (
     <Screen
       title="Estoque"
       topRight={
         <>
-          <Button ghost onClick={() => setModal('adjust')}>
+          <Button ghost onClick={onAdjustmentClick}>
             Ajuste manual
           </Button>
-          <Button primary onClick={() => setModal('entry')}>
+          <Button primary onClick={onEntryClick}>
             Entrada de estoque
           </Button>
         </>
@@ -43,23 +43,23 @@ export function StockPage() {
             widths="110px 1fr 80px 150px 60px"
             align={[null, null, null, null, 'center']}
             dense
-            rows={movements.map((m) => {
-              const entry = m.type === StockMovementType.ENTRY;
+            rows={movements.map((movement) => {
+              const isEntry = movement.type === StockMovementType.ENTRY;
               return {
-                key: m.id,
+                key: movement.id,
                 cells: [
-                  formatDateTime(m.createdAt),
+                  formatDateTime(movement.createdAt),
                   <span key="p">
-                    {m.product.name}
-                    {m.note ? <span className="s-dim"> — {m.note}</span> : null}
+                    {movement.product.name}
+                    {movement.note ? <span className="s-dim"> — {movement.note}</span> : null}
                   </span>,
-                  <Tag key="t" tone={entry ? 'ok' : 'dim'}>
-                    {STOCK_MOVEMENT_TYPE_LABELS[m.type].toLowerCase()}
+                  <Tag key="t" tone={isEntry ? 'ok' : 'dim'}>
+                    {STOCK_MOVEMENT_TYPE_LABELS[movement.type].toLowerCase()}
                   </Tag>,
-                  STOCK_MOVEMENT_SOURCE_LABELS[m.source],
+                  STOCK_MOVEMENT_SOURCE_LABELS[movement.source],
                   <b key="q">
-                    {entry ? '+' : '−'}
-                    {m.quantity}
+                    {isEntry ? '+' : '−'}
+                    {movement.quantity}
                   </b>,
                 ],
               };
@@ -76,9 +76,13 @@ export function StockPage() {
               align={[null, 'center', 'center']}
               dense
               emptyText="Tudo acima do mínimo ✓"
-              rows={(alerts?.lowStock ?? []).map((p) => ({
-                key: p.id,
-                cells: [p.name, <b className="s-low">{p.currentStock}</b>, p.minimumStock],
+              rows={(alerts?.lowStock ?? []).map((product) => ({
+                key: product.id,
+                cells: [
+                  product.name,
+                  <b className="s-low">{product.currentStock}</b>,
+                  product.minimumStock,
+                ],
               }))}
             />
           </Card>
@@ -90,13 +94,13 @@ export function StockPage() {
               align={[null, null, null, 'center']}
               dense
               emptyText="Nenhum lote vencendo ✓"
-              rows={(alerts?.expiring ?? []).map((b) => ({
-                key: b.id,
+              rows={(alerts?.expiring ?? []).map((batch) => ({
+                key: batch.id,
                 cells: [
-                  b.product.name,
-                  b.batch ?? '—',
-                  <Tag tone="warn">{formatDateOnly(b.expiresAt)}</Tag>,
-                  b.quantity,
+                  batch.product.name,
+                  batch.batch ?? '—',
+                  <Tag tone="warn">{formatDateOnly(batch.expiresAt)}</Tag>,
+                  batch.quantity,
                 ],
               }))}
             />
@@ -104,8 +108,8 @@ export function StockPage() {
         </div>
       </div>
 
-      {modal === 'entry' && <StockEntryModal onClose={closeModal} />}
-      {modal === 'adjust' && <AdjustModal onClose={closeModal} />}
+      {modal === 'entry' ? <StockEntryFlow onClose={onModalClose} /> : null}
+      {modal === 'adjustment' ? <StockAdjustmentFlow onClose={onModalClose} /> : null}
     </Screen>
   );
 }

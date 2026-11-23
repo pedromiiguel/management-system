@@ -11,7 +11,7 @@ import type {
 } from '@beverage/shared';
 import { http, type Paginated } from '@/lib/http';
 import { rootKeys, useInvalidate, type Resource } from '@main/query/query-keys';
-import type { Product } from '@/features/products/api';
+import type { IProduct as Product } from '@modules/products/domain/product-model';
 
 export interface Customer {
   id: string;

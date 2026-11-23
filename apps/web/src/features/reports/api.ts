@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import { http } from '@/lib/http';
 import { rootKeys } from '@main/query/query-keys';
-import type { Product } from '@/features/products/api';
+import type { IProduct as Product } from '@modules/products/domain/product-model';
 
 /** Receita (CONTEXT.md): só produtos, sem a Taxa de serviço — a taxa vem à parte. */
 interface SalesTotals {

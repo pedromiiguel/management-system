@@ -14,7 +14,7 @@ import { Tag } from '@presentation/components/Tag';
 import { toast } from '@presentation/utils/toast';
 import { formatBRL, maskBRL, parseMoney } from '@presentation/utils/format';
 import { useSession } from '@modules/auth/main/session';
-import type { Product } from '@/features/products/api';
+import type { IProduct as Product } from '@modules/products/domain/product-model';
 import type { AddSaleItemInput, Customer, Sale, SaleItem } from './api';
 import { CashPanel, CreditPanel, PaymentTiles, SaleChargesCard, SaleTotalCard } from './Checkout';
 import { CustomerModal } from './CustomerModal';
