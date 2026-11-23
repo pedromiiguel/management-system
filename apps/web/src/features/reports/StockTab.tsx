@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { Card } from '@/components/Card';
-import { StatCard } from '@/components/StatCard';
-import { Table } from '@/components/Table';
-import { formatBRL } from '@/lib/format';
+import { Card } from '@presentation/components/Card';
+import { StatCard } from '@presentation/components/StatCard';
+import { Table } from '@presentation/components/Table';
+import { formatBRL } from '@presentation/utils/format';
 import { stockPositionQuery } from './api';
 
 export function StockTab() {

@@ -1,10 +1,10 @@
 import { clsx } from 'clsx';
 import { SERVICE_FEE_LABEL, type PaymentMethod } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
-import { Kbd } from '@/components/Kbd';
-import { Toggle } from '@/components/Toggle';
-import { formatBRL } from '@/lib/format';
+import { Button } from '@presentation/components/Button';
+import { Card } from '@presentation/components/Card';
+import { Kbd } from '@presentation/components/Kbd';
+import { Toggle } from '@presentation/components/Toggle';
+import { formatBRL } from '@presentation/utils/format';
 import type { Customer } from './api';
 import { PAYMENT_TILES, SALE_HOTKEYS } from './hotkeys';
 

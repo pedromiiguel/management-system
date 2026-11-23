@@ -13,14 +13,14 @@ import {
   type CashMovementInput,
   type PaymentMethod,
 } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
-import { Chip } from '@/components/Chip';
-import { Modal, ModalActions } from '@/components/Modal';
-import { Table } from '@/components/Table';
-import { Tag } from '@/components/Tag';
-import { toast } from '@/lib/toast';
-import { formatBRL, formatDateTime, moneyText } from '@/lib/format';
+import { Button } from '@presentation/components/Button';
+import { Card } from '@presentation/components/Card';
+import { Chip } from '@presentation/components/Chip';
+import { Modal, ModalActions } from '@presentation/components/Modal';
+import { Table } from '@presentation/components/Table';
+import { Tag } from '@presentation/components/Tag';
+import { toast } from '@presentation/utils/toast';
+import { formatBRL, formatDateTime, moneyText } from '@presentation/utils/format';
 import {
   currentRegisterQuery,
   registerHistoryQuery,

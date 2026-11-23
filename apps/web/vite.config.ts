@@ -18,6 +18,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      ...Object.fromEntries(
+        ['shared', 'domain', 'data', 'infra', 'main', 'presentation', 'modules'].map((layer) => [
+          `@${layer}`,
+          path.resolve(__dirname, 'src', layer === 'shared' ? '@shared' : layer),
+        ]),
+      ),
       // O pacote shared é CJS (consumido pelo Nest); no Vite usamos o fonte TS.
       '@beverage/shared': path.resolve(__dirname, '../../packages/shared/src/index.ts'),
     },

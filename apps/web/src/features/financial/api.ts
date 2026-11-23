@@ -15,7 +15,7 @@ import type {
   SettleReceivableInput,
 } from '@beverage/shared';
 import { http } from '@/lib/http';
-import { rootKeys, useInvalidate } from '@/lib/query-keys';
+import { rootKeys, useInvalidate } from '@main/query/query-keys';
 import type { Customer, Sale } from '@/features/sale/api';
 
 export interface FinancialCategory {

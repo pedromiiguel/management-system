@@ -5,7 +5,7 @@ import {
   SERVICE_FEE_PERCENT,
   STORE_TIME_ZONE,
 } from '@beverage/shared';
-import { formatBRLText as brl, formatDecimal } from '@/lib/format';
+import { formatBRLText as brl, formatDecimal } from '@presentation/utils/format';
 import type { Sale } from './api';
 import { salePricing } from './sale';
 

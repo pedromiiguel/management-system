@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { ScanBarcode } from 'lucide-react';
 import { useState, type KeyboardEvent, type RefObject } from 'react';
-import { Kbd } from '@/components/Kbd';
-import { formatBRL } from '@/lib/format';
-import { useDebounce } from '@/lib/useDebounce';
+import { Kbd } from '@presentation/components/Kbd';
+import { formatBRL } from '@presentation/utils/format';
+import { useDebounce } from '@presentation/hooks/use-debounce';
 import { productSearchQuery, type Product } from '@/features/products/api';
 import { SALE_HOTKEYS } from './hotkeys';
 

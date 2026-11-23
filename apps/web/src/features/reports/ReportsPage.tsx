@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
-import { Button } from '@/components/Button';
-import { Screen } from '@/components/Screen';
-import { SegmentedControl } from '@/components/SegmentedControl';
-import { PeriodPicker, type Period } from '@/components/PeriodPicker';
-import { monthToDate } from '@/lib/format';
+import { Button } from '@presentation/components/Button';
+import { Screen } from '@presentation/components/Screen';
+import { SegmentedControl } from '@presentation/components/SegmentedControl';
+import { PeriodPicker, type Period } from '@presentation/components/PeriodPicker';
+import { monthToDate } from '@presentation/utils/format';
 import { reportCsv } from './api';
 import { ProductsTab } from './ProductsTab';
 import { SalesTab } from './SalesTab';

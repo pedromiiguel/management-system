@@ -1,13 +1,14 @@
 # Arquitetura
 
 Visão curta da estrutura atual. Vocabulário do domínio: [CONTEXT.md](../CONTEXT.md).
-Por que é assim: [ADR 0014](adr/0014-organizacao-por-funcionalidade.md). Regra geral:
+Por que é assim: [ADR 0014](adr/0014-organizacao-por-funcionalidade.md) e, no web,
+[ADR 0016](adr/0016-clean-architecture-por-modulo.md). Regra geral:
 **as peças que mudam juntas moram juntas; cada fato tem uma fonte só.**
 
 ```
 packages/shared   contrato: schemas Zod, enums + rótulos, permissões, priceSale, dia da loja
 apps/api          NestJS + Prisma: um módulo por domínio, ledgers donos das tabelas
-apps/web          React: uma pasta por funcionalidade
+apps/web          React: Clean Architecture com as camadas dentro de cada módulo
 apps/e2e          Playwright contra web + api
 ```
 
@@ -53,41 +54,72 @@ apps/e2e          Playwright contra web + api
 
 ## Web (`apps/web/src`)
 
+Clean Architecture do guia, com as camadas agrupadas por módulo
+([ADR 0016](adr/0016-clean-architecture-por-modulo.md)).
+
 - `routes/` — rotas de arquivo do TanStack Router, finas; `_app.tsx` exige sessão.
-- `features/<f>/` — `api.ts` (chamadas tipadas, `queryOptions`, mutations que
-  invalidam o que o servidor alterou), páginas/componentes `.tsx` e lógica pura
-  com teste ao lado. Funcionalidades: `auth`, `sale` (PDV), `products`, `stock`,
-  `financial`, `reports`, `settings`, `users`.
-- `lib/` — `http` (erros viram `ApiError`), `session` e `session-query`
-  (permissões vivas de `/auth/me`), `query-keys`, `query-client` (aviso de erro
-  de consultas e ações), `toast`, `format` (dinheiro e datas pela regra do
-  `time.ts`).
-- `components/` — componentes de UI compartilhados, numa pasta plana.
+  Importam só a entrada de um flow (`@modules/<m>/presentation/flows/<tela>`).
+- `modules/<m>/` — um módulo por funcionalidade:
+  - `domain/` — models (formato da API e da tela) e `I<M>Gateway`, a interface com
+    um método por chamada à API. Tipos puros e regras sem framework.
+  - `data/` — `<M>Handler extends BaseService implements I<M>Gateway`: só conhece o
+    `IHttpClient`. Converter só quando há transformação real.
+  - `main/` — `make<M>Gateway()` e as `queryOptions`/mutations (TanStack Query), que
+    invalidam tudo o que o efeito no servidor atinge. É o que a apresentação importa.
+  - `presentation/flows/<tela>/` — `index.ts` (exporta o controller como `<Tela>Flow`),
+    `controller.tsx` (estado, hooks, queries), `layout.tsx` (JSX, só props),
+    `types.ts`, `constants.ts` e, quando preciso, `schema.ts`, `utils.ts`,
+    `components/` e sub-flows.
+  - Módulos: `auth` (sessão e login), `settings`. Ainda em `features/` (ADR 0014),
+    migrando um por PR: `sale`, `products`, `stock`, `financial`, `reports`, `users`.
+- `@shared/` — contratos técnicos sem framework (`IHttpClient`, `IKeyValueStorage`).
+- `domain/` — erros de domínio (`NotFoundError`, `ConflictError`…, com `status`) e
+  `IPaginated`.
+- `data/base-service/` — `BaseService.send`: 2xx devolve o corpo; o resto vira erro de
+  domínio com a mensagem da API.
+- `infra/` — `AxiosHttpClient` (nunca lança; token e 401 por construtor),
+  `BrowserLocalStorage`.
+- `main/` — composition root: `makeHttpClient`, `query/query-client` (toast global de
+  erro, ignora 401), `query/query-keys` (`rootKeys` + `useInvalidate`).
+- `presentation/` — `components/` (UI compartilhada, pasta plana), `flows/app-shell`,
+  `utils/` (`toast`, `format`), `hooks/`, `constants/navigation`.
+- `lib/http.ts` — ponte temporária sobre o `BaseService` para o que ainda está em
+  `features/`; some no fim da migração.
 
-### Dependências
+### Camadas
 
-Tudo depende do que muda menos: `routes → features → components → lib → shared`.
+```
+presentation ──► main ──► data ──► domain
+                  │         │        ▲
+                  └──► infra ┘        │
+        todas podem importar ──► @shared
+```
 
-- `lib/` não importa `components/` nem `features/`; `components/` não importa
-  `features/`.
-- Entre funcionalidades, só o `api.ts` (tipos, `queryOptions`, mutations) e os
-  **componentes de entrada** — feitos para serem embutidos por outra tela:
+- `@shared/` não importa nenhuma camada nem framework.
+- `domain/` (global e de módulo) não importa data, infra, main, presentation, React,
+  axios nem TanStack.
+- `data/` só importa domain e `@shared`; nada de axios, React ou TanStack.
+- `infra/` não importa data, main, presentation nem módulos.
+- `presentation/` não importa `data/` nem `infra/`. De outro módulo, só o `main/`, tipos
+  do `domain/` e a entrada de um flow.
+- `main/` monta tudo e pode importar qualquer camada.
+
+O Oxlint (`no-restricted-imports` no `vite.config.ts` da raiz) barra o resto.
+
+### Dependências (`features/`, enquanto existir)
+
+- Entre funcionalidades, só o `api.ts` e os **componentes de entrada**:
   `financial/CategoriesTab` e `users/AccessTab` (Configurações),
   `stock/StockEntryModal` (Produtos) e `sale/SaleDetailModal` (Relatórios).
-  Páginas são importadas só pelas rotas. O resto (lógica pura, componentes
-  internos) fica dentro da funcionalidade; se outra precisar, vira um
-  componente de entrada ou sobe para `components/`/`lib/`/shared.
-- O lint (Oxlint via `vp lint`, regra `no-restricted-imports` no
-  `vite.config.ts` da raiz) barra o resto; um componente de entrada novo entra
-  na lista de lá e daqui.
 
-Uma funcionalidade nova costuma ser: schema no shared → módulo na API com
-permissão → `features/<f>/api.ts` + página → rota.
+Uma funcionalidade nova costuma ser: schema no shared → módulo na API com permissão →
+`modules/<m>/` (gateway, handler, factory, queries, flow) → rota.
 
 ## Testes
 
 - `packages/shared` e `apps/web`: Vitest (`vp test`) da lógica pura (precificação, dia da
-  loja, cupom, fila do PDV).
+  loja, cupom, fila do PDV) e dos handlers que transformam dados, com o `IHttpClient`
+  mockado à mão.
 - `apps/api/test`: e2e com supertest num Postgres real — cobrem as regras de
   negócio e suas ramificações (BR-xx, permissões, erros). Um `migrate reset`
   por execução; cada bloco volta a "seed base + fixtures" com `t.reset()`.

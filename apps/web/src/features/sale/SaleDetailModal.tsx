@@ -6,11 +6,11 @@ import {
   SaleStatus,
   SERVICE_FEE_LABEL,
 } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Modal } from '@/components/Modal';
-import { Table } from '@/components/Table';
-import { Tag } from '@/components/Tag';
-import { formatBRL, formatDateTime } from '@/lib/format';
+import { Button } from '@presentation/components/Button';
+import { Modal } from '@presentation/components/Modal';
+import { Table } from '@presentation/components/Table';
+import { Tag } from '@presentation/components/Tag';
+import { formatBRL, formatDateTime } from '@presentation/utils/format';
 import type { Sale } from './api';
 import { CupomReceipt } from './CupomReceipt';
 import { salePricing } from './sale';

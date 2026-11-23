@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { Card } from '@/components/Card';
-import { Table } from '@/components/Table';
-import { formatBRL } from '@/lib/format';
+import { Card } from '@presentation/components/Card';
+import { Table } from '@presentation/components/Table';
+import { formatBRL } from '@presentation/utils/format';
 import { productPerformanceQuery } from './api';
 
 export function ProductsTab({

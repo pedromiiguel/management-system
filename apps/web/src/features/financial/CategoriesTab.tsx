@@ -6,12 +6,12 @@ import {
   financialCategorySchema,
   type FinancialCategoryInput,
 } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
-import { Chip } from '@/components/Chip';
-import { Table } from '@/components/Table';
-import { Tag } from '@/components/Tag';
-import { toast } from '@/lib/toast';
+import { Button } from '@presentation/components/Button';
+import { Card } from '@presentation/components/Card';
+import { Chip } from '@presentation/components/Chip';
+import { Table } from '@presentation/components/Table';
+import { Tag } from '@presentation/components/Tag';
+import { toast } from '@presentation/utils/toast';
 import { categoriesQuery, useCreateCategory } from './api';
 
 /** Categorias de receitas e despesas (aba de Configurações). */

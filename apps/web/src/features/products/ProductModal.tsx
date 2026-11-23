@@ -7,11 +7,11 @@ import {
   productStockEntrySchema,
   type ProductInput,
 } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Field } from '@/components/Field';
-import { Modal } from '@/components/Modal';
-import { toast } from '@/lib/toast';
-import { hasPermission, useSession } from '@/lib/session';
+import { Button } from '@presentation/components/Button';
+import { Field } from '@presentation/components/Field';
+import { Modal } from '@presentation/components/Modal';
+import { toast } from '@presentation/utils/toast';
+import { usePermission } from '@modules/auth/main/session';
 import { useDeactivateProduct, useSaveProduct, type Product } from './api';
 
 // Entrada embutida (CONTEXT.md, Entrada): opcional — só vira movimento de estoque se a
@@ -34,7 +34,7 @@ const formSchema = productSchema
 const optional = (v: string) => v || undefined;
 
 export function ProductModal({ product, onClose }: { product?: Product; onClose: () => void }) {
-  const canEnterStock = hasPermission(useSession(), Permission.STOCK_WRITE);
+  const canEnterStock = usePermission(Permission.STOCK_WRITE);
   const save = useSaveProduct();
   const deactivate = useDeactivateProduct();
 

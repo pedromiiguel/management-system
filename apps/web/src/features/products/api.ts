@@ -1,7 +1,7 @@
 import { queryOptions, useMutation } from '@tanstack/react-query';
 import type { ProductInput, UpdateProductInput } from '@beverage/shared';
 import { http, type Paginated } from '@/lib/http';
-import { rootKeys, useInvalidate } from '@/lib/query-keys';
+import { rootKeys, useInvalidate } from '@main/query/query-keys';
 
 /** Produto como a API devolve; as demais telas usam recortes (`Pick`) dele. */
 export interface Product {

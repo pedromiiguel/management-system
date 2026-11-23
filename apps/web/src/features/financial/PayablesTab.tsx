@@ -9,14 +9,20 @@ import {
   payableSchema,
   type PayableInput,
 } from '@beverage/shared';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
-import { Field } from '@/components/Field';
-import { Modal } from '@/components/Modal';
-import { Table } from '@/components/Table';
-import { Tag } from '@/components/Tag';
-import { toast } from '@/lib/toast';
-import { formatBRL, formatDateOnly, moneyText, optionalText, todayKey } from '@/lib/format';
+import { Button } from '@presentation/components/Button';
+import { Card } from '@presentation/components/Card';
+import { Field } from '@presentation/components/Field';
+import { Modal } from '@presentation/components/Modal';
+import { Table } from '@presentation/components/Table';
+import { Tag } from '@presentation/components/Tag';
+import { toast } from '@presentation/utils/toast';
+import {
+  formatBRL,
+  formatDateOnly,
+  moneyText,
+  optionalText,
+  todayKey,
+} from '@presentation/utils/format';
 import { categoriesQuery, payablesQuery, useCreatePayable, usePayPayable } from './api';
 
 export function PayablesTab() {
