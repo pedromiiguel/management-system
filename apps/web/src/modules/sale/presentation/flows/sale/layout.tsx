@@ -45,6 +45,7 @@ export function SaleLayout({
   withInvoice,
   onInvoiceToggle,
   payment,
+  enabledPayments,
   onPaymentSelect,
   received,
   onReceivedChange,
@@ -119,7 +120,7 @@ export function SaleLayout({
             withInvoice={withInvoice}
             onToggleInvoice={onInvoiceToggle}
           />
-          <PaymentTiles payment={payment} onSelect={onPaymentSelect} />
+          <PaymentTiles payment={payment} enabled={enabledPayments} onSelect={onPaymentSelect} />
           {payment === PaymentMethod.CASH ? (
             <CashPanel
               received={received}
